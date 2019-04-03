@@ -1,0 +1,19 @@
+try{
+  $result = Invoke-DscResource @invokeParams
+}catch{
+$response.errormessage   = $_.Exception.Message
+return ($response | ConvertTo-Json -Compress)
+}
+
+# keep the switch for when Test passes back changed properties
+switch ($invokeParams.Method) {
+'Test' {
+  $response.indesiredstate = $result.InDesiredState
+  return ($response | ConvertTo-Json -Compress)
+}
+'Set' {
+  $response.indesiredstate = $true
+  $response.rebootrequired = $result.RebootRequired
+  return ($response | ConvertTo-Json -Compress)
+}
+}

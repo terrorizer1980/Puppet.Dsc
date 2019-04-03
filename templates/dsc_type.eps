@@ -1,0 +1,35 @@
+require 'puppet/resource_api'
+
+Puppet::ResourceApi.register_type(
+  name: 'dsc_<%= $resource.name.ToLowerInvariant() %>',
+  dscmeta_resource_friendly_name: '<%= $resource.friendlyname %>',
+  dscmeta_resource_name: '<%= $resource.resourcetype %>',
+  dscmeta_module_name: '<%= $resource.modulename %>',
+  dscmeta_module_version: '<%= $resource.version %>',
+  docs: %q{
+    The DSC <%= $resource.friendlyname %> resource type.
+    Automatically generated from
+    '<%= $resource.relative_mof_path %>'
+  },
+  features: [],
+  attributes: {
+    ensure: {
+      type:    'Enum[present, absent]',
+      desc:    'Whether this resource should be present or absent on the target system.',
+      default: 'present',
+    },
+    name: {
+      type:      'String',
+      desc:      'The name of the resource you want to manage.',
+      behaviour: :namevar,
+    },
+<% $resource.allowed_properties | Each { -%>
+    dsc_<%= $_.name.ToLowerInvariant() -%>: {
+      type: <%= $_.Type %>,
+      desc: '<%= $_.Name %>',
+      mof_type: '<%= $_.ShortType %>',
+      mof_is_embedded: <%= $_.embeddedinstance.tostring().tolowerinvariant() %>,
+    },
+<% }  -%>
+  },
+)

@@ -1,0 +1,125 @@
+<Types>
+  <Type>
+    <Name>Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo</Name>
+    <Members>
+      <ScriptProperty>
+        <Name>provider_name</Name>
+        <GetScriptBlock>
+          [string]$first = $this.name.Substring(0,1)
+          $first.ToUpperInvariant() + $this.name.ToLowerInvariant().Substring(1)
+        </GetScriptBlock>
+      </ScriptProperty>
+      <ScriptProperty>
+        <Name>relative_mof_path</Name>
+        <GetScriptBlock>
+          if($this.Path.Contains('WINDOWS\system32\WindowsPowershell\v1.0\Modules')){
+            (Split-Path $this.Path -NoQualifier).Replace('\WINDOWS\system32\WindowsPowershell\v1.0\Modules\', '')
+          }else{
+            $this.Path.Replace('import/dsc_resources/','')
+          }
+        </GetScriptBlock>
+      </ScriptProperty>
+      <ScriptProperty>
+        <Name>allowed_properties</Name>
+        <GetScriptBlock>
+          $this.properties | ? { $_.name -notmatch '(dependson|waitfor.*)' }
+        </GetScriptBlock>
+      </ScriptProperty>
+
+    </Members>
+  </Type>
+  <Type>
+    <Name>Microsoft.PowerShell.DesiredStateConfiguration.DscResourcePropertyInfo</Name>
+    <Members>
+      <ScriptProperty>
+        <Name>description</Name>
+        <GetScriptBlock>
+          "TODO!!!"
+        </GetScriptBlock>
+      </ScriptProperty>
+      <ScriptProperty>
+        <Name>ShortType</Name>
+        <GetScriptBlock>
+          $text = $this.PropertyType.TrimStart('[')
+          if($text.EndsWith(']]')){
+            $text = $text.Replace(']]',']')
+          }else{
+            $text = $text.TrimEnd(']')
+          }
+          $text
+        </GetScriptBlock>
+      </ScriptProperty>
+      <ScriptProperty>
+        <Name>Type</Name>
+        <GetScriptBlock>
+          if($this.values){
+            $typeText = "Enum[$( ($this.Values | % { "'$($_.ToLowerInvariant())'" }) -join `", `" )]"
+          }else{
+            if($this.embeddedinstance){
+              $typeText = 'String'
+            }else{
+              $typeText = switch ($this.PropertyType.TrimStart('[').TrimEnd(']')){
+                'Bool' { 'Boolean';break; }
+                'String' { 'String';break; }
+                default { $_; }
+              }
+            }
+          }
+
+          if($this.array){
+            $typeText = "Array[$($typeText)]"
+          }
+
+          if($this.credential){
+            $typeText = "Struct[{ user => String[1], password => String[1] }]"
+          }
+
+          switch($this.IsMandatory){
+            $true {
+              "'$($typeText)'"
+            }
+            $false{
+              "`"Optional[$($typeText)]`""
+            }
+          }
+        </GetScriptBlock>
+      </ScriptProperty>
+      <AliasProperty>
+        <Name>required</Name>
+        <ReferencedMemberName>IsMandatory</ReferencedMemberName>
+      </AliasProperty>
+      <ScriptProperty>
+        <Name>embeddedinstance</Name>
+        <GetScriptBlock>
+$EmbeddedInstances = @{
+  "Hashtable"         = "MSFT_KeyValuePair";
+  "PSCredential"      = "MSFT_Credential";
+  "Hashtable[]"       = "MSFT_KeyValuePair";
+  "PSCredential[]"    = "MSFT_Credential";
+  "HashtableArray"    = "MSFT_KeyValuePair";
+  "PSCredentialArray" = "MSFT_Credential";
+}
+$basetypes = @(
+"[Uint8","[Uint16]","[Uint32]","[Uint64]",`
+"[Sint8]","[Sint16]","[Sint32]","[Sint64]",`
+"[Real32]","[Real64]","[Char16]","[String]",`
+"[bool]","[Boolean]","[DateTime]","[Hashtable]",`
+"[PSCredential]",`
+"[Uint8[]]","[Uint16[]]","[Uint32[]]","[Uint64[]]",`
+"[Sint8[]]","[Sint16[]]","[Sint32[]]","[Sint64[]]",`
+"[Real32[]]","[Real64[]]","[Char16[]]","[String[]]",`
+"[Boolean[]]","[DateTime[]]","[Hashtable[]]",`
+"[PSCredential[]]",`
+"Microsoft.Management.Infrastructure.CimInstance",`
+"Microsoft.Management.Infrastructure.CimInstance[]"
+        )
+        if($basetypes -contains $this.PropertyType){
+          return $false
+        }else{
+          return $true
+        }
+        </GetScriptBlock>
+      </ScriptProperty>
+    </Members>
+  </Type>
+</Types>
