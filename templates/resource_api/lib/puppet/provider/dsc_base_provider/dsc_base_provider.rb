@@ -1,12 +1,9 @@
 require 'puppet/resource_api/simple_provider'
 require 'puppet_x/puppetlabs/dsc_api/dsc_template_helper'
+require 'ruby-pwsh'
 require 'pathname'
 require 'json'
-if Puppet::Util::Platform.windows?
-  require_relative '../../puppet_x/puppetlabs/dsc_api/powershell_manager'
-end
 
-# Implementation for the dsc_file type using the Resource API.
 class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
 
   def get(context)
@@ -32,7 +29,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     context.debug("Script:\n #{script_content}")
 
     require 'pry';binding.pry
-    output = ps_manager.execute(script_content, COMMAND_TIMEOUT)[:stdout]
+    output = ps_manager.execute(script_content)[:stdout]
     context.err('Nothing returned') if output.nil?
 
     data   = JSON.parse(output)
@@ -54,7 +51,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
 
     resource = should_to_resource(should, context, 'set')
     script_content = ps_script_content(resource)
-    # output         = ps_manager.execute(script_content, COMMAND_TIMEOUT)[:stdout]
+    # output         = ps_manager.execute(script_content)[:stdout]
     # data           = JSON.parse(output)
     # context.err(data['errormessage']) if !data['errormessage'].empty?
     # # notify_reboot_pending if data['rebootrequired'] == true
@@ -88,29 +85,11 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     template      = File.new(template_path + "/invoke_dsc_resource.ps1.erb").read
     postscript    = File.new(template_path + "/invoke_dsc_resource_postscript.ps1.erb").read
     content = preamble + template + postscript
-    require 'pry';binding.pry
     PuppetX::DscApi::TemplateHelpers.ps_script_content(resource, content)
   end
 
-  def self.powershell_args
-    ps_args = ['-NoProfile', '-NonInteractive', '-NoLogo', '-ExecutionPolicy', 'Bypass']
-    ps_args << '-Command' if !PuppetX::DscApi::PowerShellManager.supported?
-    ps_args
-  end
-
   def ps_manager
-    # debug_output = Puppet::Util::Log.level == :debug
-    debug_output = true
-    powershell = if File.exists?("#{ENV['SYSTEMROOT']}\\sysnative\\WindowsPowershell\\v1.0\\powershell.exe")
-      "#{ENV['SYSTEMROOT']}\\sysnative\\WindowsPowershell\\v1.0\\powershell.exe"
-    elsif File.exists?("#{ENV['SYSTEMROOT']}\\system32\\WindowsPowershell\\v1.0\\powershell.exe")
-      "#{ENV['SYSTEMROOT']}\\system32\\WindowsPowershell\\v1.0\\powershell.exe"
-    else
-      'powershell.exe'
-    end
-    manager_args = "#{powershell} #{self.class.powershell_args().join(' ')}"
-    PuppetX::DscApi::PowerShellManager.instance(manager_args, debug_output)
+    debug_output = Puppet::Util::Log.level == :debug
+    Pwsh::Manager.instance(Pwsh::Manager.powershell_path, Pwsh::Manager.powershell_args, debug: debug_output)
   end
-
-  COMMAND_TIMEOUT = 1200000 # 20 minutes
 end

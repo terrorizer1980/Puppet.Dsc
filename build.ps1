@@ -39,9 +39,9 @@ Pop-Location
 
 ## copy pdk specific files
 Copy-Item -Path (Join-Path -Path $templateDir 'pdk/*') -Destination $moduleDir -Recurse -Force
-
-# copy power_manager code
-Get-ChildITem -Path (Join-Path -Path $PSScriptRoot -ChildPath 'templates/powershell_manager/*') | Copy-Item -Destination $moduleDir -Recurse -Force
+$metadatajson = Get-Content -Path (Join-Path $moduleDir "metadata.json") | ConvertFrom-Json
+$metadatajson.dependencies = @( @{ "name" = "puppetlabs/pwshlib"; "version_requirement" = ">= 0.1.0 < 2.0.0" } )
+$metadatajson | ConvertTo-Json | Set-Content -Path (Join-Path $moduleDir "metadata.json") -Encoding UTF8
 
 # copy resource_api base classes
 Get-ChildITem -Path (Join-Path -Path $PSScriptRoot -ChildPath 'templates/resource_api/*') | Copy-Item -Destination $moduleDir -Recurse -Force
@@ -59,7 +59,11 @@ $oldPsModulePath = $env:PSModulePath
 $env:PSModulePath = "$($downloadedDscResources);" + $env:PSModulePath
 $global:resources = Get-DscResource
 
-ipmo C:\Users\james\src\puppetlabs\eps\EPS\EPS.psd1
+# ipmo C:\Users\james\src\puppetlabs\eps\EPS\EPS.psd1
+iF(!(Get-Module -Name 'EPS')){
+  Install-Module -Name 'EPS'
+}
+Import-Module -Name 'EPS'
 # EPS requires global variables to keep them in accessible scope
 # Also need to set the variable to null inside the loop
 # Files are written using UTF8, but newlines will need to addressed
