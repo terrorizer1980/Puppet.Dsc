@@ -40,8 +40,17 @@ Pop-Location
 ## copy pdk specific files
 Copy-Item -Path (Join-Path -Path $templateDir 'pdk/*') -Destination $moduleDir -Recurse -Force
 $metadatajson = Get-Content -Path (Join-Path $moduleDir "metadata.json") | ConvertFrom-Json
-$metadatajson.dependencies = @( @{ "name" = "puppetlabs/pwshlib"; "version_requirement" = ">= 0.1.0 < 2.0.0" } )
-$metadatajson | ConvertTo-Json | Set-Content -Path (Join-Path $moduleDir "metadata.json") -Encoding UTF8
+$metadatajson.dependencies = @( @{ "name" = "puppetlabs/pwshlib"; "version_requirement" = ">= 0.4.0 < 2.0.0" } )
+[IO.File]::WriteAllLines(
+  (Join-Path $moduleDir "metadata.json"),
+  (ConvertTo-Json -InputObject $metadatajson)
+)
+$FixturesYaml = Get-Content -Path (Join-Path $moduleDir ".fixtures.yml") -Raw | ConvertFrom-Yaml
+$FixturesYaml.fixtures.forge_modules = @{pwshlib = 'puppetlabs/pwshlib'}
+[IO.File]::WriteAllLines(
+  (Join-Path $moduleDir ".fixtures.yml"),
+  ("---`n" + (ConvertTo-Yaml -Data $FixturesYaml))
+)
 
 # copy resource_api base classes
 Get-ChildITem -Path (Join-Path -Path $PSScriptRoot -ChildPath 'templates/resource_api/*') | Copy-Item -Destination $moduleDir -Recurse -Force
