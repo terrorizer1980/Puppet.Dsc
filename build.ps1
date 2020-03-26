@@ -64,15 +64,15 @@ Get-ChildITem -Path (Join-Path -Path $PSScriptRoot -ChildPath 'templates/resourc
 
 Update-TypeData -PrependPath $dscResourcePowerShellTypes
 
-$oldPsModulePath = $env:PSModulePath
-$env:PSModulePath = "$($downloadedDscResources);" + $env:PSModulePath
-$global:resources = Get-DscResource
-
-# ipmo C:\Users\james\src\puppetlabs\eps\EPS\EPS.psd1
-iF(!(Get-Module -Name 'EPS')){
+If (!(Get-Module -Name 'EPS' -ListAvailable)) {
   Install-Module -Name 'EPS'
 }
 Import-Module -Name 'EPS'
+
+$oldPsModulePath  = $env:PSModulePath
+$env:PSModulePath = "$($downloadedDscResources);"
+$global:resources = Get-DscResource -Module $PowerShellModuleName
+
 # EPS requires global variables to keep them in accessible scope
 # Also need to set the variable to null inside the loop
 # Files are written using UTF8, but newlines will need to addressed
