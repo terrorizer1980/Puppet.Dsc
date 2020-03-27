@@ -61,7 +61,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   def should_to_resource(should, context, dsc_invoke_method)
     resource = {}
     resource[:parameters] = {}
-    [:name, :dscmeta_resource_friendly_name, :dscmeta_resource_name, :dscmeta_module_name].each do |k|
+    [:name, :dscmeta_resource_friendly_name, :dscmeta_resource_name, :dscmeta_module_name, :dscmeta_module_version].each do |k|
       resource[k] = context.type.definition[k]
     end
     should.each do |k,v|
