@@ -1,30 +1,15 @@
 [CmdletBinding()]
 param(
-  $ModuleName = 'dsc_api'
+  $PuppetModuleName,
+  $PowerShellModuleName = 'PowerShellGet',
+  $PowerShellModuleVersion
 )
+
+If ($null -eq $PuppetModuleName) { $PuppetModuleName = $PowerShellModuleName.tolower() }
 
 $importDir   = Join-Path $PSScriptRoot 'import'
 $templateDir = Join-Path $PSScriptRoot 'templates'
-$moduleDir   = Join-Path $importDir $ModuleName
-
-# import dsc resources from psgallery
-$dscResourceSheet          = Join-Path $PSScriptRoot 'import.csv'
-$downloadedDscResources    = Join-Path $importDir 'dsc_resources'
-$downloadedDscResourcesTmp = "$($downloadedDscResources)_tmp"
-
-if(-not(Test-Path $downloadedDscResources)){
-  if(-not(Test-Path $downloadedDscResources)){
-    mkdir $downloadedDscResources
-  }
-  if(-not(Test-Path $downloadedDscResourcesTmp)){
-    mkdir $downloadedDscResourcesTmp
-  }
-  $items = Import-Csv -Path $dscResourceSheet
-  $items | ForEach-Object {
-    Save-Module -Name $_.Name -Path $downloadedDscResourcesTmp -RequiredVersion $_.Version
-    Move-Item -Path "$($downloadedDscResourcesTmp)/$($_.Name)/$($_.Version)" -Destination "$($downloadedDscResources)/$($_.Name)"
-  }
-}
+$moduleDir   = Join-Path $importDir $PuppetModuleName
 
 # create new pdk module
 if(-not(Test-Path $importDir)){
@@ -34,8 +19,32 @@ if(Test-Path $moduleDir){
   Remove-Item -Path $moduleDir -Force -Recurse
 }
 Push-Location  $importDir
-pdk new module --skip-interview --template-url "https://github.com/puppetlabs/pdk-templates" $ModuleName
+pdk new module --skip-interview --template-url "https://github.com/puppetlabs/pdk-templates" $PuppetModuleName
 Pop-Location
+
+# import dsc resources from psgallery
+$downloadedDscResources    = Join-Path $importDir "$PuppetModuleName/lib/puppet_x/dsc_resources"
+$downloadedDscResourcesTmp = "$($downloadedDscResources)_tmp"
+
+if(-not(Test-Path $downloadedDscResources)){
+  if(-not(Test-Path $downloadedDscResources)){
+    mkdir $downloadedDscResources
+  }
+  if(-not(Test-Path $downloadedDscResourcesTmp)){
+    mkdir $downloadedDscResourcesTmp
+  }
+  Save-Module -Name $PowerShellModuleName -Path $downloadedDscResourcesTmp -RequiredVersion $PowerShellModuleVersion
+  ForEach ($ModuleFolder in (Get-ChildItem $downloadedDscResourcesTmp)) {
+    Move-Item -Path (Get-ChildItem $ModuleFolder.FullName).FullName -Destination "$downloadedDscResources/$($ModuleFolder.Name)"
+  }
+
+# create new pdk module
+if(-not(Test-Path $importDir)){
+  mkdir $importDir
+}
+if(Test-Path $moduleDir){
+  Remove-Item -Path $moduleDir -Force -Recurse
+}
 
 ## copy pdk specific files
 Copy-Item -Path (Join-Path -Path $templateDir 'pdk/*') -Destination $moduleDir -Recurse -Force
