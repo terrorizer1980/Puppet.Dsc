@@ -10,7 +10,7 @@ Puppet::ResourceApi.register_type(
     The DSC <%= $resource.friendlyname %> resource type.
     Automatically generated from version <%= $resource.version %>
   },
-  features: [],
+  features: ['simple_get_filter'],
   attributes: {
     ensure: {
       type:    'Enum[present, absent]',

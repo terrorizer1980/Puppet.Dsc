@@ -6,20 +6,43 @@ require 'json'
 
 class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
 
-  def get(context)
+  def get(context, names = nil)
+    # Relies on the get_simple_filter feature to pass the namevars
+    # as an array containing the namevar parameters as a hash.
+    # This hash is functionally the same as a should hash as
+    # passed to the should_to_resource method.
     context.debug('Returning pre-canned example data')
-    # context.type.definition[:dsc_invoke_method] = 'get'
-    # is there an exists? method instead?
-    [
-      {
-        name: 'foo',
-        ensure: 'present',
-      },
-      {
-        name: 'bar',
-        ensure: 'present',
-      },
-    ]
+    names.collect { |name_hash| invoke_get_method(context,name_hash) }
+  end
+
+  def invoke_get_method(context, name_hash)
+    context.notice("retrieving '#{name_hash}'")
+    resource = should_to_resource(name_hash, context, 'get')
+    script_content = ps_script_content(resource)
+    context.debug("Script:\n #{script_content}")
+    output = ps_manager.execute(script_content)[:stdout]
+    context.err('Nothing returned') if output.nil?
+
+    data   = JSON.parse(output)
+    # DSC gives back information we don't care about; filter down to only
+    # those properties exposed in the type definition.
+    valid_attributes = context.type.attributes.keys.collect{ |k| k.to_s }
+    data.reject! { |key,value| !valid_attributes.include?("dsc_#{key.downcase}") }
+    # Canonicalize the results to match the type definition representation;
+    # failure to do so will prevent the resource_api from comparing the result
+    # to the should hash retrieved from the resource definition in the manifest.
+    data.keys.each do |key|
+      type_key = "dsc_#{key.downcase}".to_sym
+      data[type_key] = data.delete(key)
+      if context.type.attributes[type_key][:type] =~ /Enum/
+        data[type_key] = data[type_key].downcase if data[type_key].is_a?(String)
+      end
+    end
+    data.merge!({ensure: 'present', name: name_hash[:name]})
+
+    context.debug(data)
+
+    data
   end
 
   def invoke_set_method(context, name, should)
