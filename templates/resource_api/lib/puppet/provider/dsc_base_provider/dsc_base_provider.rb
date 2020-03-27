@@ -22,13 +22,12 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     ]
   end
 
-  def create(context, name, should)
-    context.notice("Creating '#{name}' with #{should.inspect}")
+  def invoke_set_method(context, name, should)
+    context.notice("Ivoking Set Method for '#{name}' with #{should.inspect}")
     resource = should_to_resource(should, context, 'set')
     script_content = ps_script_content(resource)
     context.debug("Script:\n #{script_content}")
 
-    require 'pry';binding.pry
     output = ps_manager.execute(script_content)[:stdout]
     context.err('Nothing returned') if output.nil?
 
@@ -40,22 +39,19 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     data
   end
 
+  def create(context, name, should)
+    context.notice("Creating '#{name}' with #{should.inspect}")
+    invoke_set_method(context, name, should)
+  end
+
   def update(context, name, should)
     context.notice("Updating '#{name}' with #{should.inspect}")
-    # there isn't a direct correlation for update in dsc, it's get|set
-    # possible just implement set in provider, not any of create|update|delete ?
+    invoke_set_method(context, name, should)
   end
 
   def delete(context, name)
     context.notice("Deleting '#{name}'")
-
-    resource = should_to_resource(should, context, 'set')
-    script_content = ps_script_content(resource)
-    # output         = ps_manager.execute(script_content)[:stdout]
-    # data           = JSON.parse(output)
-    # context.err(data['errormessage']) if !data['errormessage'].empty?
-    # # notify_reboot_pending if data['rebootrequired'] == true
-    # data
+    invoke_set_method(context, name, should)
   end
 
   def should_to_resource(should, context, dsc_invoke_method)
