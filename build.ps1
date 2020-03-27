@@ -7,6 +7,8 @@ param(
 
 If ($null -eq $PuppetModuleName) { $PuppetModuleName = $PowerShellModuleName.tolower() }
 
+. $PSScriptRoot\Get-DscResourceTypeInformation.ps1
+
 $importDir   = Join-Path $PSScriptRoot 'import'
 $templateDir = Join-Path $PSScriptRoot 'templates'
 $moduleDir   = Join-Path $importDir $PuppetModuleName
@@ -74,7 +76,7 @@ Import-Module -Name 'EPS'
 
 $oldPsModulePath  = $env:PSModulePath
 $env:PSModulePath = "$($downloadedDscResources);"
-$global:resources = Get-DscResource -Module $PowerShellModuleName
+$global:resources = Get-DscResource -Module $PowerShellModuleName | Get-DscResourceTypeInformation
 
 # EPS requires global variables to keep them in accessible scope
 # Also need to set the variable to null inside the loop
@@ -82,7 +84,7 @@ $global:resources = Get-DscResource -Module $PowerShellModuleName
 foreach($resource in $resources){
   $global:resource = $resource
 
-  $dscResourceName = "dsc_$($resource.Name.ToLowerInvariant())"
+  $dscResourceName = "dsc_$($resource.Name)"
   if(-not(Test-Path $puppetTypeDir)){
     mkdir $puppetTypeDir | Out-Null
   }
