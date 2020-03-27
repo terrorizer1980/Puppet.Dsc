@@ -37,13 +37,7 @@ if(-not(Test-Path $downloadedDscResources)){
   ForEach ($ModuleFolder in (Get-ChildItem $downloadedDscResourcesTmp)) {
     Move-Item -Path (Get-ChildItem $ModuleFolder.FullName).FullName -Destination "$downloadedDscResources/$($ModuleFolder.Name)"
   }
-
-# create new pdk module
-if(-not(Test-Path $importDir)){
-  mkdir $importDir
-}
-if(Test-Path $moduleDir){
-  Remove-Item -Path $moduleDir -Force -Recurse
+  Remove-Item $downloadedDscResourcesTmp -Recurse
 }
 
 ## copy pdk specific files
