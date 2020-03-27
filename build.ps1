@@ -88,7 +88,7 @@ foreach($resource in $resources){
   }
   [string]$puppetTypeFileName = [IO.Path]::Combine($puppetTypeDir, "$($dscResourceName).rb")
   $puppetTypeText = Invoke-EpsTemplate -Path $puppetTypeTemplate
-  [IO.File]::WriteAllText($puppetTypeFileName, $puppetTypeText, [Text.Encoding]::UTF8)
+  [IO.File]::WriteAllLines($puppetTypeFileName, $puppetTypeText)
 
   [string]$puppetTypeProviderDir  = Join-Path $puppetProviderDir "$($dscResourceName)"
   [string]$puppetProviderFileName = [IO.Path]::Combine($puppetProviderDir, "$($dscResourceName)", "$($dscResourceName).rb")
@@ -96,7 +96,7 @@ foreach($resource in $resources){
     mkdir $puppetTypeProviderDir | Out-Null
   }
   $puppetProviderText = Invoke-EpsTemplate -Path $puppetProviderTemplate
-  [IO.File]::WriteAllText($puppetProviderFileName, $puppetProviderText, [Text.Encoding]::UTF8)
+  [IO.File]::WriteAllLines($puppetProviderFileName, $puppetProviderText)
 
   $resource = $Null
 }
