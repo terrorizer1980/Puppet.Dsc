@@ -16,4 +16,7 @@ switch ($invokeParams.Method) {
     $response.rebootrequired = $result.RebootRequired
     return ($response | ConvertTo-Json -Compress)
   }
+  'Get' {
+    return ($result | ConvertTo-Json -Compress -Depth 10)
+  }
 }
