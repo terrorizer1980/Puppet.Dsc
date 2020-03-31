@@ -25,7 +25,9 @@ $global:BannedCommands = @(
 #>
 $global:MayContainCommand = @{
   "Write-Host"  = @()
-  "Write-Verbose" = @()
+  "Write-Verbose" = @(
+    'Get-DscResourceTypeInformation.ps1'
+  )
   "Write-Warning" = @()
   "Write-Error"  = @()
   "Write-Output" = @()

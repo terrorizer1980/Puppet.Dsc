@@ -31,7 +31,7 @@ param(
 
 If ($null -eq $PuppetModuleName) { $PuppetModuleName = $PowerShellModuleName.tolower() }
 
-. $PSScriptRoot\Get-DscResourceTypeInformation.ps1
+Import-Module "$PSScriptRoot/src/puppet.dsc.psd1"
 
 $importDir   = Join-Path $PSScriptRoot 'import'
 $templateDir = Join-Path $PSScriptRoot 'templates'

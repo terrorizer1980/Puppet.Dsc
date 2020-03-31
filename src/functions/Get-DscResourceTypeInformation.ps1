@@ -21,9 +21,14 @@ Function Get-DscResourceTypeInformation {
 
     .EXAMPLE
       Get-DscResource -Name PSRepository | Get-DscResourceTypeInformation
-    
+
+      Retrieve the information necessary for generating a Puppet Resource API type from a DSC Resource object.
+
     .EXAMPLE
       Get-DscResourceTypeInformation -DscResourceName PSRepository
+
+      Retrieve the information necessary for generating a Puppet Resource API type by searching for a DSC
+      resource object via Get-DscResource. Will ONLY find the resource if it is in the PSModulePath.
 
     .NOTES
     This function currently takes EITHER:
@@ -35,8 +40,8 @@ Function Get-DscResourceTypeInformation {
   Param(
     [Parameter(ValueFromPipeline)]
     [Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo[]]$DscResource,
-    $DscResourceName,
-    $ModuleName
+    [string]$DscResourceName,
+    [object]$ModuleName
   )
   Begin{}
   Process {

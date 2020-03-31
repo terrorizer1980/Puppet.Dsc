@@ -39,7 +39,9 @@
   # FormatsToProcess = @('xml\puppet.dsc.Format.ps1xml')
   
   # Functions to export from this module
-  FunctionsToExport = ''
+  FunctionsToExport = @(
+    'Get-DscResourceTypeInformation'
+  )
   
   # Cmdlets to export from this module
   CmdletsToExport = ''
