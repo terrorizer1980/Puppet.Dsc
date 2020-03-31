@@ -1,17 +1,16 @@
 require 'puppet/resource_api'
 
 Puppet::ResourceApi.register_type(
-  name: 'dsc_<%= $resource.name.ToLowerInvariant() %>',
+  name: 'dsc_<%= $resource.name %>',
   dscmeta_resource_friendly_name: '<%= $resource.friendlyname %>',
   dscmeta_resource_name: '<%= $resource.resourcetype %>',
   dscmeta_module_name: '<%= $resource.modulename %>',
   dscmeta_module_version: '<%= $resource.version %>',
   docs: %q{
     The DSC <%= $resource.friendlyname %> resource type.
-    Automatically generated from
-    '<%= $resource.relative_mof_path %>'
+    Automatically generated from version <%= $resource.version %>
   },
-  features: [],
+  features: ['simple_get_filter'],
   attributes: {
     ensure: {
       type:    'Enum[present, absent]',
@@ -20,15 +19,20 @@ Puppet::ResourceApi.register_type(
     },
     name: {
       type:      'String',
-      desc:      'The name of the resource you want to manage.',
+      desc:      'Description of the purpose for this resource declaration.',
       behaviour: :namevar,
     },
-<% $resource.allowed_properties | Each { -%>
-    dsc_<%= $_.name.ToLowerInvariant() -%>: {
+<% $resource.ParameterInfo | Each { -%>
+    dsc_<%= $_.name -%>: {
       type: <%= $_.Type %>,
-      desc: '<%= $_.Name %>',
-      mof_type: '<%= $_.ShortType %>',
-      mof_is_embedded: <%= $_.embeddedinstance.tostring().tolowerinvariant() %>,
+      desc: %q{
+        <%= $_.Help %>
+      },
+<%= if($_.mandatory_for_get -eq 'true'){"      behaviour: :namevar,`n"} -%>
+      mandatory_for_get: <%= $_.mandatory_for_get %>,
+      mandatory_for_set: <%= $_.mandatory_for_set %>,
+      mof_type: '<%= $_.mof_type %>',
+      mof_is_embedded: <%= $_.mof_is_embedded %>,
     },
 <% }  -%>
   },
