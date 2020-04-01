@@ -1,0 +1,11 @@
+TOPIC
+  about_puppet.dsc
+  
+SHORT DESCRIPTION
+  Explains how to use the puppet.dsc powershell module
+  
+LONG DESCRIPTION
+  <Insert Content here>
+
+KEYWORDS
+  puppet.dsc
