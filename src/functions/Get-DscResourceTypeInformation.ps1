@@ -31,10 +31,10 @@ Function Get-DscResourceTypeInformation {
       resource object via Get-DscResource. Will ONLY find the resource if it is in the PSModulePath.
 
     .NOTES
-    This function currently takes EITHER:
+      This function currently takes EITHER:
 
-    1. A DscResource Object, as passed by Get-DSCResource
-    2. A combo of name/module to retrieve DSC Resources from
+      1. A DscResource Object, as passed by Get-DSCResource
+      2. A combo of name/module to retrieve DSC Resources from
   #>
   [CmdletBinding()]
   Param(
