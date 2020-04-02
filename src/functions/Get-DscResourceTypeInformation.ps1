@@ -64,15 +64,22 @@ Function Get-DscResourceTypeInformation {
   Process {
     # Retrieve the DSC Resource information from the system unless passed directly
     If ($null -eq $DscResource) {
-      if ($null -eq $ModuleName) {
-        $DscResource = Get-DscResource -Name $Name -ErrorAction Stop
+      if ($null -eq $Module) {
+        $DscResourceToProcess = Get-DscResource -Name $Name -ErrorAction Stop
       } else {
-        $DscResource = Get-DscResource -Name $Name -Module $Module -ErrorAction Stop
+        $DscResourceToProcess = Get-DscResource -Name $Name -Module $Module -ErrorAction Stop
       }
+    } Else {
+      $DscResourceToProcess = $DscResource
     }
-    ForEach ($Resource in $DscResource) {
-      $Resource.ParameterInfo = Get-DscResourceParameterInfo -DscResource $Resource
-      $Resource
+    ForEach ($Resource in $DscResourceToProcess) {
+      $Parameters = @{
+        MemberType = 'NoteProperty'
+        Name       = 'ParameterInfo'
+        Value      = (Get-DscResourceParameterInfo -DscResource $Resource)
+        PassThru   = $True
+      }
+      $Resource | Add-Member @Parameters
     }
   }
 

@@ -18,14 +18,16 @@ function Get-DscResourceParameterInfo {
 
   .EXAMPLE
     Get-DscResource -Name PSRepository | Get-DscResourceParameterInfo
+
+    Retrieve the Parameter information from the AST for the PSRepository Dsc Resource.
   #>
   [CmdletBinding()]
   param (
     [Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo]$DscResource
   )
-  
+
   Begin {}
-  
+
   Process {
     If ($DscResource.ImplementedAs -eq 'PowerShell') {
       $ParsedAst = [system.management.automation.language.parser]::ParseFile($DscResource.Path, [ref]$null, [ref]$null)
