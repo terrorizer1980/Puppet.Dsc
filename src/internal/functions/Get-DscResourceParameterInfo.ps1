@@ -57,8 +57,8 @@ function Get-DscResourceParameterInfo {
     }
     # We iterate over allowed_properties to get those that will work via Invoke-DscResource
     # Note that this will always return PSDscRunAsCredential (if run on 5x), which doesn't work in 7+
-    ForEach ($Parameter in $Resource.allowed_properties) {
-      If ($null -ne $AstInformation.HelpInfo) {
+    ForEach ($Parameter in $DscResource.allowed_properties) {
+      If ($null -ne $HelpInfo) {
         $ParameterDescription = $HelpInfo[$Parameter.Name.ToUpper()]
         If ($null -ne $ParameterDescription) { $ParameterDescription = $ParameterDescription.Trim()}
       } Else { $ParameterDescription = $null }
