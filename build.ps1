@@ -87,11 +87,9 @@ Get-ChildITem -Path (Join-Path -Path $PSScriptRoot -ChildPath 'templates/resourc
 # build puppet types from dsc resources
 [string]$puppetTypeTemplate         = [IO.Path]::Combine($PSScriptRoot, 'templates', 'dsc_type.eps')
 [string]$puppetProviderTemplate     = [IO.Path]::Combine($PSScriptRoot, 'templates', 'dsc_provider.eps')
-[string]$dscResourcePowerShellTypes = [IO.Path]::Combine($PSScriptRoot, 'templates', 'dsc_resource_types.ps1xml')
 [string]$puppetTypeDir              = [IO.Path]::Combine($moduleDir, 'lib', 'puppet', 'type')
 [string]$puppetProviderDir          = [IO.Path]::Combine($moduleDir, 'lib', 'puppet', 'provider')
 
-Update-TypeData -PrependPath $dscResourcePowerShellTypes
 
 If (!(Get-Module -Name 'EPS' -ListAvailable)) {
   Install-Module -Name 'EPS'

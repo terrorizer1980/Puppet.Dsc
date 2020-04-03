@@ -34,7 +34,7 @@
   # RequiredAssemblies = @('bin\puppet.dsc.dll')
   
   # Type files (.ps1xml) to be loaded when importing this module
-  # TypesToProcess = @('xml\puppet.dsc.Types.ps1xml')
+  TypesToProcess = @('xml/puppet.dsc.Types.ps1xml')
   
   # Format files (.ps1xml) to be loaded when importing this module
   # FormatsToProcess = @('xml\puppet.dsc.Format.ps1xml')
