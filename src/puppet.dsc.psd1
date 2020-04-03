@@ -27,6 +27,7 @@
   # this module
   RequiredModules = @(
     @{ ModuleName='PSFramework'; ModuleVersion='1.1.59' }
+    'PSDesiredStateConfiguration'
   )
   
   # Assemblies that must be loaded prior to importing this module
