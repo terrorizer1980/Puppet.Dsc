@@ -16,10 +16,7 @@ Write-PSFMessage -Level Important -Message "Starting Tests"
 Write-PSFMessage -Level Important -Message "Importing Module"
 
 Remove-Module puppet.dsc -ErrorAction Ignore
-Import-Module "$PSScriptRoot\..\puppet.dsc.psd1"
-Import-Module "$PSScriptRoot\..\puppet.dsc.psm1" -Force
-
-
+Import-Module "$PSScriptRoot\..\puppet.dsc.psd1" -Force
 
 $totalFailed = 0
 $totalRun = 0
