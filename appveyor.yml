@@ -1,0 +1,13 @@
+---
+version: 1.0.x.{build}
+clone_depth: 10
+install:
+  - ps: '& .\extras\install.ps1'
+build: off
+test_script:
+  - ps: '& .\src\tests\pester.ps1'
+notifications:
+  - provider: Email
+    on_build_success: false
+    on_build_failure: false
+    on_build_status_changed: false
