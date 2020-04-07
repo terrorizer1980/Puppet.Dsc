@@ -27,13 +27,14 @@
   # this module
   RequiredModules = @(
     @{ ModuleName='PSFramework'; ModuleVersion='1.1.59' }
+    'PSDesiredStateConfiguration'
   )
   
   # Assemblies that must be loaded prior to importing this module
   # RequiredAssemblies = @('bin\puppet.dsc.dll')
   
   # Type files (.ps1xml) to be loaded when importing this module
-  # TypesToProcess = @('xml\puppet.dsc.Types.ps1xml')
+  TypesToProcess = @('xml/puppet.dsc.Types.ps1xml')
   
   # Format files (.ps1xml) to be loaded when importing this module
   # FormatsToProcess = @('xml\puppet.dsc.Format.ps1xml')
