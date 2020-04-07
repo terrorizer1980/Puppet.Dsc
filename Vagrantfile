@@ -68,7 +68,7 @@ Vagrant.configure("2") do |config|
       'pester'
       'pdk'
     )
-    choco install $ChocolateyPackages -y
+    choco install $ChocolateyPackages -y --no-progress
     $PowerShellModules = @(
       @{ Name = 'PSFramework' }
       @{ Name = 'PSModuleDevelopment' }
