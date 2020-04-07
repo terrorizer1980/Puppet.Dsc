@@ -42,6 +42,8 @@
   # Functions to export from this module
   FunctionsToExport = @(
     'Get-DscResourceTypeInformation'
+    'Get-ProviderContent'
+    'Get-TypeContent'
   )
   
   # Cmdlets to export from this module
