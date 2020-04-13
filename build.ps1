@@ -25,6 +25,7 @@
 [CmdletBinding()]
 param(
   $PuppetModuleName,
+  $PuppetModuleAuthor,
   $PowerShellModuleName = 'PowerShellGet',
   $PowerShellModuleVersion
 )
@@ -67,12 +68,85 @@ if(-not(Test-Path $downloadedDscResources)){
 
 # Copy Static files, modify existing Puppet module files
 Copy-Item -Path (Join-Path -Path $PSScriptRoot -ChildPath 'src/internal/templates/static/*') -Destination $moduleDir -Recurse -Force
-$metadatajson = Get-Content -Path (Join-Path $moduleDir "metadata.json") | ConvertFrom-Json
-$metadatajson.dependencies = @( @{ "name" = "puppetlabs/pwshlib"; "version_requirement" = ">= 0.4.0 < 2.0.0" } )
+# Update the Puppet module metadata
+$metadatajson         = Get-Content -Path (Join-Path $moduleDir "metadata.json") | ConvertFrom-Json
+$PowerShellMetadata   = Import-PSFPowerShellDataFile -Path (Resolve-Path "$downloadedDscResources/$PowerShellModuleName/$PowerShellModuleName.psd1")
+If ($null -ne $PuppetModuleAuthor) {
+  $metadatajson.name   = $metadatajson.name -replace '(^\S+)-(\S+)', "$PuppetModuleAuthor-`$2"
+  $metadatajson.author = $PuppetModuleAuthor
+}
+$metadatajson.version = $PowerShellMetadata.ModuleVersion
+$metadatajson.summary = $PowerShellMetadata.Description -Replace "(`r`n|`n)", '`n'
+$metadatajson.source  = $PowerShellMetadata.PrivateData.PSData.ProjectUri
+# If we can find the issues page, link to it, otherwise default to project page.
+Switch -Regex ($PowerShellMetadata.PrivateData.PSData.ProjectUri) {
+  '(github\.com|gitlab\.com|bitbucket\.com)' {
+    $IssueUri = $PowerShellMetadata.PrivateData.PSData.ProjectUri + '/issues'
+    Try {
+      Invoke-WebRequest -Uri $IssueUri -UseBasicParsing -ErrorAction Stop
+      $metadatajson | Add-Member -MemberType NoteProperty -Name issues_url -Value $IssueUri
+    } Catch {
+      $metadatajson | Add-Member -MemberType NoteProperty -Name issues_url -Value  $PowerShellMetadata.PrivateData.PSData.ProjectUri
+    }
+  }
+  Default { $metadatajson | Add-Member -MemberType NoteProperty -Name issues_url -Value  $PowerShellMetadata.PrivateData.PSData.ProjectUri }
+}
+# If the HelpInfoURI is specified, use it, otherwise default to project page
+If ($null -ne $PowerShellMetadata.PrivateData.PSData.HelpInfoURI) {
+  $metadatajson | Add-Member -MemberType NoteProperty -Name project_page -Value $PowerShellMetadata.PrivateData.PSData.HelpUnfoURI
+} Else {
+  $metadatajson | Add-Member -MemberType NoteProperty -Name project_page -Value $PowerShellMetadata.PrivateData.PSData.ProjectUri
+}
+# Update the dependencies to include the base DSC provider and PowerShell code manager
+$metadatajson.dependencies = @(
+  @{
+    name = 'puppetlabs/pwshlib'
+    version_requirement = '>= 0.4.0 < 2.0.0'
+  }
+)
+# Update the operating sytem to only support windows *for now*.
+$metadatajson.operatingsystem_support = @(
+  @{
+    operatingsystem = 'windows'
+    operatingsystemrelease = @(
+      '2012',
+      '2012R2',
+      '2016',
+      '2019'
+    )
+  }
+)
+# Clarify Puppet lower bound
+$metadatajson.requirements[0].version_requirement = '>= 6.0.0 < 7.0.0'
+
+Function ConvertTo-UnescapedJson {
+  <#
+    .SYNOPSIS
+      Convert a  PowerShell object to JSON *without* Unicode escapes
+    .DESCRIPTION
+      Convert a  PowerShell object to JSON *without* Unicode escapes
+    .EXAMPLE
+      ConvertTo-UnescapedJson -InputObject @{a = '>=1'}
+
+      Using `ConvertTo-Json` here would output `"a": "\u003e=1"` instead of the
+      correct output, `"a": ">=1"`, so running `ConvertTo-UnescapedJson` instead
+      ensures the correct string to be passed along.
+  #>
+  [cmdletbinding()]
+  Param($InputObject)
+
+  ConvertTo-Json -InputObject $InputObject -Depth 10 |
+    ForEach-Object -Process {
+      [System.Text.RegularExpressions.Regex]::Unescape($_)
+    }
+}
+
 [IO.File]::WriteAllLines(
   (Join-Path $moduleDir "metadata.json"),
-  (ConvertTo-Json -InputObject $metadatajson)
+  (ConvertTo-UnescapedJson -InputObject $metadatajson)
 )
+
+# Update the Puppet module test fixtures
 $FixturesYaml = Get-Content -Path (Join-Path $moduleDir ".fixtures.yml") -Raw | ConvertFrom-Yaml
 $FixturesYaml.fixtures.forge_modules = @{pwshlib = 'puppetlabs/pwshlib'}
 [IO.File]::WriteAllLines(
