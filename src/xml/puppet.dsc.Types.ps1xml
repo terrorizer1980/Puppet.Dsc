@@ -61,7 +61,15 @@
               $typeText = switch ($this.PropertyType.TrimStart('[').TrimEnd(']')){
                 'Bool' { 'Boolean';break; }
                 'String' { 'String';break; }
-                default { $_; }
+                default { 
+                  $text = $this.PropertyType.TrimStart('[')
+                  if($text.EndsWith(']]')){
+                    $text = $text.Replace(']]',']')
+                  }else{
+                    $text = $text.TrimEnd(']')
+                  }
+                  (Get-Culture).TextInfo.ToTitleCase($Text)
+                }
               }
             }
           }
@@ -76,7 +84,7 @@
 
           switch($this.IsMandatory){
             $true {
-              "'$($typeText)'"
+              '"', $typeText, '"' -Join ''
             }
             $false{
               "`"Optional[$($typeText)]`""

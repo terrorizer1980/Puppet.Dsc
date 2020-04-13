@@ -31,7 +31,7 @@ Describe 'Parameter Information Retrieval' {
         $ParameterToInspect.Name | Should -BeExactly 'destinationpath'
         # The default value for a parameter can only be discovered via the AST
         $ParameterToInspect.DefaultValue | Should -BeNullOrEmpty
-        $ParameterToInspect.Type | Should -BeExactly "'String'"
+        $ParameterToInspect.Type | Should -BeExactly '"String"'
         # The help info for a parameter can only be discovered via the AST
         $ParameterToInspect.Help | Should -BeNullOrEmpty
         $ParameterToInspect.mandatory_for_get | Should -BeExactly 'true'

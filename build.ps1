@@ -20,7 +20,7 @@
   .EXAMPLE
     .\build.ps1 -PowerShellModuleName PowerShellGet -PowerShellModuleVersion 2.2.3
   .NOTES
-    For right now, we require the EPS & powershell-yaml PowerShell modules and the PDK
+    For right now, we require the powershell-yaml module and the PDK
 #>
 [CmdletBinding()]
 param(
@@ -31,10 +31,9 @@ param(
 
 If ($null -eq $PuppetModuleName) { $PuppetModuleName = $PowerShellModuleName.tolower() }
 
-Import-Module "$PSScriptRoot/src/puppet.dsc.psd1"
+Import-Module "$PSScriptRoot/src/puppet.dsc.psd1" -Force
 
 $importDir   = Join-Path $PSScriptRoot 'import'
-$templateDir = Join-Path $PSScriptRoot 'templates'
 $moduleDir   = Join-Path $importDir $PuppetModuleName
 
 # create new pdk module
@@ -66,8 +65,8 @@ if(-not(Test-Path $downloadedDscResources)){
   Remove-Item $downloadedDscResourcesTmp -Recurse
 }
 
-## copy pdk specific files
-Copy-Item -Path (Join-Path -Path $templateDir 'pdk/*') -Destination $moduleDir -Recurse -Force
+# Copy Static files, modify existing Puppet module files
+Copy-Item -Path (Join-Path -Path $PSScriptRoot -ChildPath 'src/internal/templates/static/*') -Destination $moduleDir -Recurse -Force
 $metadatajson = Get-Content -Path (Join-Path $moduleDir "metadata.json") | ConvertFrom-Json
 $metadatajson.dependencies = @( @{ "name" = "puppetlabs/pwshlib"; "version_requirement" = ">= 0.4.0 < 2.0.0" } )
 [IO.File]::WriteAllLines(
@@ -81,37 +80,24 @@ $FixturesYaml.fixtures.forge_modules = @{pwshlib = 'puppetlabs/pwshlib'}
   ("---`n" + (ConvertTo-Yaml -Data $FixturesYaml))
 )
 
-# copy resource_api base classes
-Get-ChildITem -Path (Join-Path -Path $PSScriptRoot -ChildPath 'templates/resource_api/*') | Copy-Item -Destination $moduleDir -Recurse -Force
-
 # build puppet types from dsc resources
-[string]$puppetTypeTemplate         = [IO.Path]::Combine($PSScriptRoot, 'templates', 'dsc_type.eps')
-[string]$puppetProviderTemplate     = [IO.Path]::Combine($PSScriptRoot, 'templates', 'dsc_provider.eps')
 [string]$puppetTypeDir              = [IO.Path]::Combine($moduleDir, 'lib', 'puppet', 'type')
 [string]$puppetProviderDir          = [IO.Path]::Combine($moduleDir, 'lib', 'puppet', 'provider')
 
 
-If (!(Get-Module -Name 'EPS' -ListAvailable)) {
-  Install-Module -Name 'EPS'
-}
-Import-Module -Name 'EPS'
-
 $oldPsModulePath  = $env:PSModulePath
 $env:PSModulePath = "$($downloadedDscResources);"
-$global:resources = Get-DscResource -Module $PowerShellModuleName | Get-DscResourceTypeInformation
+$resources = Get-DscResource -Module $PowerShellModuleName | Get-DscResourceTypeInformation
 
-# EPS requires global variables to keep them in accessible scope
-# Also need to set the variable to null inside the loop
 # Files are written using UTF8, but newlines will need to addressed
-foreach($resource in $resources){
-  $global:resource = $resource
+foreach($Resource in $Resources){
 
-  $dscResourceName = "dsc_$($resource.Name)"
+  $dscResourceName = "dsc_$($Resource.Name.ToLowerInvariant())"
   if(-not(Test-Path $puppetTypeDir)){
     mkdir $puppetTypeDir | Out-Null
   }
   [string]$puppetTypeFileName = [IO.Path]::Combine($puppetTypeDir, "$($dscResourceName).rb")
-  $puppetTypeText = Invoke-EpsTemplate -Path $puppetTypeTemplate
+  $puppetTypeText = Get-TypeContent $Resource
   [IO.File]::WriteAllLines($puppetTypeFileName, $puppetTypeText)
 
   [string]$puppetTypeProviderDir  = Join-Path $puppetProviderDir "$($dscResourceName)"
@@ -119,7 +105,7 @@ foreach($resource in $resources){
   if(-not(Test-Path $puppetTypeProviderDir)){
     mkdir $puppetTypeProviderDir | Out-Null
   }
-  $puppetProviderText = Invoke-EpsTemplate -Path $puppetProviderTemplate
+  $puppetProviderText = Get-ProviderContent $Resource
   [IO.File]::WriteAllLines($puppetProviderFileName, $puppetProviderText)
 
   $resource = $Null
