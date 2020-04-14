@@ -161,27 +161,21 @@ $FixturesYaml.fixtures.forge_modules = @{pwshlib = 'puppetlabs/pwshlib'}
 
 $oldPsModulePath  = $env:PSModulePath
 $env:PSModulePath = "$($downloadedDscResources);"
-$resources = Get-DscResource -Module $PowerShellModuleName | Get-DscResourceTypeInformation
+$Resources = Get-DscResource -Module $PowerShellModuleName | ConvertTo-PuppetResourceApi
 
 # Files are written using UTF8, but newlines will need to addressed
 foreach($Resource in $Resources){
-
-  $dscResourceName = "dsc_$($Resource.Name.ToLowerInvariant())"
   if(-not(Test-Path $puppetTypeDir)){
-    mkdir $puppetTypeDir | Out-Null
+    New-Item -Path $puppetTypeDir -ItemType Directory -Force | Out-Null
   }
-  [string]$puppetTypeFileName = [IO.Path]::Combine($puppetTypeDir, "$($dscResourceName).rb")
-  $puppetTypeText = Get-TypeContent $Resource
-  [IO.File]::WriteAllLines($puppetTypeFileName, $puppetTypeText)
+  [string]$puppetTypeFileName = Join-Path -Path $puppetTypeDir -ChildPath $Resource.RubyFileName
+  [IO.File]::WriteAllLines($puppetTypeFileName, $Resource.Type)
 
-  [string]$puppetTypeProviderDir  = Join-Path $puppetProviderDir "$($dscResourceName)"
-  [string]$puppetProviderFileName = [IO.Path]::Combine($puppetProviderDir, "$($dscResourceName)", "$($dscResourceName).rb")
-  if(-not(Test-Path $puppetTypeProviderDir)){
-    mkdir $puppetTypeProviderDir | Out-Null
+  [string]$ProviderDirectoryPath  = Join-Path -Path $puppetProviderDir     -ChildPath $Resource.Name
+  [string]$ProviderFilePath       = Join-Path -Path $ProviderDirectoryPath -ChildPath $Resource.RubyFileName
+  if(-not(Test-Path $ProviderDirectoryPath)){
+    New-Item -Path $ProviderDirectoryPath -ItemType Directory -Force | Out-Null
   }
-  $puppetProviderText = Get-ProviderContent $Resource
-  [IO.File]::WriteAllLines($puppetProviderFileName, $puppetProviderText)
-
-  $resource = $Null
+  [IO.File]::WriteAllLines($ProviderFilePath, $Resource.Provider)
 }
 $env:PSModulePath = $oldPsModulePath

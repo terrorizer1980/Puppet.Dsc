@@ -44,6 +44,7 @@
     'Get-DscResourceTypeInformation'
     'Get-ProviderContent'
     'Get-TypeContent'
+    'ConvertTo-PuppetResourceApi'
   )
   
   # Cmdlets to export from this module
