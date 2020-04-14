@@ -41,9 +41,6 @@
   
   # Functions to export from this module
   FunctionsToExport = @(
-    'Get-DscResourceTypeInformation'
-    'Get-ProviderContent'
-    'Get-TypeContent'
     'ConvertTo-PuppetResourceApi'
   )
   
