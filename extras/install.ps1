@@ -17,6 +17,7 @@ $PowerShellModules = @(
   @{ Name = 'PSFramework' }
   @{ Name = 'PSModuleDevelopment' }
   @{ Name = 'PowerShellGet' }
+  @{ Name = 'powershell-yaml' }
   @{ Name = 'PSScriptAnalyzer' }
   @{ Name = 'PSDepend' }
   @{ Name = 'xPSDesiredStateConfiguration' }
