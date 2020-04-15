@@ -6,7 +6,7 @@ install:
 build: off
 test_script:
   - ps: '& .\src\tests\pester.ps1'
-  - ps: '& .\build.ps1'
+  - ps: '& .\build.ps1 -ErrorAction Stop'
 notifications:
   - provider: Email
     on_build_success: false

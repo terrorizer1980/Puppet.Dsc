@@ -48,23 +48,8 @@ Push-Location  $importDir
 pdk new module --skip-interview --template-url "https://github.com/puppetlabs/pdk-templates" $PuppetModuleName
 Pop-Location
 
-# import dsc resources from psgallery
 $downloadedDscResources    = Join-Path $importDir "$PuppetModuleName/lib/puppet_x/dsc_resources"
-$downloadedDscResourcesTmp = "$($downloadedDscResources)_tmp"
-
-if(-not(Test-Path $downloadedDscResources)){
-  if(-not(Test-Path $downloadedDscResources)){
-    mkdir $downloadedDscResources
-  }
-  if(-not(Test-Path $downloadedDscResourcesTmp)){
-    mkdir $downloadedDscResourcesTmp
-  }
-  Save-Module -Name $PowerShellModuleName -Path $downloadedDscResourcesTmp -RequiredVersion $PowerShellModuleVersion
-  ForEach ($ModuleFolder in (Get-ChildItem $downloadedDscResourcesTmp)) {
-    Move-Item -Path (Get-ChildItem $ModuleFolder.FullName).FullName -Destination "$downloadedDscResources/$($ModuleFolder.Name)"
-  }
-  Remove-Item $downloadedDscResourcesTmp -Recurse
-}
+Add-DscResourceModule -Name $PowerShellModuleName -Path $downloadedDscResources -RequiredVersion $PowerShellModuleVersion
 
 # Copy Static files, modify existing Puppet module files
 Copy-Item -Path (Join-Path -Path $PSScriptRoot -ChildPath 'src/internal/templates/static/*') -Destination $moduleDir -Recurse -Force
