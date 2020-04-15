@@ -16,7 +16,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   end
 
   def invoke_get_method(context, name_hash)
-    context.notice("retrieving '#{name_hash}'")
+    context.debug("retrieving '#{name_hash}'")
     resource = should_to_resource(name_hash, context, 'get')
     script_content = ps_script_content(resource)
     context.debug("Script:\n #{script_content}")
@@ -46,7 +46,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   end
 
   def invoke_set_method(context, name, should)
-    context.notice("Ivoking Set Method for '#{name}' with #{should.inspect}")
+    context.debug("Ivoking Set Method for '#{name}' with #{should.inspect}")
     resource = should_to_resource(should, context, 'set')
     script_content = ps_script_content(resource)
     context.debug("Script:\n #{script_content}")
@@ -63,17 +63,17 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   end
 
   def create(context, name, should)
-    context.notice("Creating '#{name}' with #{should.inspect}")
+    context.debug("Creating '#{name}' with #{should.inspect}")
     invoke_set_method(context, name, should)
   end
 
   def update(context, name, should)
-    context.notice("Updating '#{name}' with #{should.inspect}")
+    context.debug("Updating '#{name}' with #{should.inspect}")
     invoke_set_method(context, name, should)
   end
 
   def delete(context, name)
-    context.notice("Deleting '#{name}'")
+    context.debug("Deleting '#{name}'")
     invoke_set_method(context, name, should)
   end
 
