@@ -44,6 +44,7 @@
     'Add-DscResourceModule'
     'ConvertTo-PuppetResourceApi'
     'Update-PuppetModuleFixture'
+    'Update-PuppetModuleMetadata'
   )
 
   # Cmdlets to export from this module
