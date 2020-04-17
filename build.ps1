@@ -38,21 +38,11 @@ $importDir   = Join-Path $PSScriptRoot 'import'
 $moduleDir   = Join-Path $importDir $PuppetModuleName
 
 # create new pdk module
-if(-not(Test-Path $importDir)){
-  mkdir $importDir
-}
-if(Test-Path $moduleDir){
-  Remove-Item -Path $moduleDir -Force -Recurse
-}
-Push-Location  $importDir
-pdk new module --skip-interview --template-url "https://github.com/puppetlabs/pdk-templates" $PuppetModuleName
-Pop-Location
+Initialize-PuppetModule -OutputFolderPath $importDir -PuppetModuleName $PuppetModuleName -verbose
 
 $downloadedDscResources    = Join-Path $importDir "$PuppetModuleName/lib/puppet_x/dsc_resources"
 Add-DscResourceModule -Name $PowerShellModuleName -Path $downloadedDscResources -RequiredVersion $PowerShellModuleVersion
 
-# Copy Static files, modify existing Puppet module files
-Copy-Item -Path (Join-Path -Path $PSScriptRoot -ChildPath 'src/internal/templates/static/*') -Destination $moduleDir -Recurse -Force
 # Update the Puppet module metadata
 $MetadataParameters = @{
   PuppetModuleFolderPath = $moduleDir
