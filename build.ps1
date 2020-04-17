@@ -132,12 +132,7 @@ Function ConvertTo-UnescapedJson {
 )
 
 # Update the Puppet module test fixtures
-$FixturesYaml = Get-Content -Path (Join-Path $moduleDir ".fixtures.yml") -Raw | ConvertFrom-Yaml
-$FixturesYaml.fixtures.forge_modules = @{pwshlib = 'puppetlabs/pwshlib'}
-[IO.File]::WriteAllLines(
-  (Join-Path $moduleDir ".fixtures.yml"),
-  ("---`n" + (ConvertTo-Yaml -Data $FixturesYaml))
-)
+Update-PuppetModuleFixture -PuppetModuleFolderPath $moduleDir
 
 # build puppet types from dsc resources
 [string]$puppetTypeDir              = [IO.Path]::Combine($moduleDir, 'lib', 'puppet', 'type')

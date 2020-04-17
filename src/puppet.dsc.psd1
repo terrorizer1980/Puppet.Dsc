@@ -43,6 +43,7 @@
   FunctionsToExport = @(
     'Add-DscResourceModule'
     'ConvertTo-PuppetResourceApi'
+    'Update-PuppetModuleFixture'
   )
 
   # Cmdlets to export from this module
