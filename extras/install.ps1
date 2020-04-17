@@ -16,7 +16,7 @@ choco install $ChocolateyPackages -y --no-progress
 $PowerShellModules = @(
   @{ Name = 'PSFramework' }
   @{ Name = 'PSModuleDevelopment' }
-  @{ Name = 'PowerShellGet' }
+  @{ Name = 'PowerShellGet' ; RequiredVersion = '2.2.3' }
   @{ Name = 'powershell-yaml' }
   @{ Name = 'PSScriptAnalyzer' }
   @{ Name = 'PSDepend' }
