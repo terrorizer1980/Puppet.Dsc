@@ -31,17 +31,22 @@ function Get-TypeContent {
       If($Null -eq $Resource.ParameterInfo) {
         $Resource = Get-DscResourceTypeInformation -DscResource $Resource
       }
+      If ($Null -eq $Resource.FriendlyName) {
+        $FriendlyName = $Resource.Name
+      } Else {
+        $FriendlyName = $Resource.FriendlyName
+      }
       New-Object -TypeName System.String @"
 require 'puppet/resource_api'
 
 Puppet::ResourceApi.register_type(
   name: 'dsc_$($Resource.Name.ToLowerInvariant())',
-  dscmeta_resource_friendly_name: '$($Resource.FriendlyName)',
+  dscmeta_resource_friendly_name: '$FriendlyName',
   dscmeta_resource_name: '$($Resource.ResourceType)',
   dscmeta_module_name: '$($Resource.ModuleName)',
   dscmeta_module_version: '$($Resource.Version)',
   docs: %q{
-    The DSC $($Resource.FriendlyName) resource type.
+    The DSC $FriendlyName resource type.
     Automatically generated from version $($Resource.Version)
   },
   features: ['simple_get_filter'],
