@@ -15,6 +15,21 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     names.collect { |name_hash| invoke_get_method(context,name_hash) }
   end
 
+  def create(context, name, should)
+    context.debug("Creating '#{name}' with #{should.inspect}")
+    invoke_set_method(context, name, should)
+  end
+
+  def update(context, name, should)
+    context.debug("Updating '#{name}' with #{should.inspect}")
+    invoke_set_method(context, name, should)
+  end
+
+  def delete(context, name)
+    context.debug("Deleting '#{name}'")
+    invoke_set_method(context, name, should)
+  end
+
   def invoke_get_method(context, name_hash)
     context.debug("retrieving '#{name_hash}'")
     resource = should_to_resource(name_hash, context, 'get')
@@ -60,21 +75,6 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     context.err(data['errormessage']) if !data['errormessage'].empty?
     # notify_reboot_pending if data['rebootrequired'] == true
     data
-  end
-
-  def create(context, name, should)
-    context.debug("Creating '#{name}' with #{should.inspect}")
-    invoke_set_method(context, name, should)
-  end
-
-  def update(context, name, should)
-    context.debug("Updating '#{name}' with #{should.inspect}")
-    invoke_set_method(context, name, should)
-  end
-
-  def delete(context, name)
-    context.debug("Deleting '#{name}'")
-    invoke_set_method(context, name, should)
   end
 
   def should_to_resource(should, context, dsc_invoke_method)
