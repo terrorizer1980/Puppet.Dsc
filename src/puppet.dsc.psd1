@@ -43,6 +43,7 @@
   FunctionsToExport = @(
     'Add-DscResourceModule'
     'ConvertTo-PuppetResourceApi'
+    'Get-PuppetizedModuleName'
     'Initialize-PuppetModule'
     'Update-PuppetModuleFixture'
     'Update-PuppetModuleMetadata'
