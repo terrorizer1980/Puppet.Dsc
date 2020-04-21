@@ -35,7 +35,12 @@ function Get-FileEncoding
   elseif ($byte[0] -eq 0xfe -and $byte[1] -eq 0xff) { 'Unicode' }
   elseif ($byte[0] -eq 0 -and $byte[1] -eq 0 -and $byte[2] -eq 0xfe -and $byte[3] -eq 0xff) { 'UTF32' }
   elseif ($byte[0] -eq 0x2b -and $byte[1] -eq 0x2f -and $byte[2] -eq 0x76) { 'UTF7' }
-  else { 'Unknown' }
+  else {
+    New-Object -TypeName System.IO.StreamReader -ArgumentList $Path -OutVariable Stream |
+      Select-Object -ExpandProperty CurrentEncoding |
+      Select-Object -ExpandProperty BodyName 
+    $Stream.Dispose()
+  }
 }
 
 Describe "Verifying integrity of module files" {
@@ -46,9 +51,9 @@ Describe "Verifying integrity of module files" {
     {
       $name = $file.FullName.Replace("$moduleRoot\", '')
       
-      It "[$name] Should have UTF8 encoding with Byte Order Mark" {
+      It "[$name] Should have UTF8 encoding without Byte Order Mark" {
         # Temporary hack as all the files are UTF8 but the tests don't support that yet
-        Get-FileEncoding -Path $file.FullName | Should -Be 'Unknown'
+        Get-FileEncoding -Path $file.FullName | Should -Be 'UTF-8'
       }
       
       It "[$name] Should have no trailing space" {
@@ -84,7 +89,7 @@ Describe "Verifying integrity of module files" {
       
       It "[$name] Should have UTF8 encoding" {
         # Temporary hack as all the files are UTF8 but the tests don't support that yet
-        Get-FileEncoding -Path $file.FullName | Should -Be 'Unknown'
+        Get-FileEncoding -Path $file.FullName | Should -Be 'UTF-8'
       }
       
       It "[$name] Should have no trailing space" {
