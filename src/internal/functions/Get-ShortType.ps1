@@ -9,7 +9,7 @@ Function Get-ShortType {
       THe property type of a DSC resource property
     .EXAMPLE
       Get-ShortType -PropertyType $DscResource.Properties[0].PropertyType
-      
+
       This will return a string representing the property type stripped of its outer brackets
   #>
   [cmdletbinding()]
@@ -17,11 +17,11 @@ Function Get-ShortType {
   Param (
     [string]$PropertyType
   )
-  $ShortType = $PropertyType.TrimStart('[')
-  $ShortType = If ($ShortType.EndsWith(']]')) {
-                 $ShortType.Replace(']]',']')
-               } Else {
-                 $ShortType.TrimEnd(']')
-               }
+  if ($PropertyType.StartsWith('[') -and $PropertyType.EndsWith(']')) {
+    $ShortType = $PropertyType.Substring(1, $PropertyType.Length - 2)
+  }
+  else {
+    $ShortType = $PropertyType
+  }
   $ShortType
 }
