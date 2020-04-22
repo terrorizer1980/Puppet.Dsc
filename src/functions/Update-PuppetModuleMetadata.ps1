@@ -42,7 +42,7 @@ function Update-PuppetModuleMetadata {
       $PuppetMetadata.name   = $PuppetMetadata.name -replace '(^\S+)-(\S+)', "$PuppetModuleAuthor-`$2"
       $PuppetMetadata.author = $PuppetModuleAuthor
     }
-    $PuppetMetadata.version = $PowerShellMetadata.ModuleVersion
+    $PuppetMetadata.version = Get-PuppetModuleVersion -Version $PowerShellMetadata.ModuleVersion
     $PuppetMetadata.summary = $PowerShellMetadata.Description -Replace "(`r`n|`n)", '`n'
     $PuppetMetadata.source  = $PowerShellMetadata.PrivateData.PSData.ProjectUri
     # If we can find the issues page, link to it, otherwise default to project page.

@@ -55,7 +55,7 @@ Describe 'Update-PuppetModuleMetadata' {
           Assert-MockCalled Out-Utf8File -Times 1
         }
         It 'Updates the version' {
-          $Result.version | Should -Be '2.2.3'
+          $Result.version | Should -Be '2.2.3-0-0'
         }
         It 'Updates the summary' {
           $Result.summary | Should -Be 'PowerShell module with commands for discovering, installing, updating and publishing the PowerShell artifacts like Modules, DSC Resources, Role Capabilities and Scripts.'
