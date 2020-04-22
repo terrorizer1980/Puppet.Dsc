@@ -13,7 +13,7 @@ Function Get-PuppetDataType {
       The DscResourcePropertyInfo object which represents a single property for a given DSC resource.
     .EXAMPLE
       Get-PuppetDataTYpe -DscResourceProperty $DscResource.Properties[0]
-      
+
       This will return a string representing the Puppet Data type that most closely equates to the
       PowerShell data type that this Property has.
   #>
@@ -58,7 +58,7 @@ Function Get-PuppetDataType {
                               'String' { 'String'  }
                               # https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/integral-numeric-types
                               'byte'   { 'Integer[0, 255]' }
-                              'Uint16' { 'Integer[0,65535]' }
+                              'Uint16' { 'Integer[0, 65535]' }
                               'Uint32' { 'Integer[0, 4294967295]' }
                               'Uint64' { 'Integer[0, 18446744073709551615]' }
                               'sybte'  { 'Integer[-128, 127]' }
