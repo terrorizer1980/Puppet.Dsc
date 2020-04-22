@@ -30,9 +30,9 @@ param(
   $PowerShellModuleVersion
 )
 
-If ($null -eq $PuppetModuleName) { $PuppetModuleName = $PowerShellModuleName.tolower() }
-
 Import-Module "$PSScriptRoot/src/puppet.dsc.psd1" -Force
+
+If ($null -eq $PuppetModuleName) { $PuppetModuleName = Get-PuppetizedModuleName -Name $PowerShellModuleName }
 
 $importDir   = Join-Path $PSScriptRoot 'import'
 $moduleDir   = Join-Path $importDir $PuppetModuleName
@@ -53,6 +53,14 @@ Update-PuppetModuleMetadata @MetadataParameters
 
 # Update the Puppet module test fixtures
 Update-PuppetModuleFixture -PuppetModuleFolderPath $moduleDir
+
+$ReadmeParameters = @{
+  PuppetModuleFolderPath       = $moduleDir
+  PowerShellModuleManifestPath = (Resolve-Path "$downloadedDscResources/$PowerShellModuleName/$PowerShellModuleName.psd1")
+  PowerShellModuleName         = $PowerShellModuleName
+  PuppetModuleName             = $PuppetModuleName
+}
+Update-PuppetModuleReadme @ReadmeParameters
 
 # build puppet types from dsc resources
 [string]$puppetTypeDir              = [IO.Path]::Combine($moduleDir, 'lib', 'puppet', 'type')
