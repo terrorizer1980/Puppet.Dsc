@@ -50,7 +50,7 @@ function Update-PuppetModuleMetadata {
       '(github\.com|gitlab\.com|bitbucket\.com)' {
         $IssueUri = $PowerShellMetadata.PrivateData.PSData.ProjectUri + '/issues'
         Try {
-          Invoke-WebRequest -Uri $IssueUri -UseBasicParsing -ErrorAction Stop
+          $null = Invoke-WebRequest -Uri $IssueUri -UseBasicParsing -ErrorAction Stop
           $PuppetMetadata | Add-Member -MemberType NoteProperty -Name issues_url -Value $IssueUri
         } Catch {
           $PuppetMetadata | Add-Member -MemberType NoteProperty -Name issues_url -Value  $PowerShellMetadata.PrivateData.PSData.ProjectUri
