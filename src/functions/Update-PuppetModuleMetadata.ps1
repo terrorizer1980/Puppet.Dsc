@@ -85,6 +85,13 @@ function Update-PuppetModuleMetadata {
     )
     # Clarify Puppet lower bound
     $PuppetMetadata.requirements[0].version_requirement = '>= 6.0.0 < 7.0.0'
+    # Add new metadata sections
+    $PuppetMetadata | Add-Member -MemberType NoteProperty -Name dsc_module_metadata -Value @{
+      name    = Get-Module -ListAvailable -Name $PowerShellModuleManifestPath | Select-Object -ExpandProperty Name
+      version = $PowerShellMetadata.ModuleVersion
+      author  = $PowerShellMetadata.Author
+      guid    = $PowerShellMetadata.Guid
+    }
     $PuppetMetadataJson = ConvertTo-UnescapedJson -InputObject $PuppetMetadata -Depth 10
     If ($PSCmdlet.ShouldProcess($PuppetModuleMetadataFilePath, "Overwrite Puppet Module metadata with:`n`n$PuppetMetadataJson")) {
       Out-Utf8File -Path $PuppetModuleMetadataFilePath -InputObject $PuppetMetadataJson

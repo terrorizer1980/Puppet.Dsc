@@ -83,6 +83,12 @@ Describe 'Update-PuppetModuleMetadata' {
         It 'Updates the Puppet lower bound' {
           $Result.requirements[0].version_requirement | Should -Be '>= 6.0.0 < 7.0.0'
         }
+        It 'Adds metadata about the Puppetized PowerShell module' {
+          $Result.dsc_module_metadata.name    | Should -BeExactly 'PowerShellGet'
+          $Result.dsc_module_metadata.version | Should -BeExactly '2.2.3'
+          $Result.dsc_module_metadata.author  | Should -BeExactly 'Microsoft Corporation'
+          $Result.dsc_module_metadata.guid    | Should -BeExactly '1d73a601-4a6c-43c5-ba3f-619b18bbb404'
+        }
       }
       Context 'Edge Cases' {
         Context 'Issues Url' {
