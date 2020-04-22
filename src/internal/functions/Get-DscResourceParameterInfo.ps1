@@ -55,9 +55,13 @@ function Get-DscResourceParameterInfo {
         $HelpInfo = $SetFunctionAst.GetHelpContent().Parameters
       }
     }
-    # We iterate over allowed_properties to get those that will work via Invoke-DscResource
+    # We iterate over the allowed properties to get those that will work via Invoke-DscResource
+    # We filter out the DependsOn and WaitFor properties as they're not used with Invoke-DscResource.
     # Note that this will always return PSDscRunAsCredential (if run on 5x), which doesn't work in 7+
-    ForEach ($Parameter in $DscResource.allowed_properties) {
+    $AllowedProperties = $DscResource.Properties | Where-Object -FilterScript {
+      $_.Name -NotMatch '(dependson|waitfor.*)'
+    }
+    ForEach ($Parameter in $AllowedProperties) {
       If ($null -ne $HelpInfo) {
         $ParameterDescription = $HelpInfo[$Parameter.Name.ToUpper()]
         If ($null -ne $ParameterDescription) { $ParameterDescription = $ParameterDescription.Trim()}
@@ -67,25 +71,27 @@ function Get-DscResourceParameterInfo {
         $DefaultValue = $SetFunctionAst.body.ParamBlock.Parameters |
           Where-Object  -FilterScript { $_.Name -match [string]$Parameter.Name } |
           Select-Object -ExpandProperty DefaultValue
-      } Else { $MandatorySet = $Parameter.Required }
+      } Else { $MandatorySet = $Parameter.IsMandatory }
       If ($null -ne $GetFunctionAst) {
         $MandatoryGet = ("`$$($Parameter.Name)" -in [string[]]$MandatoryGetParameters.Name)
-      } Else { $MandatoryGet = $Parameter.Required }
+      } Else { $MandatoryGet = $Parameter.IsMandatory }
       # We want to return all the useful info from allowed_properties PLUS
       # the help (if any), the default set value (if any), and whether or not the param is mandatory
       # for get or set calls (it *may* be manadatory for set but not get) - if we can't parse, default
       # to using the Required designation from Get-DscResource, which only cares about setting.
-      [pscustomobject] @{
+      $Type = Get-PuppetDataType -DscResourceProperty $Parameter
+      [pscustomobject]@{
         # Downcase the name for the sake of Puppet expectations
         Name              = $Parameter.Name.ToLowerInvariant()
         DefaultValue      = $DefaultValue
-        Type              = $Parameter.Type
+        # Type              = $Parameter.Type
+        Type              = $Type
         Help              = $ParameterDescription
-        # Turn a boolean into a string and downcase for Puppet language
+        # # Turn a boolean into a string and downcase for Puppet language
         mandatory_for_get = $MandatoryGet.ToString().ToLowerInvariant()
         mandatory_for_set = $MandatorySet.ToString().ToLowerInvariant()
-        mof_is_embedded   = $Parameter.EmbeddedInstance.ToString().ToLowerInvariant()
-        mof_type          = $Parameter.ShortType
+        mof_is_embedded   = (Test-EmbeddedInstance -PropertyType $Parameter.PropertyType).ToString().ToLowerInvariant()
+        mof_type          = Get-ShortType -PropertyType $Parameter.PropertyType
       }
     }
   }

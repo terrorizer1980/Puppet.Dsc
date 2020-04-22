@@ -1,4 +1,4 @@
-Describe 'Parameter Information Retrieval' {
+Describe 'Get-DscResourceParameterInfo' {
   InModuleScope puppet.dsc {
     Context 'When the AST can be parsed for functions' {
       It 'returns the full set of expected parameter info if the resource can be parsed fully' {
