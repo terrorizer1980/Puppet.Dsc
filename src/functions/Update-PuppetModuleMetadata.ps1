@@ -42,7 +42,7 @@ function Update-PuppetModuleMetadata {
       $PuppetMetadata.name   = $PuppetMetadata.name -replace '(^\S+)-(\S+)', "$PuppetModuleAuthor-`$2"
       $PuppetMetadata.author = $PuppetModuleAuthor
     }
-    $PuppetMetadata.version = $PowerShellMetadata.ModuleVersion
+    $PuppetMetadata.version = Get-PuppetModuleVersion -Version $PowerShellMetadata.ModuleVersion
     $PuppetMetadata.summary = $PowerShellMetadata.Description -Replace "(`r`n|`n)", '`n'
     $PuppetMetadata.source  = $PowerShellMetadata.PrivateData.PSData.ProjectUri
     # If we can find the issues page, link to it, otherwise default to project page.
@@ -50,7 +50,7 @@ function Update-PuppetModuleMetadata {
       '(github\.com|gitlab\.com|bitbucket\.com)' {
         $IssueUri = $PowerShellMetadata.PrivateData.PSData.ProjectUri + '/issues'
         Try {
-          Invoke-WebRequest -Uri $IssueUri -UseBasicParsing -ErrorAction Stop
+          $null = Invoke-WebRequest -Uri $IssueUri -UseBasicParsing -ErrorAction Stop
           $PuppetMetadata | Add-Member -MemberType NoteProperty -Name issues_url -Value $IssueUri
         } Catch {
           $PuppetMetadata | Add-Member -MemberType NoteProperty -Name issues_url -Value  $PowerShellMetadata.PrivateData.PSData.ProjectUri
@@ -85,6 +85,13 @@ function Update-PuppetModuleMetadata {
     )
     # Clarify Puppet lower bound
     $PuppetMetadata.requirements[0].version_requirement = '>= 6.0.0 < 7.0.0'
+    # Add new metadata sections
+    $PuppetMetadata | Add-Member -MemberType NoteProperty -Name dsc_module_metadata -Value @{
+      name    = Get-Module -ListAvailable -Name $PowerShellModuleManifestPath | Select-Object -ExpandProperty Name
+      version = $PowerShellMetadata.ModuleVersion
+      author  = $PowerShellMetadata.Author
+      guid    = $PowerShellMetadata.Guid
+    }
     $PuppetMetadataJson = ConvertTo-UnescapedJson -InputObject $PuppetMetadata -Depth 10
     If ($PSCmdlet.ShouldProcess($PuppetModuleMetadataFilePath, "Overwrite Puppet Module metadata with:`n`n$PuppetMetadataJson")) {
       Out-Utf8File -Path $PuppetModuleMetadataFilePath -InputObject $PuppetMetadataJson

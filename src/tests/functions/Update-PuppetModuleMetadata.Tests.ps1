@@ -55,7 +55,7 @@ Describe 'Update-PuppetModuleMetadata' {
           Assert-MockCalled Out-Utf8File -Times 1
         }
         It 'Updates the version' {
-          $Result.version | Should -Be '2.2.3'
+          $Result.version | Should -Be '2.2.3-0-0'
         }
         It 'Updates the summary' {
           $Result.summary | Should -Be 'PowerShell module with commands for discovering, installing, updating and publishing the PowerShell artifacts like Modules, DSC Resources, Role Capabilities and Scripts.'
@@ -82,6 +82,12 @@ Describe 'Update-PuppetModuleMetadata' {
         }
         It 'Updates the Puppet lower bound' {
           $Result.requirements[0].version_requirement | Should -Be '>= 6.0.0 < 7.0.0'
+        }
+        It 'Adds metadata about the Puppetized PowerShell module' {
+          $Result.dsc_module_metadata.name    | Should -BeExactly 'PowerShellGet'
+          $Result.dsc_module_metadata.version | Should -BeExactly '2.2.3'
+          $Result.dsc_module_metadata.author  | Should -BeExactly 'Microsoft Corporation'
+          $Result.dsc_module_metadata.guid    | Should -BeExactly '1d73a601-4a6c-43c5-ba3f-619b18bbb404'
         }
       }
       Context 'Edge Cases' {
