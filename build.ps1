@@ -24,66 +24,13 @@
 #>
 [CmdletBinding()]
 param(
-  $PuppetModuleName,
-  $PuppetModuleAuthor,
-  $PowerShellModuleName = 'PowerShellGet',
-  $PowerShellModuleVersion
+  [string]$PuppetModuleName,
+  [string]$PuppetModuleAuthor,
+  [string]$PowerShellModuleName,
+  [string]$PowerShellModuleVersion
 )
 
+Import-Module PuppetDevelopmentKit
 Import-Module "$PSScriptRoot/src/puppet.dsc.psd1" -Force
 
-If ($null -eq $PuppetModuleName) { $PuppetModuleName = Get-PuppetizedModuleName -Name $PowerShellModuleName }
-
-$importDir   = Join-Path $PSScriptRoot 'import'
-$moduleDir   = Join-Path $importDir $PuppetModuleName
-
-# create new pdk module
-Initialize-PuppetModule -OutputFolderPath $importDir -PuppetModuleName $PuppetModuleName -verbose
-
-$downloadedDscResources    = Join-Path $importDir "$PuppetModuleName/lib/puppet_x/dsc_resources"
-Add-DscResourceModule -Name $PowerShellModuleName -Path $downloadedDscResources -RequiredVersion $PowerShellModuleVersion
-
-# Update the Puppet module metadata
-$MetadataParameters = @{
-  PuppetModuleFolderPath = $moduleDir
-  PowerShellModuleManifestPath = (Resolve-Path "$downloadedDscResources/$PowerShellModuleName/$PowerShellModuleName.psd1")
-  PuppetModuleAuthor = $PuppetModuleAuthor
-}
-Update-PuppetModuleMetadata @MetadataParameters
-
-# Update the Puppet module test fixtures
-Update-PuppetModuleFixture -PuppetModuleFolderPath $moduleDir
-
-$ReadmeParameters = @{
-  PuppetModuleFolderPath       = $moduleDir
-  PowerShellModuleManifestPath = (Resolve-Path "$downloadedDscResources/$PowerShellModuleName/$PowerShellModuleName.psd1")
-  PowerShellModuleName         = $PowerShellModuleName
-  PuppetModuleName             = $PuppetModuleName
-}
-Update-PuppetModuleReadme @ReadmeParameters
-
-# build puppet types from dsc resources
-[string]$puppetTypeDir              = [IO.Path]::Combine($moduleDir, 'lib', 'puppet', 'type')
-[string]$puppetProviderDir          = [IO.Path]::Combine($moduleDir, 'lib', 'puppet', 'provider')
-
-
-$oldPsModulePath  = $env:PSModulePath
-$env:PSModulePath = "$($downloadedDscResources);"
-$Resources = Get-DscResource -Module $PowerShellModuleName | ConvertTo-PuppetResourceApi
-
-# Files are written using UTF8, but newlines will need to addressed
-foreach($Resource in $Resources){
-  if(-not(Test-Path $puppetTypeDir)){
-    New-Item -Path $puppetTypeDir -ItemType Directory -Force | Out-Null
-  }
-  [string]$puppetTypeFileName = Join-Path -Path $puppetTypeDir -ChildPath $Resource.RubyFileName
-  [IO.File]::WriteAllLines($puppetTypeFileName, $Resource.Type)
-
-  [string]$ProviderDirectoryPath  = Join-Path -Path $puppetProviderDir     -ChildPath $Resource.Name
-  [string]$ProviderFilePath       = Join-Path -Path $ProviderDirectoryPath -ChildPath $Resource.RubyFileName
-  if(-not(Test-Path $ProviderDirectoryPath)){
-    New-Item -Path $ProviderDirectoryPath -ItemType Directory -Force | Out-Null
-  }
-  [IO.File]::WriteAllLines($ProviderFilePath, $Resource.Provider)
-}
-$env:PSModulePath = $oldPsModulePath
+New-PuppetDscModule @PSBoundParameters
