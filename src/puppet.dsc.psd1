@@ -41,14 +41,9 @@
 
   # Functions to export from this module
   FunctionsToExport = @(
-    'Add-DscResourceModule'
     'ConvertTo-PuppetResourceApi'
     'Get-PuppetizedModuleName'
-    'Initialize-PuppetModule'
     'New-PuppetDscModule'
-    'Update-PuppetModuleFixture'
-    'Update-PuppetModuleMetadata'
-    'Update-PuppetModuleReadme'
   )
 
   # Cmdlets to export from this module
