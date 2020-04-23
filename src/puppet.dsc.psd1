@@ -45,6 +45,7 @@
     'ConvertTo-PuppetResourceApi'
     'Get-PuppetizedModuleName'
     'Initialize-PuppetModule'
+    'New-PuppetDscModule'
     'Update-PuppetModuleFixture'
     'Update-PuppetModuleMetadata'
     'Update-PuppetModuleReadme'
