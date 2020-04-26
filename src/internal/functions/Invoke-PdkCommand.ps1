@@ -36,7 +36,7 @@ Function Invoke-PdkCommand {
   )
   
   begin {
-    $null = Resolve-Path $Path -ErrorAction Stop
+    $Path = Resolve-Path $Path -ErrorAction Stop
 
     $ScriptBlock = [ScriptBlock]::Create("
       Push-Location -Path $Path

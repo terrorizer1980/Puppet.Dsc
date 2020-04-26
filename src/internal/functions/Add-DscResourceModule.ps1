@@ -36,11 +36,11 @@ function Add-DscResourceModule {
   Process {
     if (-not(Test-Path $Path)) {
       if (-not(Test-Path $Path)) {
-        New-Item -Path $Path -Force -ItemType 'Directory'
+        $null = New-Item -Path $Path -Force -ItemType 'Directory'
       }
       $PathTmp = ($Path -Replace "(/|\\)$", $Null) + '_tmp'
       if (-not(Test-Path $PathTmp)) {
-        New-Item -Path $PathTmp -Force -ItemType 'Directory'
+        $null = New-Item -Path $PathTmp -Force -ItemType 'Directory'
       }
       Save-Module -Name $Name -Path $PathTmp -RequiredVersion $RequiredVersion
       ForEach ($ModuleFolder in (Get-ChildItem $PathTmp)) {
