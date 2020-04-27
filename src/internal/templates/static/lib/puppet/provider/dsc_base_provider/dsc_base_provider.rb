@@ -72,7 +72,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     context.debug("retrieving '#{name_hash}'")
     resource = should_to_resource(name_hash, context, 'get')
     script_content = ps_script_content(resource)
-    context.debug("Script:\n #{script_content}")
+    context.debug("Script:\n #{redact_secrets(script_content)}")
     output = ps_manager.execute(script_content)[:stdout]
     context.err('Nothing returned') if output.nil?
 
@@ -112,7 +112,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     context.debug("Ivoking Set Method for '#{name}' with #{should.inspect}")
     resource = should_to_resource(should, context, 'set')
     script_content = ps_script_content(resource)
-    context.debug("Script:\n #{script_content}")
+    context.debug("Script:\n #{redact_secrets(script_content)}")
 
     output = ps_manager.execute(script_content)[:stdout]
     context.err('Nothing returned') if output.nil?
@@ -383,6 +383,25 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   def escape_quotes(text)
     text.gsub("'", "''")
   end
+
+  # While Puppet is aware of Sensitive data types, the PowerShell script is not
+  # and so for debugging purposes must be redacted before being sent to debug
+  # output but must *not* be redacted when sent to the PowerShell code manager.
+  #
+  # @params text [String] the text to redact
+  # @returns [String] the redacted text
+  def redact_secrets(text)
+    # Every secret unwrapped in this module will unwrap as "'secret' # PuppetSensitive" and, currently,
+    # no known resources specify a SecureString instead of a PSCredential object. We therefore only 
+    # need to redact strings which look like password declarations.
+    modified_text = text.gsub(%r{(?<=-Password )'.+' # PuppetSensitive}, "'#<Sensitive [value redacted]>'")
+    if modified_text =~ %r{'.+' # PuppetSensitive}
+      # Something has gone wrong, error loudly?
+    else
+      modified_text
+    end
+  end
+
 
   # Instantiate a PowerShell manager via the ruby-pwsh library and use it to invoke PowerShell.
   # Definiing it here allows re-use of a single instance instead of continually instantiating and
