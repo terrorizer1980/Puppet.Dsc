@@ -10,7 +10,7 @@ function Add-PuppetReferenceDocumentation {
         The path, relative or literal, to the Puppet module's root folder.
       .EXAMPLE
         Add-PuppetReferenceDocumentation -PuppetModuleFolderPath C:\output\testmodule
-        This command will generate `REFERENCE.md` file.
+        This command will generate `REFERENCE.md` file for the `testmodule` Puppet module.
     #>
     [CmdletBinding()]
     param (
