@@ -46,7 +46,7 @@ Function Invoke-PdkCommand {
   
   process {
     $PdkResults = Start-Job -ScriptBlock $ScriptBlock | Wait-Job
-    $PdkSuccessMessage = $PDkResults.ChildJobs[0].Error.Exception |
+    $PdkSuccessMessage = $PdkResults.ChildJobs[0].Error.Exception, $PdkResults.ChildJobs[0].Output |
       Where-Object -FilterScript $SuccessFilterScript
     If ($null -eq $PdkSuccessMessage) {
       Throw "Command '$Command' failed:`n`t$($PdkResults.ChildJobs[0].Error[-1].Exception -Replace 'System.Management.Automation.RemoteException:', $null)"
