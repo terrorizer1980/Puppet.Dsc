@@ -36,22 +36,47 @@ Describe 'Invoke-PdkCommand' {
       }
 
       Context 'Success' {
-        Mock Start-Job {
-          [PSCustomObject]@{ID = 0}
-        }
-        Mock Wait-Job  {
-          # Create a version of the job output that has only what we need for a "good" job
-          return @{
-            ChildJobs = [System.Collections.ArrayList]@(
-              @{ Error = [System.Collections.ArrayList]@(@{ Exception = $SuccessException }) }
-            )
+        Context 'Success message is in stderr' {
+          Mock Start-Job {
+            [PSCustomObject]@{ID = 0}
+          }
+          Mock Wait-Job  {
+            # Create a version of the job output that has only what we need for a "good" job
+            return @{
+              ChildJobs = [System.Collections.ArrayList]@(
+                @{ Error = [System.Collections.ArrayList]@(@{ Exception = $SuccessException }) }
+              )
+            }
+          }
+  
+          It 'Starts and waits for a job' {
+            { Invoke-PdkCommand -Command $CommandFoo -SuccessFilterScript { $_ -eq $SuccessException } } | Should -Not -Throw
+            Assert-MockCalled Start-Job -Times 1
+            Assert-MockCalled Wait-Job  -Times 1
           }
         }
 
-        It 'Starts and waits for a job' {
-          { Invoke-PdkCommand -Command $CommandFoo -SuccessFilterScript { $_ -eq $SuccessException } } | Should -Not -Throw
-          Assert-MockCalled Start-Job -Times 1
-          Assert-MockCalled Wait-Job  -Times 1
+        Context 'Success message is in stdout' {
+          Mock Start-Job {
+            [PSCustomObject]@{ID = 0}
+          }
+          Mock Wait-Job  {
+            # Create a version of the job output that has only what we need for a "good" job
+            return @{
+              ChildJobs = [System.Collections.ArrayList]@(
+                @{
+                  Error  = [System.Collections.ArrayList]@(@{ Exception = 'foo' })
+                  Output = [System.Collections.ArrayList]@($SuccessException)
+                }
+              )
+            }
+          }
+  
+          It 'Starts and waits for a job' {
+            { Invoke-PdkCommand -Command $CommandFoo -SuccessFilterScript { $_ -eq $SuccessException } } | Should -Not -Throw
+            Assert-MockCalled Start-Job -Times 1
+            Assert-MockCalled Wait-Job  -Times 1
+          }
         }
       }
     }
