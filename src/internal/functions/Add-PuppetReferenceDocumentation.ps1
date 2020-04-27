@@ -26,13 +26,13 @@ function Add-PuppetReferenceDocumentation {
       Try {
         $ErrorActionPreference = 'Stop'
         Invoke-PdkCommand -Path $PuppetModuleFolderPath -Command $Command -SuccessFilterScript {
-          $_ -match "pdk"
+          $_ -match "% documented"
         }
         # Verify REFERENCE.md file is generated
         $ReferenceFile = Join-Path -Path $PuppetModuleFolderPath -ChildPath REFERENCE.md
-        if (Test-Path $ReferenceFile -PathType leaf)
+        if (!(Test-Path $ReferenceFile -PathType leaf))
           {
-            Write-Output "REFERENCE.md file generated"
+            Write-PSFMessage "REFERENCE.md file is not generated"
           }
       } Catch {
         $PSCmdlet.ThrowTerminatingError($PSItem)

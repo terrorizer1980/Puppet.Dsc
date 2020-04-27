@@ -44,7 +44,6 @@
     'ConvertTo-PuppetResourceApi'
     'Get-PuppetizedModuleName'
     'New-PuppetDscModule'
-    'Add-PuppetReferenceDocumentation'
   )
 
   # Cmdlets to export from this module
