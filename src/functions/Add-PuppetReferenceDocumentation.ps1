@@ -3,7 +3,9 @@ function Add-PuppetReferenceDocumentation {
       .SYNOPSIS
         Generate REFERENCE.md
       .DESCRIPTION
-        Generate REFERENCE.md
+        Generate REFERENCE.md file for the Puppet module from the auto-generated types for each DSC
+        resource. This will *always* have the syntax but **may not** have the property documentation,
+        depending on whether or not those reference docs were discoverable for each DSC resource.
       .PARAMETER PuppetModuleFolderPath
         The path, relative or literal, to the Puppet module's root folder.
       .EXAMPLE
