@@ -4,9 +4,11 @@ clone_depth: 10
 install:
   - ps: '& .\extras\install.ps1'
 build: off
+environment:
+  PDK_DISABLE_ANALYTICS: 'true'
 test_script:
   - ps: '& .\src\tests\pester.ps1'
-  - ps: '& .\build.ps1 -PowerShellModuleName PowerShellGet -ErrorAction Stop -Verbose -PassThru'
+  - ps: 'Invoke-Pester .\build.Tests.ps1'
 notifications:
   - provider: Email
     on_build_success: false
