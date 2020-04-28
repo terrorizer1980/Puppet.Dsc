@@ -30,10 +30,7 @@ function Add-PuppetReferenceDocumentation {
         }
         # Verify REFERENCE.md file is generated
         $ReferenceFile = Join-Path -Path $PuppetModuleFolderPath -ChildPath REFERENCE.md
-        if (!(Test-Path $ReferenceFile -PathType leaf))
-          {
-            Write-PSFMessage "REFERENCE.md file is not generated"
-          }
+        $null = Resolve-Path $ReferenceFile
       } Catch {
         $PSCmdlet.ThrowTerminatingError($PSItem)
       }
