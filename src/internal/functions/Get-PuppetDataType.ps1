@@ -69,7 +69,7 @@ Function Get-PuppetDataType {
                               { $_ -in $Floats } { 'Float' }
                               'PSCredential' { 'Struct[{ user => String[1], password => Sensitive[String[1]] }]' }
                               # Can we mandate that an attribute be a sensitive string? Does this even make sense?
-                              'SecureString' { 'Sensitive' }
+                              'SecureString' { 'Sensitive[String]' }
                               # TODO: Should this just be a string? Do we need/want to validate this?
                               'DateTime' { 'Timestamp' }
                               'HashTable' { 'Hash' }
