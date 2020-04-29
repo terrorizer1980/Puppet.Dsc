@@ -25,6 +25,7 @@ Describe "New-PuppetDscModule" {
       }
       Mock Test-Path {$true}
       Mock Out-Utf8File {}
+      Mock Add-PuppetReferenceDocumentation {}
       Mock Get-Item {}
       $ExpectedOutputDirectory = Join-Path -Path (Get-location) -ChildPath 'import'
 
@@ -81,6 +82,11 @@ Describe "New-PuppetDscModule" {
           $Path -cmatch 'barresource\.rb$'
         } -Times 2
       }
+      It 'Generates the REFERENCE.md file' {
+        Assert-MockCalled Add-PuppetReferenceDocumentation -ParameterFilter {
+          $PuppetModuleFolderPath -match 'import(/|\\)foo'
+        } -Times 1
+      }
       It 'Sets the PSModulePath back' {
         Assert-MockCalled Set-PSModulePath -ParameterFilter {
           $Path -eq $env:PSModulePath
@@ -100,6 +106,7 @@ Describe "New-PuppetDscModule" {
         Mock ConvertTo-PuppetResourceApi {}
         Mock Test-Path {$true}
         Mock Out-Utf8File {}
+        Mock Add-PuppetReferenceDocumentation {}
         Mock Get-Item {}
 
         New-PuppetDscModule -PowerShellModuleName Foo -OutputDirectory  TestDrive:\Bar
@@ -122,6 +129,9 @@ Describe "New-PuppetDscModule" {
           Assert-MockCalled Set-PSModulePath -ParameterFilter {
             $Path -match 'bar(/|\\)foo\S*dsc_resources$'
           } -Times 1
+          Assert-MockCalled Add-PuppetReferenceDocumentation -ParameterFilter {
+            $PuppetModuleFolderPath -eq 'TestDrive:\Bar\foo'
+          } -Times 1
         }
       }
       Context 'Puppet Module Name' {
@@ -137,6 +147,7 @@ Describe "New-PuppetDscModule" {
           Mock ConvertTo-PuppetResourceApi {}
           Mock Test-Path {$true}
           Mock Out-Utf8File {}
+          Mock Add-PuppetReferenceDocumentation {}
           Mock Get-Item {}
   
           New-PuppetDscModule -PowerShellModuleName Foo -OutputDirectory  TestDrive:\Bar
@@ -175,6 +186,7 @@ Describe "New-PuppetDscModule" {
         Mock ConvertTo-PuppetResourceApi {}
         Mock Test-Path {$true}
         Mock Out-Utf8File {}
+        Mock Add-PuppetReferenceDocumentation {}
         Mock Get-Item {'Output'}
 
         $ExpectNoOutputResult = New-PuppetDscModule -PowerShellModuleName Foo
@@ -197,6 +209,7 @@ Describe "New-PuppetDscModule" {
         Mock ConvertTo-PuppetResourceApi {}
         Mock Test-Path {$true}
         Mock Out-Utf8File {}
+        Mock Add-PuppetReferenceDocumentation {}
         Mock Get-Item {$Path}
 
         $UnspecifiedResult = New-PuppetDscModule -PowerShellModuleName Foo -PassThru
@@ -253,6 +266,7 @@ Describe "New-PuppetDscModule" {
           'ConvertTo-PuppetResourceApi'
           'Test-Path'
           'Out-Utf8File'
+          'Add-PuppetReferenceDocumentation'
           'Get-Item'
         )
         ForEach ($Function in $UncalledFunctions) {

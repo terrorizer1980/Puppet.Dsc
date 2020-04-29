@@ -103,6 +103,10 @@ Function New-PuppetDscModule {
           }
           Out-Utf8File -Path $PuppetProviderFilePath -InputObject $Resource.Provider
         }
+        
+        # Generate REFERENCE.md file for the Puppet module from the auto-generated types for each DSC resource
+        Set-PSModulePath -Path $InitialPsModulePath
+        Add-PuppetReferenceDocumentation -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory -verbose
 
         If ($PassThru) {
           # Return the folder containing the puppetized module
