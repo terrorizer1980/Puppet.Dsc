@@ -4,6 +4,7 @@ Describe 'Add-PuppetReferenceDocumentation' {
       Mock Test-Path         { return $False }
       Mock New-Item          {}
       Mock Invoke-PdkCommand {}
+      Mock Resolve-Path      {$Path}
 
       Initialize-PuppetModule -OutputFolderPath TestDrive:\ -PuppetModuleName Foo
 
