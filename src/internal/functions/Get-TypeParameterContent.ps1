@@ -25,7 +25,7 @@ Function Get-TypeParameterContent {
   ForEach ($Parameter in $ParameterInfo) {
     New-Object -TypeName System.String @"
     dsc_$($Parameter.name): {
-      type: $($Parameter.Type),
+      type: $($Parameter.Type -split "`n" -join "`n            "),
 $(
   If ([string]::IsNullOrEmpty($Parameter.Help)) {
     "      desc: %q{},"

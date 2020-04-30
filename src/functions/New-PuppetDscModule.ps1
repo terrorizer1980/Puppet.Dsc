@@ -59,6 +59,13 @@ Function New-PuppetDscModule {
     $PuppetModuleProviderDirectory   = Join-Path -Path $PuppetModuleRootFolderDirectory -ChildPath 'lib/puppet/provider'
     $InitialPSModulePath          = $Env:PSModulePath
     $InitialErrorActionPreference = $ErrorActionPreference
+    If (!(Test-RunningElevated)) {
+      Write-PSFMessage -Message 'Running un-elevated: will not be able to parse embedded CIM instances; run again with Administrator permissions to map embedded CIM instances' -Level Warning
+    } Else {
+      If (Test-SymLinkedItem -Path $OutputDirectory -Recurse) {
+        Stop-PsfFunction -EnableException $true -Message "The specified output folder '$OutputDirectory' has a symlink in the path; CIM class parsing will not work in a symlinked folder, specify another path"
+      }
+    }
   }
 
   Process {
@@ -68,13 +75,16 @@ Function New-PuppetDscModule {
       Try {
         $ErrorActionPreference = 'Stop'
         # Scaffold the module via the PDK
+        Write-PSFMessage -Message 'Initializing the Puppet Module'
         Initialize-PuppetModule -OutputFolderPath $OutputDirectory -PuppetModuleName $PuppetModuleName -verbose
 
         # Vendor the PowerShell module and all of its dependencies
+        Write-PSFMessage -Message 'Vendoring the DSC Resources'
         Add-DscResourceModule -Name $PowerShellModuleName -Path $VendoredDscResourcesDirectory -RequiredVersion $PowerShellModuleVersion
 
         # Update the Puppet module metadata
-        $PowerShellModuleManifestPath = (Resolve-Path "$VendoredDscResourcesDirectory/$PowerShellModuleName/$PowerShellModuleName.psd1")
+        Write-PSFMessage -Message 'Updating the Puppet Module metadata'
+        $PowerShellModuleManifestPath = (Resolve-Path -Path "$VendoredDscResourcesDirectory/$PowerShellModuleName/$PowerShellModuleName.psd1")
         $MetadataParameters = @{
           PuppetModuleFolderPath       = $PuppetModuleRootFolderDirectory
           PowerShellModuleManifestPath = $PowerShellModuleManifestPath
@@ -83,13 +93,16 @@ Function New-PuppetDscModule {
         Update-PuppetModuleMetadata @MetadataParameters
 
         # Update the Puppet module test fixtures
+        Write-PSFMessage -Message 'Updating the Puppet Module test fixtures'
         Update-PuppetModuleFixture -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory
 
         # Write the Puppet module README
+        Write-PSFMessage -Message 'Writing the Puppet Module readme'
         Update-PuppetModuleReadme -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory -PowerShellModuleManifestPath $PowerShellModuleManifestPath
 
         # The PowerShell Module path needs to be munged because the Get-DscResource function always and only
         # checks the PSModulePath for DSC modules; you CANNOT point to a module by path.
+        Write-PSFMessage -Message 'Converting the DSC resources to Puppet types and providers'
         Set-PSModulePath -Path $VendoredDscResourcesDirectory
         $Resources = Get-DscResource -Module $PowerShellModuleName | ConvertTo-PuppetResourceApi
 
@@ -109,6 +122,7 @@ Function New-PuppetDscModule {
         }
         
         # Generate REFERENCE.md file for the Puppet module from the auto-generated types for each DSC resource
+        Write-PSFMessage -Message 'Writing the reference documentation for the Puppet module'
         Set-PSModulePath -Path $InitialPsModulePath
         Add-PuppetReferenceDocumentation -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory -verbose
 
