@@ -33,7 +33,7 @@ Describe 'Get-PuppetDataType' {
         Get-PuppetDataType -DscResourceProperty (New-DscParameter -PropertyType '[Byte]') | Should -BeExactly """Optional[Integer[0, 255]]"""
         Get-PuppetDataType -DscResourceProperty (New-DscParameter -PropertyType '[int]') | Should -BeExactly """Optional[Integer[-2147483648, 2147483647]]"""
         Get-PuppetDataType -DscResourceProperty (New-DscParameter -PropertyType '[PSCredential]') | Should -BeExactly """Optional[Struct[{ user => String[1], password => Sensitive[String[1]] }]]"""
-        Get-PuppetDataType -DscResourceProperty (New-DscParameter -PropertyType '[SecureString]') | Should -BeExactly """Optional[Sensitive]"""
+        Get-PuppetDataType -DscResourceProperty (New-DscParameter -PropertyType '[SecureString]') | Should -BeExactly """Optional[Sensitive[String]]"""
         Get-PuppetDataType -DscResourceProperty (New-DscParameter -PropertyType '[DateTime]') | Should -BeExactly """Optional[Timestamp]"""
         Get-PuppetDataType -DscResourceProperty (New-DscParameter -PropertyType '[HashTable]') | Should -BeExactly """Optional[Hash]"""
         Get-PuppetDataType -DscResourceProperty (New-DscParameter -PropertyType '[Char]') | Should -BeExactly """Optional[String[1,1]]"""
