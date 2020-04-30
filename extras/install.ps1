@@ -22,6 +22,7 @@ $PowerShellModules = @(
   @{ Name = 'PSDepend' }
   @{ Name = 'xPSDesiredStateConfiguration' }
   @{ Name = 'PSDscResources' ; RequiredVersion = '2.12.0.0' }
+  @{ Name = 'AccessControlDsc' ; RequiredVersion = '1.4.0.0' }
 )
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 ForEach ($Module in $PowerShellModules) {
