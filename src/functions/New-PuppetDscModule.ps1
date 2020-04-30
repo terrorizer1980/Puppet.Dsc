@@ -74,15 +74,19 @@ Function New-PuppetDscModule {
         Add-DscResourceModule -Name $PowerShellModuleName -Path $VendoredDscResourcesDirectory -RequiredVersion $PowerShellModuleVersion
 
         # Update the Puppet module metadata
+        $PowerShellModuleManifestPath = (Resolve-Path "$VendoredDscResourcesDirectory/$PowerShellModuleName/$PowerShellModuleName.psd1")
         $MetadataParameters = @{
           PuppetModuleFolderPath       = $PuppetModuleRootFolderDirectory
-          PowerShellModuleManifestPath = (Resolve-Path "$VendoredDscResourcesDirectory/$PowerShellModuleName/$PowerShellModuleName.psd1")
+          PowerShellModuleManifestPath = $PowerShellModuleManifestPath
           PuppetModuleAuthor           = $PuppetModuleAuthor
         }
         Update-PuppetModuleMetadata @MetadataParameters
 
         # Update the Puppet module test fixtures
         Update-PuppetModuleFixture -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory
+
+        # Write the Puppet module README
+        Update-PuppetModuleReadme -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory -PowerShellModuleManifestPath $PowerShellModuleManifestPath
 
         # The PowerShell Module path needs to be munged because the Get-DscResource function always and only
         # checks the PSModulePath for DSC modules; you CANNOT point to a module by path.
