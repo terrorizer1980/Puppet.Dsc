@@ -7,6 +7,7 @@ Describe "New-PuppetDscModule" {
       Mock Resolve-Path {$Path}
       Mock Update-PuppetModuleMetadata {}
       Mock Update-PuppetModuleFixture {}
+      Mock Update-PuppetModuleReadme {}
       Mock Set-PSModulePath {}
       Mock Get-DscResource {
         [Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo[]]@(
@@ -53,6 +54,12 @@ Describe "New-PuppetDscModule" {
         Assert-MockCalled Update-PuppetModuleFixture -ParameterFilter {
           $PuppetModuleFolderPath -match 'import(/|\\)foo'
         } -Times 1
+      }
+      It 'Updates the Puppet README based on the PowerShell metadata' {
+        Assert-MockCalled Update-PuppetModuleReadme -ParameterFilter {
+          $PuppetModuleFolderPath       -match 'import(/|\\)foo' -and
+          $PowerShellModuleManifestPath -match 'import(/|\\)foo\S+(/|\\)foo(/|\\)foo.psd1'
+        }
       }
       It 'Temporarily sets the PSModulePath' {
         Assert-MockCalled Set-PSModulePath -ParameterFilter {
@@ -101,6 +108,7 @@ Describe "New-PuppetDscModule" {
         Mock Resolve-Path {$Path}
         Mock Update-PuppetModuleMetadata {}
         Mock Update-PuppetModuleFixture {}
+        Mock Update-PuppetModuleReadme {}
         Mock Set-PSModulePath {}
         Mock Get-DscResource {}
         Mock ConvertTo-PuppetResourceApi {}
@@ -142,6 +150,7 @@ Describe "New-PuppetDscModule" {
           Mock Resolve-Path {$Path}
           Mock Update-PuppetModuleMetadata {}
           Mock Update-PuppetModuleFixture {}
+          Mock Update-PuppetModuleReadme {}
           Mock Set-PSModulePath {}
           Mock Get-DscResource {}
           Mock ConvertTo-PuppetResourceApi {}
@@ -181,6 +190,7 @@ Describe "New-PuppetDscModule" {
         Mock Resolve-Path {$Path}
         Mock Update-PuppetModuleMetadata {}
         Mock Update-PuppetModuleFixture {}
+        Mock Update-PuppetModuleReadme {}
         Mock Set-PSModulePath {}
         Mock Get-DscResource {}
         Mock ConvertTo-PuppetResourceApi {}
@@ -204,6 +214,7 @@ Describe "New-PuppetDscModule" {
         Mock Resolve-Path {$Path}
         Mock Update-PuppetModuleMetadata {}
         Mock Update-PuppetModuleFixture {}
+        Mock Update-PuppetModuleReadme {}
         Mock Set-PSModulePath {}
         Mock Get-DscResource {}
         Mock ConvertTo-PuppetResourceApi {}
