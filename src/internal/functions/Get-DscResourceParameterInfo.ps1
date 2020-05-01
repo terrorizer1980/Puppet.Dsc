@@ -1,28 +1,29 @@
 function Get-DscResourceParameterInfo {
   <#
-  .SYNOPSIS
-    Retrieve the DSC Parameter information, if possible
+    .SYNOPSIS
+      Retrieve the DSC Parameter information, if possible
 
     .DESCRIPTION
-    Given a DSC Resource Info object, introspect on the source (if possible) to return information about
-    the resources parameters, including their help text, whether or not they are mandatory for calling the
-    resource with the Get method, and whether or not they are mandatory for calling the resource with the
-    Set method.
+      Given a DSC Resource Info object, introspect on the source (if possible) to return information about
+      the resources parameters, including their help text, whether or not they are mandatory for calling the
+      resource with the Get method, and whether or not they are mandatory for calling the resource with the
+      Set method.
 
-    This information can be reliably retrieved if the DSC resource is implemented in PowerShell and is
-    not class based. Otherewise, best guesses are made about the mandatory status of the parameters via
-    the Required attribute and the help information is null.
+      This information can be reliably retrieved if the DSC resource is implemented in PowerShell and is
+      not class based. Otherewise, best guesses are made about the mandatory status of the parameters via
+      the Required attribute and the help information is null.
 
     .PARAMETER DscResource
-    A Dsc Resource Info object, as returned by Get-DscResource.
+      A Dsc Resource Info object, as returned by Get-DscResource.
 
-  .EXAMPLE
-    Get-DscResource -Name PSRepository | Get-DscResourceParameterInfo
+    .EXAMPLE
+      Get-DscResource -Name PSRepository | Get-DscResourceParameterInfo
 
-    Retrieve the Parameter information from the AST for the PSRepository Dsc Resource.
+      Retrieve the Parameter information from the AST for the PSRepository Dsc Resource.
   #>
   [CmdletBinding()]
   param (
+    [Parameter(ValueFromPipeline)]
     [Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo]$DscResource
   )
 

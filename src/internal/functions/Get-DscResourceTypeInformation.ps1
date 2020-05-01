@@ -59,7 +59,9 @@ Function Get-DscResourceTypeInformation {
     [object]$Module
   )
 
-  Begin{}
+  Begin{
+    $RunningElevated = Test-RunningElevated
+  }
 
   Process {
     # Retrieve the DSC Resource information from the system unless passed directly
@@ -73,10 +75,15 @@ Function Get-DscResourceTypeInformation {
       $DscResourceToProcess = $DscResource
     }
     ForEach ($Resource in $DscResourceToProcess) {
+      $Value = If ($RunningElevated) {
+        Get-DscResourceParameterInfoByCimClass -DscResource $Resource
+      } Else {
+        Get-DscResourceParameterInfo -DscResource $Resource
+      }
       $Parameters = @{
         MemberType = 'NoteProperty'
         Name       = 'ParameterInfo'
-        Value      = (Get-DscResourceParameterInfo -DscResource $Resource)
+        Value      = $Value
         PassThru   = $True
       }
       $Resource | Add-Member @Parameters
