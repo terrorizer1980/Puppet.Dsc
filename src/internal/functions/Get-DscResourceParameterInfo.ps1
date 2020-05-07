@@ -34,7 +34,7 @@ function Get-DscResourceParameterInfo {
       $ParsedAst = [system.management.automation.language.parser]::ParseFile($DscResource.Path, [ref]$null, [ref]$null)
     }
     If ($null -ne $ParsedAst) {
-      # We can curreently only retrieve parameter metadata from function and composite DSC resources, not class-based :(
+      # We can currently only retrieve parameter metadata from function and composite DSC resources, not class-based :(
       # There are probably more elegant AST filters but this worked for now.
       $GetFunctionAst = $ParsedAst.FindAll({$true}, $true) | Where-Object -FilterScript {$_.Name -eq 'Get-TargetResource'}
       $SetFunctionAst = $ParsedAst.FindAll({$true}, $true) | Where-Object -FilterScript {$_.Name -eq 'Set-TargetResource'}
