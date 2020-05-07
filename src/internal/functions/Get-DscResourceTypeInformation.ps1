@@ -75,7 +75,7 @@ Function Get-DscResourceTypeInformation {
       $DscResourceToProcess = $DscResource
     }
     ForEach ($Resource in $DscResourceToProcess) {
-      $Value = If ($RunningElevated) {
+      $Value = If ($RunningElevated -and ($DscResource.ImplementedAs -ne 'Composite')) {
         Get-DscResourceParameterInfoByCimClass -DscResource $Resource
       } Else {
         Get-DscResourceParameterInfo -DscResource $Resource
