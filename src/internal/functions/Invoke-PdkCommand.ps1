@@ -47,28 +47,34 @@ Function Invoke-PdkCommand {
 
     $ScriptBlock = [ScriptBlock]::Create("
       Push-Location -Path $Path
-      $Command
+      $Command *>&1
     ")
   }
 
   process {
+    Write-PSFMessage -Level Debug -Message "Invoke-PdkCommand -Path '$($Path)' -Command '$($Command)'"
+
     $PdkResults = Start-Job -ScriptBlock $ScriptBlock | Wait-Job
+    $PdkJob = $PdkResults.ChildJobs[0]
+
+    Write-PSFMessage -Level Debug -Message "Output: $($PdkJob.Output)"
+
     if ($null -ne $SuccessFilterScript) {
-      $PdkSuccessMessage = $PdkResults.ChildJobs[0].Error.Exception, $PdkResults.ChildJobs[0].Output |
-        Where-Object -FilterScript $SuccessFilterScript
+      $PdkSuccessMessage = $PdkJob.Output | Where-Object -FilterScript $SuccessFilterScript
     }
     Else {
       $PdkSuccessMessage = $null
     }
+
     if ($null -ne $ErrorFilterScript) {
-      $PdkErrorMessage = $PdkResults.ChildJobs[0].Error.Exception, $PdkResults.ChildJobs[0].Output |
-        Where-Object -FilterScript $ErrorFilterScript
+      $PdkErrorMessage = $PdkJob.Output | Where-Object -FilterScript $ErrorFilterScript
     }
     Else {
       $PdkErrorMessage = $null
     }
+
     If (($null -eq $PdkSuccessMessage) -or ($null -ne $PdkErrorMessage)) {
-      Throw "Command '$Command' failed:`n`t$($PdkResults.ChildJobs[0].Error[-1].Exception -Replace 'System.Management.Automation.RemoteException:', $null)"
+      Throw "Command '$Command' failed:`n$($PdkJob.Output)"
     }
     Else {
       # Should we output anything??
