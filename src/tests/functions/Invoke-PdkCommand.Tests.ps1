@@ -1,7 +1,7 @@
 Describe 'Invoke-PdkCommand' {
   InModuleScope puppet.dsc {
     Context 'Basic verification' {
-      $CommandFoo = [scriptblock]::Create('foo')
+      $CommandFoo = 'foo'
       $SuccessOutput = "Module 'Foo' generated at path"
 
       Context 'Failures' {
