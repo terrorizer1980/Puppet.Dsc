@@ -19,13 +19,13 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     # as an array containing the namevar parameters as a hash.
     # This hash is functionally the same as a should hash as
     # passed to the should_to_resource method.
-    context.debug('Returning pre-canned example data')
-    names.collect { |name_hash| invoke_get_method(context,name_hash) }
+    context.debug('Collecting data from the DSC Resource')
+    names.collect { |name_hash| invoke_get_method(context, name_hash) }
   end
 
   # Attempts to set an instance of the DSC resource, invoking the `Set` method and thinly wrapping
   # the `invoke_set_method` method; whether this method, `update`, or `delete` is called is entirely
-  # up to the Resource API based on the results 
+  # up to the Resource API based on the results
   #
   # @param context [Object] the Puppet runtime context to operate in and send feedback to
   # @param name [String] the name of the resource being created
@@ -37,7 +37,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
 
   # Attempts to set an instance of the DSC resource, invoking the `Set` method and thinly wrapping
   # the `invoke_set_method` method; whether this method, `create`, or `delete` is called is entirely
-  # up to the Resource API based on the results 
+  # up to the Resource API based on the results
   #
   # @param context [Object] the Puppet runtime context to operate in and send feedback to
   # @param name [String] the name of the resource being created
@@ -49,7 +49,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
 
   # Attempts to set an instance of the DSC resource, invoking the `Set` method and thinly wrapping
   # the `invoke_set_method` method; whether this method, `create`, or `update` is called is entirely
-  # up to the Resource API based on the results 
+  # up to the Resource API based on the results
   #
   # @param context [Object] the Puppet runtime context to operate in and send feedback to
   # @param name [String] the name of the resource being created
@@ -97,7 +97,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     # if name_hash[:dsc_psdscrunascredential].nil?
     #   data.delete(:dsc_psdscrunascredential)
     # else
-    #   data.merge!({dsc_psdscrunascredential: name_hash[:dsc_psdscrunascredential]}) 
+    #   data.merge!({dsc_psdscrunascredential: name_hash[:dsc_psdscrunascredential]})
     # end
     context.debug(data)
     data
@@ -238,7 +238,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   def prepare_cim_instances(resource)
     cim_instances_block = []
     resource[:parameters].each do |property_name, property_hash|
-      next unless property_hash[:mof_is_embedded] 
+      next unless property_hash[:mof_is_embedded]
       # strip dsc_ from the beginning of the property name declaration
       name = property_name.to_s.gsub(/^dsc_/, '').to_sym
       # Process nested CIM instances first as those neeed to be passed to higher-order
@@ -344,7 +344,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     params_block
   end
 
-  # Given a resource definition (as from `should_to_resource`), return a PowerShell script which has 
+  # Given a resource definition (as from `should_to_resource`), return a PowerShell script which has
   # all of the appropriate function and variable definitions, which will call Invoke-DscResource, and
   # will correct munge the results for returning to Puppet as a JSON object.
   #
@@ -395,7 +395,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @returns [String] the redacted text
   def redact_secrets(text)
     # Every secret unwrapped in this module will unwrap as "'secret' # PuppetSensitive" and, currently,
-    # no known resources specify a SecureString instead of a PSCredential object. We therefore only 
+    # no known resources specify a SecureString instead of a PSCredential object. We therefore only
     # need to redact strings which look like password declarations.
     modified_text = text.gsub(%r{(?<=-Password )'.+' # PuppetSensitive}, "'#<Sensitive [value redacted]>'")
     if modified_text =~ %r{'.+' # PuppetSensitive}
