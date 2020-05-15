@@ -209,6 +209,7 @@ Describe "New-PuppetDscModule" {
         Mock Test-RunningElevated { return $true }
         Mock Test-SymLinkedItem   { return $false }
         Mock Add-DscResourceModule {}
+        Mock New-Item {$Path}
         Mock Resolve-Path {$Path}
         Mock Update-PuppetModuleMetadata {}
         Mock Update-PuppetModuleFixture {}
@@ -253,6 +254,7 @@ Describe "New-PuppetDscModule" {
           Mock Test-RunningElevated { return $true }
           Mock Test-SymLinkedItem   { return $false }
           Mock Add-DscResourceModule {}
+          Mock New-Item {$Path}
           Mock Resolve-Path {$Path}
           Mock Update-PuppetModuleMetadata {}
           Mock Update-PuppetModuleFixture {}
@@ -305,6 +307,7 @@ Describe "New-PuppetDscModule" {
         Mock Test-Path {$true}
         Mock Out-Utf8File {}
         Mock Add-PuppetReferenceDocumentation {}
+        Mock New-Item { 'TestDrive:\OutputDirectory' }
         Mock Get-Item {'Output'}
 
         $ExpectNoOutputResult = New-PuppetDscModule -PowerShellModuleName Foo
@@ -382,7 +385,6 @@ Describe "New-PuppetDscModule" {
         Mock Set-PSModulePath {}
         $UncalledFunctions = @(
           'Add-DscResourceModule'
-          'Resolve-Path'
           'Update-PuppetModuleMetadata'
           'Update-PuppetModuleFixture'
           'Get-DscResource'

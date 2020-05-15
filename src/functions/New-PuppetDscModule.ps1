@@ -53,6 +53,9 @@ Function New-PuppetDscModule {
       $OutputDirectory  = Join-Path -Path (Get-Location) -ChildPath 'import'
     } Else {}
 
+    # make sure that we're operating on a absolute path to avoid confusion from symlinks and relative paths
+    $OutputDirectory = New-Item -Path $OutputDirectory -ItemType "directory" -Force
+
     $PuppetModuleRootFolderDirectory = Join-Path -Path $OutputDirectory                 -ChildPath $PuppetModuleName
     $VendoredDscResourcesDirectory   = Join-Path -Path $OutputDirectory                 -ChildPath "$PuppetModuleName/lib/puppet_x/dsc_resources"
     $PuppetModuleTypeDirectory       = Join-Path -Path $PuppetModuleRootFolderDirectory -ChildPath 'lib/puppet/type'
@@ -120,7 +123,7 @@ Function New-PuppetDscModule {
           }
           Out-Utf8File -Path $PuppetProviderFilePath -InputObject $Resource.Provider
         }
-        
+
         # Generate REFERENCE.md file for the Puppet module from the auto-generated types for each DSC resource
         Write-PSFMessage -Message 'Writing the reference documentation for the Puppet module'
         Set-PSModulePath -Path $InitialPsModulePath
