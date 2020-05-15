@@ -90,7 +90,8 @@ Function Get-PuppetDataType {
   }
 
   # Return the string formatted for being dropped directly into the type file
-  If ($True -eq $DscResourceProperty.IsMandatory) {
+  # special case PSCredential for now to always be optional
+  If (($True -eq $DscResourceProperty.IsMandatory) -and ('PSCredential' -ne $DataTypeName)) {
     """$PuppetDataTypeText"""
   } Else {
     """Optional[$($PuppetDataTypeText)]"""
