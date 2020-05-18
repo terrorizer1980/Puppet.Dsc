@@ -20,7 +20,10 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     # This hash is functionally the same as a should hash as
     # passed to the should_to_resource method.
     context.debug('Collecting data from the DSC Resource')
-    names.collect { |name_hash| invoke_get_method(context, name_hash) }
+    names.collect do |name|
+      name = { name: name } if name.is_a? String
+      invoke_get_method(context, name)
+    end
   end
 
   # Attempts to set an instance of the DSC resource, invoking the `Set` method and thinly wrapping
@@ -143,7 +146,6 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
       resource[k] = context.type.definition[k]
     end
     should.each do |k,v|
-      next if k == :name
       next if k == :ensure
       # PSDscRunAsCredential is considered a namevar and will always be passed, even if nil
       # To prevent flapping during runs, remove it from the resource definition unless specified
