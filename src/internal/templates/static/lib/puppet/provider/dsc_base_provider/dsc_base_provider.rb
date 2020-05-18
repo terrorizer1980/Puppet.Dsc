@@ -69,7 +69,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @param name_hash [Hash] the hash of namevars to be passed as properties to `Invoke-DscResource`
   # @return [Hash] returns a hash representing the DSC resource munged to the representation the Puppet Type expects
   def invoke_get_method(context, name_hash)
-    context.debug("retrieving '#{name_hash}'")
+    context.debug("retrieving #{name_hash.inspect}")
     resource = should_to_resource(name_hash, context, 'get')
     script_content = ps_script_content(resource)
     context.debug("Script:\n #{redact_secrets(script_content)}")
@@ -77,6 +77,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     context.err('Nothing returned') if output.nil?
 
     data   = JSON.parse(output)
+    context.debug("raw data received: #{data.inspect}")
+    context.err(data['errormessage']) if data['errormessage']
     # DSC gives back information we don't care about; filter down to only
     # those properties exposed in the type definition.
     valid_attributes = context.type.attributes.keys.collect{ |k| k.to_s }
@@ -109,7 +111,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @param should [Hash] the desired state represented definition to pass as properties to Invoke-DscResource
   # @return [Hash] returns a hash indicating whether or not the resource is in the desired state, whether or not it requires a reboot, and any error messages captured.
   def invoke_set_method(context, name, should)
-    context.debug("Ivoking Set Method for '#{name}' with #{should.inspect}")
+    context.debug("Invoking Set Method for '#{name}' with #{should.inspect}")
     resource = should_to_resource(should, context, 'set')
     script_content = ps_script_content(resource)
     context.debug("Script:\n #{redact_secrets(script_content)}")
@@ -155,6 +157,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     resource[:dsc_invoke_method] = dsc_invoke_method
     resource[:vendored_modules_path] = File.expand_path(Pathname.new(__FILE__).dirname + '../../../' + 'puppet_x/dsc_resources')
     resource[:attributes] = nil
+    context.debug("should_to_resource: #{resource.inspect}")
     resource
   end
 
@@ -167,7 +170,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     SecureRandom.uuid.gsub('-','_')
   end
 
-  # Retun a Hash containing all of the variables defined for instantiation as well as the Ruby hash for their
+  # Return a Hash containing all of the variables defined for instantiation as well as the Ruby hash for their
   # properties so they can be matched and replaced as needed.
   #
   # @returns [Hash] containing all instantiated variables and the properties that they define
@@ -175,7 +178,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     @@instantiated_variables ||= {}
   end
 
-  # Look through a fully formatted string, replacing all instances where a value matches the formmated properties
+  # Look through a fully formatted string, replacing all instances where a value matches the formatted properties
   # of an instantiated variable with references to the variable instead. This allows us to pass complex and nested
   # CIM instances to the Invoke-DscResource parameter hash without constructing them *in* the hash.
   #
