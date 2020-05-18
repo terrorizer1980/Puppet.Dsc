@@ -209,6 +209,7 @@ Describe "New-PuppetDscModule" {
         Mock Test-RunningElevated { return $true }
         Mock Test-SymLinkedItem   { return $false }
         Mock Add-DscResourceModule {}
+        Mock New-Item {$Path}
         Mock Resolve-Path {$Path}
         Mock Update-PuppetModuleMetadata {}
         Mock Update-PuppetModuleFixture {}
@@ -253,6 +254,7 @@ Describe "New-PuppetDscModule" {
           Mock Test-RunningElevated { return $true }
           Mock Test-SymLinkedItem   { return $false }
           Mock Add-DscResourceModule {}
+          Mock New-Item {$Path}
           Mock Resolve-Path {$Path}
           Mock Update-PuppetModuleMetadata {}
           Mock Update-PuppetModuleFixture {}
@@ -264,7 +266,7 @@ Describe "New-PuppetDscModule" {
           Mock Out-Utf8File {}
           Mock Add-PuppetReferenceDocumentation {}
           Mock Get-Item {}
-  
+
           New-PuppetDscModule -PowerShellModuleName Foo -OutputDirectory  TestDrive:\Bar
           It 'Respects the specified path' {
             Assert-MockCalled Initialize-PuppetModule -ParameterFilter {
@@ -287,7 +289,7 @@ Describe "New-PuppetDscModule" {
             } -Times 1
           }
         }
-        
+
       }
       Context 'Function Output' {
         Mock Get-PuppetizedModuleName {$Name.ToLowerInvariant()}
@@ -305,6 +307,7 @@ Describe "New-PuppetDscModule" {
         Mock Test-Path {$true}
         Mock Out-Utf8File {}
         Mock Add-PuppetReferenceDocumentation {}
+        Mock New-Item { 'TestDrive:\OutputDirectory' }
         Mock Get-Item {'Output'}
 
         $ExpectNoOutputResult = New-PuppetDscModule -PowerShellModuleName Foo
@@ -382,7 +385,6 @@ Describe "New-PuppetDscModule" {
         Mock Set-PSModulePath {}
         $UncalledFunctions = @(
           'Add-DscResourceModule'
-          'Resolve-Path'
           'Update-PuppetModuleMetadata'
           'Update-PuppetModuleFixture'
           'Get-DscResource'
@@ -412,7 +414,7 @@ Describe "New-PuppetDscModule" {
         Mock Test-SymLinkedItem   { return $true }
 
         It 'throws an explanatory exception' {
-          { New-PuppetDscModule -PowerShellModuleName Foo } | 
+          { New-PuppetDscModule -PowerShellModuleName Foo } |
             Should -Throw -PassThru |
             Select-Object -ExpandProperty Exception |
             Should -Match "The specified output folder '.+' has a symlink in the path; CIM class parsing will not work in a symlinked folder, specify another path"

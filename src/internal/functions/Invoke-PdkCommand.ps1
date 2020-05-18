@@ -8,9 +8,7 @@ Function Invoke-PdkCommand {
       Specifies the path from which the PDK command should be run; many PDK commands are only
       valid from inside the root folder of a Puppet module.
     .PARAMETER Command
-      The ScriptBlock to execute as a PDK command. Use the [scriptblock]::Create() method in the
-      calling scope to interpolate variables so that complicated multi-scope interpolation is not
-      required to make the command function.
+      The String to execute as a PDK command.
     .PARAMETER SuccessFilterScript
       The scriptblock representing a Where-Object FilterScript which will iterate over the stderr
       from the PDK command (which is how it writes output), looking for a an error whose exception
@@ -26,7 +24,7 @@ Function Invoke-PdkCommand {
       If any of the stderr messages meet the error criteria, the PDK command is assumed to have
       failed and will throw the last message from stderr as an exception.
     .EXAMPLE
-      Invoke-PDKCommand -Command [scriptblock]::Create('pdk new module foo') -SuccessFilterScript {
+      Invoke-PDKCommand -Command 'pdk new module foo' -SuccessFilterScript {
         $_ -match "Module 'foo' generated at path"
       }
 
@@ -37,7 +35,7 @@ Function Invoke-PdkCommand {
   param(
     [System.String]$Path = '.',
     [Parameter(Mandatory = $True)]
-    [System.Management.Automation.ScriptBlock]$Command,
+    [System.String]$Command,
     [System.Management.Automation.ScriptBlock]$SuccessFilterScript,
     [System.Management.Automation.ScriptBlock]$ErrorFilterScript
   )
@@ -66,6 +64,12 @@ Function Invoke-PdkCommand {
       $PdkSuccessMessage = $null
     }
 
+    $hasSuccessFilterScript = ($null -ne $SuccessFilterScript)
+    $hasSuccessMatch = ($null -ne $PdkSuccessMessage)
+    If ($hasSuccessFilterScript -and -not $hasSuccessMatch) {
+      Throw "Command '$Command' failed to match success condition $($SuccessFilterScript):`n$($PdkJob.Output)"
+    }
+
     if ($null -ne $ErrorFilterScript) {
       $PdkErrorMessage = $PdkJob.Output | Where-Object -FilterScript $ErrorFilterScript
     }
@@ -73,12 +77,13 @@ Function Invoke-PdkCommand {
       $PdkErrorMessage = $null
     }
 
-    If (($null -eq $PdkSuccessMessage) -or ($null -ne $PdkErrorMessage)) {
-      Throw "Command '$Command' failed:`n$($PdkJob.Output)"
+    $hasErrorFilterScript = ($null -ne $ErrorFilterScript)
+    $hasErrorMatch = ($null -ne $PdkErrorMessage)
+    If ($hasErrorFilterScript -and $hasErrorMatch) {
+      Throw "Command '$Command' matched error condition $($ErrorFilterScript):`n$($PdkJob.Output)"
     }
-    Else {
-      # Should we output anything??
-    }
+
+    Write-PSFMessage -Level Debug -Message "Command '$Command' executed successfully:`n$($PdkJob.Output)"
   }
 
   end { }

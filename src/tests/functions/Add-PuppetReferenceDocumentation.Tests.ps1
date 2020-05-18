@@ -23,7 +23,7 @@ Describe 'Add-PuppetReferenceDocumentation' {
         { Add-PuppetReferenceDocumentation -PuppetModuleFolderPath TestDrive:\ } | Should -Throw 'foo'
       }
     }
-    Context 'When the PuppetModuleFolder path doesnot exist' {
+    Context 'When the PuppetModuleFolder path does not exist' {
       Mock Test-Path         { return $True }
       Mock New-Item          {}
       Mock Invoke-PdkCommand {}

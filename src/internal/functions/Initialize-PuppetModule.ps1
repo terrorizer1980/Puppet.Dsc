@@ -26,7 +26,7 @@ function Initialize-PuppetModule {
   )
 
   begin {
-    $Command = [scriptblock]::Create("pdk new module $PuppetModuleName --skip-interview --template-url https://github.com/puppetlabs/pdk-templates")
+    $Command = "pdk new module $PuppetModuleName --skip-interview --template-url https://github.com/puppetlabs/pdk-templates"
     $ModuleFolderPath = Join-Path -Path $OutputFolderPath -ChildPath $PuppetModuleName
     $TemplateFolder = Join-Path -Path (Split-Path -Path $MyInvocation.MyCommand.Module.Path -Parent) -ChildPath 'internal/templates/static'
   }

@@ -20,7 +20,7 @@ function Add-PuppetReferenceDocumentation {
 
     begin {
       $PuppetModuleFolderPath = Resolve-Path -Path $PuppetModuleFolderPath -ErrorAction Stop
-      $Command = [scriptblock]::Create("pdk bundle exec puppet strings generate --format markdown --out REFERENCE.md")
+      $Command = "pdk bundle exec puppet strings generate --format markdown --out REFERENCE.md"
     }
     process {
       Try {
