@@ -61,6 +61,8 @@ Function Get-PuppetDataType {
                               'Uint16' { 'Integer[0, 65535]' }
                               'Uint32' { 'Integer[0, 4294967295]' }
                               'Uint64' { 'Integer[0, 18446744073709551615]' }
+                              'Real32' { 'Float' }
+                              'Real64' { 'Float' }
                               'sybte'  { 'Integer[-128, 127]' }
                               'int16' { 'Integer[-32768, 32767]' }
                               {$_ -in 'int', 'int32'}  { 'Integer[-2147483648, 2147483647]' }

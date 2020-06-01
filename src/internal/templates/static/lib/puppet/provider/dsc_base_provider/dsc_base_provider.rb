@@ -138,7 +138,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @param should [Hash] A hash representing the desired state of the DSC resource as defined in Puppet
   # @param context [Object] the Puppet runtime context to operate in and send feedback to
   # @param dsc_invoke_method [String] the method to pass to Invoke-DscResource: get, set, or test
-  # @returns [Hash] a hash with the information needed to run `Invoke-DscResource`
+  # @return [Hash] a hash with the information needed to run `Invoke-DscResource`
   def should_to_resource(should, context, dsc_invoke_method)
     resource = {}
     resource[:parameters] = {}
@@ -166,7 +166,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # Return a UUID with the dashes turned into underscores to enable the specifying of guaranteed-unique
   # variables in the PowerShell script.
   #
-  # @returns [String] a uuid with underscores instead of dashes.
+  # @return [String] a uuid with underscores instead of dashes.
   def random_variable_name
     # PowerShell variables can't include dashes
     SecureRandom.uuid.gsub('-','_')
@@ -175,7 +175,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # Return a Hash containing all of the variables defined for instantiation as well as the Ruby hash for their
   # properties so they can be matched and replaced as needed.
   #
-  # @returns [Hash] containing all instantiated variables and the properties that they define
+  # @return [Hash] containing all instantiated variables and the properties that they define
   def instantiated_variables
     @@instantiated_variables ||= {}
   end
@@ -184,8 +184,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # of an instantiated variable with references to the variable instead. This allows us to pass complex and nested
   # CIM instances to the Invoke-DscResource parameter hash without constructing them *in* the hash.
   #
-  # @params string [String] the string of text to search through for places an instantiated variable can be referenced
-  # @returns [String] the string with references to instantiated variables instead of their properties
+  # @param string [String] the string of text to search through for places an instantiated variable can be referenced
+  # @return [String] the string with references to instantiated variables instead of their properties
   def interpolate_variables(string)
     modified_string = string
     # Always replace later-created variables first as they sometimes were built from earlier ones
@@ -201,7 +201,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # These credential variables can then be simply assigned in the parameter hash where needed.
   #
   # @param resource [Hash] a hash with the information needed to run `Invoke-DscResource`
-  # @returns [String] An array of lines of PowerShell to instantiate PSCredentialObjects and store them in variables
+  # @return [String] An array of lines of PowerShell to instantiate PSCredentialObjects and store them in variables
   def prepare_credentials(resource)
     credentials_block = []
     resource[:parameters].each do |property_name, property_hash|
@@ -221,9 +221,9 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
 
   # Write a line of PowerShell which creates a PSCredential object and assigns it to a variable
   #
-  # @params variable_name [String] the name of the Variable to assign the PSCredential object to
-  # @params credential_hash [Hash] the Properties which define the PSCredential Object
-  # @returns [String] A line of PowerShell which defines the PSCredential object and stores it to a variable
+  # @param variable_name [String] the name of the Variable to assign the PSCredential object to
+  # @param credential_hash [Hash] the Properties which define the PSCredential Object
+  # @return [String] A line of PowerShell which defines the PSCredential object and stores it to a variable
   def format_pscredential(variable_name, credential_hash)
     definition = "$#{variable_name} = New-PSCredential -User #{credential_hash['user']} -Password '#{credential_hash['password']}' # PuppetSensitive"
     definition
@@ -236,7 +236,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # by variable reference.
   #
   # @param resource [Hash] a hash with the information needed to run `Invoke-DscResource`
-  # @returns [String] An array of lines of PowerShell to instantiate CIM Instances and store them in variables
+  # @return [String] An array of lines of PowerShell to instantiate CIM Instances and store them in variables
   def prepare_cim_instances(resource)
     cim_instances_block = []
     resource[:parameters].each do |property_name, property_hash|
@@ -274,8 +274,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
 
   # Recursively search for and return CIM instances nested in an enumerable
   #
-  # @params enumerable [Enumerable] a hash or array which may contain CIM Instances
-  # @returns [Hash] every discovered hash which does define a CIM Instance
+  # @param enumerable [Enumerable] a hash or array which may contain CIM Instances
+  # @return [Hash] every discovered hash which does define a CIM Instance
   def nested_cim_instances(enumerable)
     enumerable.collect do |key, value|
       if key.is_a?(Hash) && key.key?('cim_instance_type')
@@ -292,10 +292,10 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
 
   # Write a line of PowerShell which creates a CIM Instance and assigns it to a variable
   #
-  # @params variable_name [String] the name of the Variable to assign the CIM Instance to
-  # @params class_name [String] the CIM Class to instantiate
-  # @params property_hash [Hash] the Properties which define the CIM Instance
-  # @returns [String] A line of PowerShell which defines the CIM Instance and stores it to a variable
+  # @param variable_name [String] the name of the Variable to assign the CIM Instance to
+  # @param class_name [String] the CIM Class to instantiate
+  # @param property_hash [Hash] the Properties which define the CIM Instance
+  # @return [String] A line of PowerShell which defines the CIM Instance and stores it to a variable
   def format_ciminstance(variable_name, class_name, property_hash)
     definition = "$#{variable_name} = New-CimInstance -ClientOnly -ClassName '#{class_name}' -Property #{format(property_hash)}"
     # AWFUL HACK to make New-CimInstance happy ; it can't parse an array unless it's an array of Cim Instances
@@ -309,7 +309,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # defined variables into the hash.
   #
   # @param resource [Hash] a hash with the information needed to run `Invoke-DscResource`
-  # @returns [String] A string representing the PowerShell definition of the InvokeParams hash
+  # @return [String] A string representing the PowerShell definition of the InvokeParams hash
   def invoke_params(resource)
     params = {
       Name: resource[:dscmeta_resource_friendly_name],
@@ -351,7 +351,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # will correct munge the results for returning to Puppet as a JSON object.
   #
   # @param resource [Hash] a hash with the information needed to run `Invoke-DscResource`
-  # @returns [String] A string representing the PowerShell script which will invoke the DSC Resource.
+  # @return [String] A string representing the PowerShell script which will invoke the DSC Resource.
   def ps_script_content(resource)
     template_path = File.expand_path('../', __FILE__)
     # The preamble defines the helper functions and the response hash.
@@ -371,8 +371,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # munging over what is provided in the ruby-pwsh library, as it does not handle unwrapping Sensitive
   # data types or interpolating Credentials.
   #
-  # @params value [Object] The object to format into valid PowerShell
-  # @returns [String] A string representation of the input value as valid PowerShell
+  # @param value [Object] The object to format into valid PowerShell
+  # @return [String] A string representation of the input value as valid PowerShell
   def format(value)
     if value.class.name == 'Puppet::Pops::Types::PSensitiveType::Sensitive'
       "'#{escape_quotes(value.unwrap)}' # PuppetSensitive"
@@ -383,8 +383,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
 
   # Escape any nested single quotes in a Sensitive string
   #
-  # @params text [String] the text to escape
-  # @returns [String] the escaped text
+  # @param text [String] the text to escape
+  # @return [String] the escaped text
   def escape_quotes(text)
     text.gsub("'", "''")
   end
@@ -393,8 +393,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # and so for debugging purposes must be redacted before being sent to debug
   # output but must *not* be redacted when sent to the PowerShell code manager.
   #
-  # @params text [String] the text to redact
-  # @returns [String] the redacted text
+  # @param text [String] the text to redact
+  # @return [String] the redacted text
   def redact_secrets(text)
     # Every secret unwrapped in this module will unwrap as "'secret' # PuppetSensitive" and, currently,
     # no known resources specify a SecureString instead of a PSCredential object. We therefore only
