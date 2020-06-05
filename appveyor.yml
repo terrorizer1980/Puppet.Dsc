@@ -2,13 +2,17 @@
 version: 1.0.x.{build}
 clone_depth: 10
 install:
-  - ps: '& .\extras\install.ps1'
+  - ps: |
+      $ErrorActionPreference = "Stop"
+      & .\extras\install.ps1
 build: off
 environment:
   PDK_DISABLE_ANALYTICS: 'true'
 test_script:
-  - ps: '& .\src\tests\pester.ps1'
-  - ps: 'Invoke-Pester .\build.Tests.ps1'
+  - ps: |
+      $ErrorActionPreference = "Stop"
+      & .\src\tests\pester.ps1
+      Invoke-Pester .\build.Tests.ps1
 notifications:
   - provider: Email
     on_build_success: false
