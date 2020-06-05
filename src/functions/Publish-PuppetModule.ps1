@@ -25,13 +25,13 @@ function Publish-PuppetModule {
       $PuppetModuleFolderPath,
       [string]$ForgeToken,
       [string]$ForgeUploadUrl,
-      [string]$Build,
-      [string]$Publish
+      [bool]$Build,
+      [bool]$Publish
     )
 
     begin {
       $PuppetModuleFolderPath = Resolve-Path -Path $PuppetModuleFolderPath -ErrorAction Stop
-      If ($Publish -eq 'true') {
+      If ($Publish) {
         If ([string]::IsNullOrEmpty($ForgeUploadUrl)) {
           $CommandPublish = "pdk release publish --forge-token $ForgeToken"
         } Else {
@@ -45,12 +45,12 @@ function Publish-PuppetModule {
     process {
       Try {
         $ErrorActionPreference = 'Stop'
-        If ($Build -eq 'true')  {
+        If ($Build)  {
           Invoke-PdkCommand -Path $PuppetModuleFolderPath -Command $CommandBuild -SuccessFilterScript {
             $_ -match "completed successfully"
           }
         }
-        If ($Publish -eq 'true') {
+        If ($Publish) {
           Invoke-PdkCommand -Path $PuppetModuleFolderPath -Command $CommandPublish -SuccessFilterScript {
             $_ -match "Publish to Forge was successful"
           }
