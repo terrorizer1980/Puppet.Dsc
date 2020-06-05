@@ -5,6 +5,8 @@ install:
   - ps: |
       $ErrorActionPreference = "Stop"
       & .\extras\install.ps1
+      if ($LastExitCode -ne 0) { $host.SetShouldExit($LastExitCode)  }
+
 build: off
 environment:
   PDK_DISABLE_ANALYTICS: 'true'
