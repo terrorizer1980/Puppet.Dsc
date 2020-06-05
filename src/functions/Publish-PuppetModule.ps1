@@ -1,19 +1,19 @@
 function Publish-PuppetModule {
     <#
       .SYNOPSIS
-        Build and Publish Module
+        Build and Publish Puppet Module
       .DESCRIPTION
-        Generate package for the Puppet module and publish to the forge.
+        Generate package for the module and publish to the forge.
       .PARAMETER PuppetModuleFolderPath
-        The path, relative or literal, to the Puppet module's root folder.
+        The path, relative or absolute, to the Puppet module's root folder.
       .PARAMETER ForgeUploadUrl
-        The Forge Upload Url Path and default is https://forgeapi.puppetlabs.com/v3/releases.
+        The URL for the Forge Upload API. Defaults to the public forge.
       .PARAMETER ForgeToken
-        The Forge Token.
+        The Forge API Token for the target account.
       .PARAMETER Build
-        Flag to build the package.
+        Flag whether to build the package.
       .PARAMETER Publish
-        Flag to publish the package.
+        Flag whether to publish the package.
       .EXAMPLE
         Publish-PuppetModule -PuppetModuleFolderPath C:\output\testmodule -ForgeUploadUrl https://forgeapi.puppetlabs.com/v3/releases -ForgeToken testmoduletoken -Build true -Publish true
         This command will createo or use existing pkg and Publishes the <tarball> to the Forge , for the `testmodule` depends on the options passed for pdk release command.
