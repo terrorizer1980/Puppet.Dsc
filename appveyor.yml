@@ -14,6 +14,7 @@ test_script:
   - ps: |
       $ErrorActionPreference = "Stop"
       & .\src\tests\pester.ps1
+
       Invoke-Pester .\build.Tests.ps1
 notifications:
   - provider: Email
