@@ -2,13 +2,25 @@
 version: 1.0.x.{build}
 clone_depth: 10
 install:
-  - ps: '& .\extras\install.ps1'
+  - ps: |
+      $ErrorActionPreference = "Stop"
+      & .\extras\install.ps1
+      if ($LastExitCode -ne 0) { $host.SetShouldExit($LastExitCode)  }
+
 build: off
 environment:
   PDK_DISABLE_ANALYTICS: 'true'
 test_script:
-  - ps: '& .\src\tests\pester.ps1'
-  - ps: 'Invoke-Pester .\build.Tests.ps1'
+  - ps: |
+      $ErrorActionPreference = "Stop"
+      & .\src\tests\pester.ps1
+
+      $testResultsFile = ".\AcceptanceTestsResults.xml"
+      $res = Invoke-Pester -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru .\build.Tests.ps1
+      (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
+      if ($res.FailedCount -gt 0) {
+        throw "$($res.FailedCount) tests failed."
+      }
 notifications:
   - provider: Email
     on_build_success: false
