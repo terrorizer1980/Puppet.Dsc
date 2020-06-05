@@ -10,7 +10,7 @@ $expected_base = '../bar/powershellget'
 
 Remove-Item $expected_base -Force -Recurse -ErrorAction Ignore
 
-& $script -ErrorAction Stop -PowerShellModuleName "PowerShellGet" -PowerShellModuleVersion "2.1.3"  -OutputDirectory "../bar"
+& $script -ErrorAction Stop -PowerShellModuleName "PowerShellGet" -PowerShellModuleVersion "2.1.3"  -PuppetModuleAuthor 'testuser' -OutputDirectory "../bar"
 
 # remove test instances left over from a previous run
 try {
@@ -21,7 +21,7 @@ catch {
 }
 
 # cleanup a previously installed test module before the test, ignoring any result
-Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet module uninstall vagrant-powershellget' -SuccessFilterScript { $true }
+Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet module uninstall testuser-powershellget' -SuccessFilterScript { $true }
 
 Describe $script {
 
@@ -52,7 +52,7 @@ Describe $script {
     }
     It "is buildable" {
       Invoke-PdkCommand -Path $expected_base -Command 'pdk build' -SuccessFilterScript {
-        $_ -match "Build of vagrant-powershellget has completed successfully."
+        $_ -match "Build of testuser-powershellget has completed successfully."
       }
     }
     It "is installable" {
