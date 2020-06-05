@@ -15,7 +15,10 @@ test_script:
       $ErrorActionPreference = "Stop"
       & .\src\tests\pester.ps1
 
-      Invoke-Pester .\build.Tests.ps1
+      $res = Invoke-Pester -PassThru .\build.Tests.ps1
+      if ($res.FailedCount -gt 0) {
+        throw "$($res.FailedCount) tests failed."
+      }
 notifications:
   - provider: Email
     on_build_success: false

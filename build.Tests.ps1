@@ -1,3 +1,5 @@
+$ErrorActionPreference = "Stop"
+
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '\.Tests\.', '.'
 # . "$here\$sut"
@@ -10,7 +12,7 @@ $expected_base = '../bar/powershellget'
 
 Remove-Item $expected_base -Force -Recurse -ErrorAction Ignore
 
-& $script -ErrorAction Stop -PowerShellModuleName "PowerShellGet" -PowerShellModuleVersion "2.1.3"  -OutputDirectory "../bar"
+& $script -PowerShellModuleName "PowerShellGet" -PowerShellModuleVersion "2.1.3"  -OutputDirectory "../bar"
 
 # remove test instances left over from a previous run
 try {
