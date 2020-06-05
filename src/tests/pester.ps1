@@ -25,11 +25,15 @@ $totalFailed = 0
 #region Run General Tests
 if ($TestGeneral)
 {
+  $testResultsFile = ".\GeneralTestsResults.xml"
   Write-PSFMessage -Level Important -Message "Modules imported, proceeding with general tests"
   foreach ($file in (Get-ChildItem "$PSScriptRoot\general" | Where-Object Name -like "*.Tests.ps1"))
   {
     Write-PSFMessage -Level Significant -Message "  Executing <c='em'>$($file.Name)</c>"
-    $results = Invoke-Pester -Script $file.FullName -Show $Show -PassThru
+    $results = Invoke-Pester -Script $file.FullName -Show $Show -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru
+    if ($env:APPVEYOR -eq 'True') {
+      (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
+    }
     foreach ($result in $results)
     {
       $totalFailed += $result.FailedCount
@@ -48,7 +52,10 @@ if ($TestFunctions)
     if ($file.Name -like $Exclude) { continue }
 
     Write-PSFMessage -Level Significant -Message "  Executing <c='em'>$($file.Name)</c>"
-    $results = Invoke-Pester -Script $file.FullName -Show $Show -PassThru
+    $results = Invoke-Pester -Script $file.FullName -Show $Show -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru
+    if ($env:APPVEYOR -eq 'True') {
+      (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
+    }
     foreach ($result in $results)
     {
       $totalFailed += $result.FailedCount
