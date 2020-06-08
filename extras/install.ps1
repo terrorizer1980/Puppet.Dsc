@@ -23,7 +23,7 @@ if ($LastExitCode -ne 0) {
 
 $PowerShellModules = @(
   @{ Name = 'PSFramework' }
-  @{ Name = 'PSModuleDevelopment' }
+  @{ Name = 'PSModuleDevelopment' ; RequiredVersion = '2.2.7.90' }
   @{ Name = 'PowerShellGet' ; RequiredVersion = '2.2.3' }
   @{ Name = 'powershell-yaml' }
   @{ Name = 'PSScriptAnalyzer' }
