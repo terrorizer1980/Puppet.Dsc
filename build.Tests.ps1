@@ -12,7 +12,7 @@ $expected_base = '../bar/powershellget'
 
 Remove-Item $expected_base -Force -Recurse -ErrorAction Ignore
 
-& $script -ErrorAction Stop -PowerShellModuleName "PowerShellGet" -PowerShellModuleVersion "2.1.3"  -PuppetModuleAuthor 'testuser' -OutputDirectory "../bar"
+& $script -PowerShellModuleName "PowerShellGet" -PowerShellModuleVersion "2.1.3"  -PuppetModuleAuthor 'testuser' -OutputDirectory "../bar"
 
 # remove test instances left over from a previous run
 try {
