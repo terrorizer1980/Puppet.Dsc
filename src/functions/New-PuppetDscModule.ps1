@@ -48,6 +48,8 @@ Function New-PuppetDscModule {
   Begin {
     # Unless specified, use a valid Puppet module name
     If ([string]::IsNullOrEmpty($PuppetModuleName)) { $PuppetModuleName = Get-PuppetizedModuleName -Name $PowerShellModuleName }
+    # If specified, canonicalize the Puppet module author name
+    If (![string]::IsNullOrEmpty($PuppetModuleAuthor)) { $PuppetModuleAuthor = ConvertTo-CanonicalPuppetAuthorName -AuthorName $PuppetModuleAuthor }
     # Default to the `import` folder in the current path
     If ([string]::IsNullOrEmpty($OutputDirectory))  {
       $OutputDirectory  = Join-Path -Path (Get-Location) -ChildPath 'import'

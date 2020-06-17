@@ -2,6 +2,7 @@ Describe "New-PuppetDscModule" {
   InModuleScope puppet.dsc {
     Context "Basic functionality: Elevated" {
       Mock Get-PuppetizedModuleName {$Name.ToLowerInvariant()}
+      Mock ConvertTo-CanonicalPuppetAuthorName {$AuthorName}
       Mock Initialize-PuppetModule {}
       Mock Test-RunningElevated { return $true }
       Mock Test-SymLinkedItem   { return $false }
@@ -34,6 +35,9 @@ Describe "New-PuppetDscModule" {
 
       New-PuppetDscModule -PowerShellModuleName Foo
 
+      It 'Does not canonicalize the author name because none was specified' {
+        Assert-MockCalled ConvertTo-CanonicalPuppetAuthorName -Times 0
+      }
       It 'Scaffolds the initial Puppet module' {
         Assert-MockCalled Initialize-PuppetModule -ParameterFilter {
           $OutputFolderPath -eq $ExpectedOutputDirectory -and
@@ -104,6 +108,7 @@ Describe "New-PuppetDscModule" {
     }
     Context "Basic functionality: Unelevated" {
       Mock Get-PuppetizedModuleName {$Name.ToLowerInvariant()}
+      Mock ConvertTo-CanonicalPuppetAuthorName {$AuthorName}
       Mock Initialize-PuppetModule {}
       Mock Write-PSFMessage {}
       Mock Test-RunningElevated { return $false }
@@ -135,10 +140,13 @@ Describe "New-PuppetDscModule" {
       Mock Get-Item {}
       $ExpectedOutputDirectory = Join-Path -Path (Get-location) -ChildPath 'import'
 
-      New-PuppetDscModule -PowerShellModuleName Foo
+      New-PuppetDscModule -PowerShellModuleName Foo -PuppetModuleAuthor 'foobar'
 
       It 'Warns that the function is running in an unelevated context' {
         Assert-MockCalled Write-PSFMessage -ParameterFilter {$Message -match '^Running un-elevated' } -Times 1
+      }
+      It 'Canonicalizes the author name' {
+        Assert-MockCalled ConvertTo-CanonicalPuppetAuthorName -Times 1
       }
       It 'Scaffolds the initial Puppet module' {
         Assert-MockCalled Initialize-PuppetModule -ParameterFilter {
