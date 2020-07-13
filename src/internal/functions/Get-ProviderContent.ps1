@@ -26,6 +26,7 @@ function Get-ProviderContent {
       # Ensure the Name is lower case except for the first character to conform to puppet/ruby naming conventions;
       # Prepend with Dsc for namespacing considerations.
       $Name = 'Dsc' + (Get-Culture).TextInfo.ToTitleCase($Resource.Name)
+      $Name = $Name -replace '[_]'
       New-Object -TypeName System.String @"
 require_relative '../dsc_base_provider/dsc_base_provider'
 
