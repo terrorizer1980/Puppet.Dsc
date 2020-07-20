@@ -64,9 +64,9 @@ Function Get-PuppetDataType {
                               'Real32' { 'Float' }
                               'Real64' { 'Float' }
                               'sybte'  { 'Integer[-128, 127]' }
-                              'int16' { 'Integer[-32768, 32767]' }
-                              {$_ -in 'int', 'int32'}  { 'Integer[-2147483648, 2147483647]' }
-                              'int64' { 'Integer[-9223372036854775808, 9223372036854775807]' }
+                              {$_ -in 'int16', 'SInt16'}  { 'Integer[-32768, 32767]' }
+                              {$_ -in 'int', 'int32', 'SInt32'}  { 'Integer[-2147483648, 2147483647]' }
+                              {$_ -in 'int64', 'SInt64'}  { 'Integer[-9223372036854775808, 9223372036854775807]' }
                               { $_ -in $OtherIntegers } { 'Integer' }
                               { $_ -in $Floats } { 'Float' }
                               'PSCredential' { 'Struct[{ user => String[1], password => Sensitive[String[1]] }]' }
