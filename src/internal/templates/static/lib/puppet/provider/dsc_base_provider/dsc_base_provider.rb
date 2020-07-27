@@ -73,7 +73,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @return [Hash] returns a hash representing the DSC resource munged to the representation the Puppet Type expects
   def invoke_get_method(context, name_hash)
     context.debug("retrieving #{name_hash.inspect}")
-    resource = should_to_resource(name_hash, context, 'get')
+    query_props = name_hash.select{ |k,v| mandatory_get_attributes(context).include?(k) || (k == :dsc_psdscrunascredential && !v.nil?) }
+    resource = should_to_resource(query_props, context, 'get')
     script_content = ps_script_content(resource)
     context.debug("Script:\n #{redact_secrets(script_content)}")
     output = ps_manager.execute(script_content)[:stdout]
@@ -115,7 +116,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @return [Hash] returns a hash indicating whether or not the resource is in the desired state, whether or not it requires a reboot, and any error messages captured.
   def invoke_set_method(context, name, should)
     context.debug("Invoking Set Method for '#{name}' with #{should.inspect}")
-    resource = should_to_resource(should, context, 'set')
+    apply_props = should.reject{ |k,v| !(k.to_s =~ /^dsc_/) }
+    resource = should_to_resource(apply_props, context, 'set')
     script_content = ps_script_content(resource)
     context.debug("Script:\n #{redact_secrets(script_content)}")
 
@@ -437,6 +439,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     credential_block    = prepare_credentials(resource)
     cim_instances_block = prepare_cim_instances(resource)
     parameters_block    = invoke_params(resource)
+    # clean them out of the temporary cache now that they're not needed; failure to do so can goof up future executions in this run
+    clear_instantiated_variables!
 
     content = [preamble, credential_block, cim_instances_block, parameters_block, postscript].join("\n")
     content
