@@ -19,6 +19,7 @@ Describe 'Get-DscResourceParameterInfoByCimClass' {
         $CimlessParameterToInspect.DefaultValue      | Should -BeNullOrEmpty
         $CimlessParameterToInspect.Type              | Should -BeExactly '"Optional[Boolean]"'
         $CimlessParameterToInspect.Help              | Should -MatchExactly '^Specifies whether or not'
+        $CimlessParameterToInspect.is_namevar        | Should -BeExactly 'false'
         $CimlessParameterToInspect.mandatory_for_get | Should -BeExactly 'false'
         $CimlessParameterToInspect.mandatory_for_set | Should -BeExactly 'false'
         $CimlessParameterToInspect.mof_is_embedded   | Should -BeExactly 'false'
@@ -34,18 +35,22 @@ Describe 'Get-DscResourceParameterInfoByCimClass' {
           ModuleName    = 'AccessControlDSC'
           ModuleVersion = '1.4.0.0'
         }
-        $CimfulParameterToInspect = Get-DscResourceParameterInfoByCimClass -DscResource $CimfulDscResource |
-          Sort-Object -Property Name |
-          Select-Object -First 1
-        $CimfulParameterToInspect.Name              | Should -BeExactly 'accesscontrollist'
+        $CimfulParametersToInspect = Get-DscResourceParameterInfoByCimClass -DscResource $CimfulDscResource |
+          Sort-Object -Property Name
+        $AclProperty = $CimfulParametersToInspect | Where-Object -FilterScript { $_.Name -eq 'AccessControlList'}
+        $PathProperty = $CimfulParametersToInspect | Where-Object -FilterScript { $_.Name -eq 'Path'}
+        $AclProperty.Name              | Should -BeExactly 'accesscontrollist'
         # This function currently cannot discover default values
-        $CimfulParameterToInspect.DefaultValue      | Should -BeNullOrEmpty
-        $CimfulParameterToInspect.Type              | Should -MatchExactly ([Regex]::Escape('"Array[Struct[{'))
-        $CimfulParameterToInspect.Help              | Should -MatchExactly '^Indicates the access control information'
-        $CimfulParameterToInspect.mandatory_for_get | Should -BeExactly 'true'
-        $CimfulParameterToInspect.mandatory_for_set | Should -BeExactly 'true'
-        $CimfulParameterToInspect.mof_is_embedded   | Should -BeExactly 'true'
-        $CimfulParameterToInspect.mof_type          | Should -BeExactly 'NTFSAccessControlList[]'
+        $AclProperty.DefaultValue      | Should -BeNullOrEmpty
+        $AclProperty.Type              | Should -MatchExactly ([Regex]::Escape('"Array[Struct[{'))
+        $AclProperty.Help              | Should -MatchExactly '^Indicates the access control information'
+        $AclProperty.is_namevar        | Should -BeExactly 'false'
+        $AclProperty.mandatory_for_get | Should -BeExactly 'true'
+        $AclProperty.mandatory_for_set | Should -BeExactly 'true'
+        $AclProperty.mof_is_embedded   | Should -BeExactly 'true'
+        $AclProperty.mof_type          | Should -BeExactly 'NTFSAccessControlList[]'
+        # It should also be able to tell if something is mandatory & a namevar
+        $PathProperty.is_namevar       | Should -BeExactly 'true'
       }
     }
     Context "When the resource can't be found" {

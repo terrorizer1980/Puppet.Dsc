@@ -14,6 +14,7 @@ Describe 'Get-DscResourceParameterInfo' {
         $ParameterToInspect.DefaultValue | Should -BeExactly '$false'
         $ParameterToInspect.Type | Should -BeExactly '"Optional[Boolean]"'
         $ParameterToInspect.Help | Should -MatchExactly '^Specifies whether or not'
+        $ParameterToInspect.is_namevar        | Should -BeExactly 'false'
         $ParameterToInspect.mandatory_for_get | Should -BeExactly 'false'
         $ParameterToInspect.mandatory_for_set | Should -BeExactly 'false'
         $ParameterToInspect.mof_is_embedded | Should -BeExactly 'false'
@@ -34,6 +35,7 @@ Describe 'Get-DscResourceParameterInfo' {
         $ParameterToInspect.Type | Should -BeExactly '"String"'
         # The help info for a parameter can only be discovered via the AST
         $ParameterToInspect.Help | Should -BeNullOrEmpty
+        $ParameterToInspect.is_namevar        | Should -BeExactly 'true'
         $ParameterToInspect.mandatory_for_get | Should -BeExactly 'true'
         $ParameterToInspect.mandatory_for_set | Should -BeExactly 'true'
         $ParameterToInspect.mof_is_embedded | Should -BeExactly 'false'
