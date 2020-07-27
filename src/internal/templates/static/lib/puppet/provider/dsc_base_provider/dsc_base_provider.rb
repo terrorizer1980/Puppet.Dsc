@@ -59,7 +59,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @return [Hash] returns a hash indicating whether or not the resource is in the desired state, whether or not it requires a reboot, and any error messages captured.
   def delete(context, name)
     context.debug("Deleting '#{name}'")
-    invoke_set_method(context, name, should)
+    invoke_set_method(context, name, name.merge({dsc_ensure: 'Absent'}))
   end
 
   # Invokes the `Get` method, passing the name_hash as the properties to use with `Invoke-DscResource`
