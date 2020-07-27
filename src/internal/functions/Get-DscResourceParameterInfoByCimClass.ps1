@@ -48,7 +48,7 @@ Function Get-DscResourceParameterInfoByCimClass {
           # Capture the metadata in order to parse the Puppet type definition and retrieve the cim instance types.
           $EmbeddedInstanceMetadata = @{}
           $EmbeddedInstanceMetadata.$InstanceType = @{
-            cim_instance_type = "'$($InstanceType.ToLowerInvariant())'"
+            cim_instance_type = "'$InstanceType'"
           }
           $CimClassProperties = Get-CimClassPropertiesList -ClassName $InstanceType
           ForEach($Property in $CimClassProperties) {
@@ -72,7 +72,7 @@ Function Get-DscResourceParameterInfoByCimClass {
           # Nested CIM instances need to be reassembled into readable Structs; but we want to increase the indentation level by one
           # so that it's more visually distinct in the end file
           $StructComponents = $EmbeddedInstanceMetadata.$InstanceType.Keys |
-            ForEach-Object -Process { "$($_.ToLowerInvariant()) => $($EmbeddedInstanceMetadata.$InstanceType.$_ -replace "`n", "`n  ")" }
+            ForEach-Object -Process { "$_ => $($EmbeddedInstanceMetadata.$InstanceType.$_ -replace "`n", "`n  ")" }
           # Assemble the current CIM instance as a struct, strip out any double quotes to prevent breaking parsing
           $DefinedEmbeddedInstances.$InstanceType = "Struct[{`n  $($StructComponents -join ",`n  " -replace '"')`n}]"
         }

@@ -45,7 +45,7 @@ Function ConvertTo-CanonicalResult {
     $CimInstanceProperties = $ResultPropertyList | Where-Object -FilterScript $CimInstancePropertyFilter
 
     foreach ($Property in $ResultPropertyList) {
-        $PropertyName = $Property.Name.ToLowerInvariant()
+        $PropertyName = $Property.Name
         if ($Property -notin $CimInstanceProperties) {
             $Value = $Result.$PropertyName
             if ($PropertyName -eq 'Ensure' -and [string]::IsNullOrEmpty($Result.$PropertyName)) {
@@ -55,7 +55,7 @@ Function ConvertTo-CanonicalResult {
             }
             else {
                 if ($Value -is [string] -or $value -is [string[]]) {
-                    $Value = $Value.ToLowerInvariant()
+                    $Value = $Value
                 }
 
                 if ($Value.Count -eq 1 -and $Property.Definition -match '\\[\\]') {
@@ -84,7 +84,7 @@ Function ConvertTo-CanonicalResult {
 
             if ($RecursionLevel -gt $MaxDepth) {
                 # Give up recursing more than this
-                return $Result.ToString()ToLowerInvariant()
+                return $Result.ToString()
             }
 
             $Value = foreach ($item in $Result.$PropertyName) {
@@ -99,10 +99,10 @@ Function ConvertTo-CanonicalResult {
                 # need to specify only *one* name, otherwise things end up *very* broken.
                 if ($Value.GetType().Name -match '\[\]') {
                     $Value | ForEach-Object -Process {
-                        $_.cim_instance_type = $Result.$PropertyName.CimClass.CimClassName[0].ToLowerInvariant()
+                        $_.cim_instance_type = $Result.$PropertyName.CimClass.CimClassName[0]
                     }
                 } else {
-                    $Value.cim_instance_type = $Result.$PropertyName.CimClass.CimClassName.ToLowerInvariant()
+                    $Value.cim_instance_type = $Result.$PropertyName.CimClass.CimClassName
                     # Ensure that, if it should be an array, it is
                     if ($Result.$PropertyName.GetType().Name -match '\[\]') {
                         $Value = @($Value)
