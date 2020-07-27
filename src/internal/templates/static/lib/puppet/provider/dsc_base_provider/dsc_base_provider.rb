@@ -180,6 +180,81 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     @@instantiated_variables ||= {}
   end
 
+  # Clear the instantiated variables hash to be ready for the next run
+  def clear_instantiated_variables!
+    @@instantiated_variables = {}
+  end
+
+  # Recursively transforms any enumerable, camelCasing any hash keys it finds
+  #
+  # @param enumerable [Enumerable] a string, array, hash, or other object to attempt to recursively downcase
+  # @return [Enumerable] returns the input object with hash keys recursively camelCased
+  def camelcase_hash_keys!(enumerable)
+    if enumerable.is_a?(Hash)
+      enumerable.keys.each do |key|
+        name = key.dup
+        name[0] = name[0].downcase
+        enumerable[name] = enumerable.delete(key)
+        camelcase_hash_keys!(enumerable[name]) if enumerable[name].is_a?(Enumerable)
+      end
+    else
+      enumerable.each{ |item| camelcase_hash_keys!(item) if item.is_a?(Enumerable) }
+    end
+  end
+
+  # Recursively transforms any object, downcasing it to enable case insensitive comparisons
+  #
+  # @param object [Object] a string, array, hash, or other object to attempt to recursively downcase
+  # @return [Object] returns the input object recursively downcased
+  def recursively_downcase(object)
+    case object
+    when String
+      object.downcase
+    when Array
+      object.map{ |item| recursively_downcase(item) }
+    when Hash
+      transformed = {}
+      object.transform_keys(&:downcase).each do |key, value|
+        transformed[key] = recursively_downcase(value)
+      end
+      transformed
+    else
+      object
+    end
+  end
+
+  # Checks to see whether the DSC resource being managed is defined as ensurable
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @return [Bool] returns true if the DSC Resource is ensurable, otherwise false.
+  def ensurable?(context)
+    context.type.attributes.keys.include?(:ensure)
+  end
+
+  # Parses the DSC resource type definition to retrieve the names of any attributes which are specified as mandatory for get operations
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @return [Array] returns an array of attribute names as symbols which are mandatory for get operations
+  def mandatory_get_attributes(context)
+    context.type.attributes.select{ |attribute,properties| properties[:mandatory_for_get] }.keys
+  end
+
+  # Parses the DSC resource type definition to retrieve the names of any attributes which are specified as mandatory for set operations
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @return [Array] returns an array of attribute names as symbols which are mandatory for set operations
+  def mandatory_set_attributes(context)
+    context.type.attributes.select{ |attribute,properties| properties[:mandatory_for_set] }.keys
+  end
+
+  # Parses the DSC resource type definition to retrieve the names of any attributes which are specified as namevars
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @return [Array] returns an array of attribute names as symbols which are namevars
+  def namevar_attributes(context)
+    context.type.attributes.select{ |attribute,properties| properties[:behaviour] == :namevar }.keys
+  end
+
   # Look through a fully formatted string, replacing all instances where a value matches the formatted properties
   # of an instantiated variable with references to the variable instead. This allows us to pass complex and nested
   # CIM instances to the Invoke-DscResource parameter hash without constructing them *in* the hash.
