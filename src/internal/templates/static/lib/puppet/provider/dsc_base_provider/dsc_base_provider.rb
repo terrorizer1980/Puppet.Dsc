@@ -322,14 +322,16 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
       name = property_name.to_s.gsub(/^dsc_/, '').to_sym
       # Process nested CIM instances first as those neeed to be passed to higher-order
       # instances and must therefore be declared before they must be referenced
-      cim_instance_hashes = nested_cim_instances(property_hash[:value])
-      cim_instance_hashes.flatten!.reject!{ |cim_instance_hash| cim_instance_hash.nil? }
-      cim_instance_hashes.each do |instance|
-        variable_name = random_variable_name
-        instantiated_variables.merge!(variable_name => instance)
-        class_name = instance['cim_instance_type']
-        properties = instance.reject{ |k,v| k == 'cim_instance_type' }
-        cim_instances_block << format_ciminstance(variable_name, class_name, properties)
+      cim_instance_hashes = nested_cim_instances(property_hash[:value]).flatten.reject{ |item| item.nil? }
+      # Sometimes the instances are an empty array
+      unless cim_instance_hashes.count == 0
+        cim_instance_hashes.each do |instance|
+          variable_name = random_variable_name
+          instantiated_variables.merge!(variable_name => instance)
+          class_name = instance['cim_instance_type']
+          properties = instance.reject{ |k,v| k == 'cim_instance_type' }
+          cim_instances_block << format_ciminstance(variable_name, class_name, properties)
+        end
       end
       # We have to handle arrays of CIM instances slightly differently
       if property_hash[:mof_type] =~ %r{\[\]$}
@@ -376,7 +378,10 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   def format_ciminstance(variable_name, class_name, property_hash)
     definition = "$#{variable_name} = New-CimInstance -ClientOnly -ClassName '#{class_name}' -Property #{format(property_hash)}"
     # AWFUL HACK to make New-CimInstance happy ; it can't parse an array unless it's an array of Cim Instances
-    definition = definition.gsub("@(@{'cim_instance_type'","[CimInstance[]]@(@{'cim_instance_type'")
+    # definition = definition.gsub("@(@{'cim_instance_type'","[CimInstance[]]@(@{'cim_instance_type'")
+    # EVEN WORSE HACK - this one we can't even be sure it's a cim instance...
+    # but I don't _think_ anything but nested cim instances show up as hashes inside an array
+    definition = definition.gsub('@(@{','[CimInstance[]]@(@{')
     definition = interpolate_variables(definition)
     definition
   end
