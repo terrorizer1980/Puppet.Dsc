@@ -20,6 +20,7 @@ Describe 'Get-TypeContent' {
         $Result | Should -MatchExactly "dscmeta_module_version: '2.12.0.0'"
         $Result | Should -MatchExactly 'The DSC Archive resource type.'
         $Result | Should -MatchExactly 'Automatically generated from version 2.12.0.0'
+        $Result | Should -MatchExactly "features: \['simple_get_filter', 'canonicalize'\]"
       }
       It 'Attempts to interpolate the parameter information once' {
         Assert-MockCalled -CommandName Get-TypeParameterContent -Times 1

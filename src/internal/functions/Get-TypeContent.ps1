@@ -49,7 +49,7 @@ Puppet::ResourceApi.register_type(
     The DSC $FriendlyName resource type.
     Automatically generated from version $($Resource.Version)
   },
-  features: ['simple_get_filter'],
+  features: ['simple_get_filter', 'canonicalize'],
   attributes: {
     ensure: {
       type:    'Enum[present, absent]',

@@ -5,6 +5,58 @@ require 'pathname'
 require 'json'
 
 class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
+  # Initializes the provider, preparing the class variable which caches the canonicalized resources across calls.
+  def initialize
+    @@cached_canonicalized_resource = []
+  end
+
+  # Verify that the canonicalized value cache does not already have any entries
+  #
+  # @return [Bool] returns true if the cache is empty, otherwise false
+  def canonical_cache_empty?
+    @@cached_canonicalized_resource.empty?
+  end
+
+  # Implements the canonicalize feature of the Resource API; this method is called first against any resources
+  # defined in the manifest, then again to conform the results from a get call. The method attempts to retrieve
+  # the DSC resource from the machine; if the resource is found, this method then compares the downcased values
+  # of the two hashes, overwriting the manifest value with the discovered one if they are case insensitively
+  # equivalent; this enables case insensitive but preserving behavior where a manifest declaration of a path as
+  # "c:/foo/bar" if discovered on disk as "C:\Foo\Bar" will canonicalize to the latter and prevent any flapping.
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @param resources [Hash] the hash of the resource to canonicalize from either manifest or invocation
+  # @return [Hash] returns a hash representing the current state of the object, if it exists
+  def canonicalize(context, resources)
+    canonicalized_resources = []
+    resources.collect do |r|
+      if canonical_cache_empty?
+        canonicalized = invoke_get_method(context, r)
+        canonicalized[:name] = r[:name]
+        if r[:dsc_psdscrunascredential].nil?
+          canonicalized.delete(:dsc_psdscrunascredential)
+        else
+          canonicalized[:dsc_psdscrunascredential] = r[:dsc_psdscrunascredential]
+        end
+        downcased_result = recursively_downcase(canonicalized)
+        downcased_resource = recursively_downcase(r)
+        downcased_result.each do |key, value|
+          canonicalized[key] = r[key] unless downcased_resource[key] == value
+          canonicalized.delete(key) unless downcased_resource.keys.include?(key)
+        end
+        # If the resource is ensurable & the canonicalized result does not include it, set it
+        if ensurable?(context)
+          canonicalized[:ensure] = context.type.attributes[:ensure][:default] unless canonicalized.keys.include?(:ensure)
+        end
+        @@cached_canonicalized_resource << canonicalized
+      else
+        canonicalized = r
+      end
+      canonicalized_resources << canonicalized
+    end
+    context.debug("Canonicalized Resources: #{canonicalized_resources}")
+    canonicalized_resources
+  end
 
   # Attempts to retrieve an instance of the DSC resource, invoking the `Get` method and passing any
   # namevars as the Properties to Invoke-DscResource. The result object, if any, is compared to the
@@ -20,9 +72,16 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     # This hash is functionally the same as a should hash as
     # passed to the should_to_resource method.
     context.debug('Collecting data from the DSC Resource')
+    if @@cached_canonicalized_resource.empty?
+      mandatory_properties = {}
+    else
+      mandatory_properties = @@cached_canonicalized_resource[0].select do |attribute, value|
+        (mandatory_get_attributes(context) - namevar_attributes(context)).include?(attribute)
+      end
+    end
     names.collect do |name|
       name = { name: name } if name.is_a? String
-      invoke_get_method(context, name)
+      invoke_get_method(context, name.merge(mandatory_properties))
     end
   end
 
@@ -93,9 +152,14 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     data.keys.each do |key|
       type_key = "dsc_#{key.downcase}".to_sym
       data[type_key] = data.delete(key)
+      camelcase_hash_keys!(data[type_key]) if data[type_key].is_a?(Enumerable)
     end
     # If a resource is found, it's present, so refill these two Puppet-only keys
-    data.merge!({ensure: 'present', name: name_hash[:name]})
+    data.merge!({name: name_hash[:name]})
+    if ensurable?(context)
+      ensure_value = data.has_key?(:dsc_ensure) ? data[:dsc_ensure].downcase : 'present'
+      data.merge!({ensure: ensure_value})
+    end
     # TODO: Handle PSDscRunAsCredential flapping
     # Resources do not return the account under which they were discovered, so re-add that
     # if name_hash[:dsc_psdscrunascredential].nil?
