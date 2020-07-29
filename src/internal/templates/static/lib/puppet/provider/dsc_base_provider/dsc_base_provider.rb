@@ -5,6 +5,58 @@ require 'pathname'
 require 'json'
 
 class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
+  # Initializes the provider, preparing the class variable which caches the canonicalized resources across calls.
+  def initialize
+    @@cached_canonicalized_resource = []
+  end
+
+  # Verify that the canonicalized value cache does not already have any entries
+  #
+  # @return [Bool] returns true if the cache is empty, otherwise false
+  def canonical_cache_empty?
+    @@cached_canonicalized_resource.empty?
+  end
+
+  # Implements the canonicalize feature of the Resource API; this method is called first against any resources
+  # defined in the manifest, then again to conform the results from a get call. The method attempts to retrieve
+  # the DSC resource from the machine; if the resource is found, this method then compares the downcased values
+  # of the two hashes, overwriting the manifest value with the discovered one if they are case insensitively
+  # equivalent; this enables case insensitive but preserving behavior where a manifest declaration of a path as
+  # "c:/foo/bar" if discovered on disk as "C:\Foo\Bar" will canonicalize to the latter and prevent any flapping.
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @param resources [Hash] the hash of the resource to canonicalize from either manifest or invocation
+  # @return [Hash] returns a hash representing the current state of the object, if it exists
+  def canonicalize(context, resources)
+    canonicalized_resources = []
+    resources.collect do |r|
+      if canonical_cache_empty?
+        canonicalized = invoke_get_method(context, r)
+        canonicalized[:name] = r[:name]
+        if r[:dsc_psdscrunascredential].nil?
+          canonicalized.delete(:dsc_psdscrunascredential)
+        else
+          canonicalized[:dsc_psdscrunascredential] = r[:dsc_psdscrunascredential]
+        end
+        downcased_result = recursively_downcase(canonicalized)
+        downcased_resource = recursively_downcase(r)
+        downcased_result.each do |key, value|
+          canonicalized[key] = r[key] unless downcased_resource[key] == value
+          canonicalized.delete(key) unless downcased_resource.keys.include?(key)
+        end
+        # If the resource is ensurable & the canonicalized result does not include it, set it
+        if ensurable?(context)
+          canonicalized[:ensure] = context.type.attributes[:ensure][:default] unless canonicalized.keys.include?(:ensure)
+        end
+        @@cached_canonicalized_resource << canonicalized
+      else
+        canonicalized = r
+      end
+      canonicalized_resources << canonicalized
+    end
+    context.debug("Canonicalized Resources: #{canonicalized_resources}")
+    canonicalized_resources
+  end
 
   # Attempts to retrieve an instance of the DSC resource, invoking the `Get` method and passing any
   # namevars as the Properties to Invoke-DscResource. The result object, if any, is compared to the
@@ -20,9 +72,16 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     # This hash is functionally the same as a should hash as
     # passed to the should_to_resource method.
     context.debug('Collecting data from the DSC Resource')
+    if @@cached_canonicalized_resource.empty?
+      mandatory_properties = {}
+    else
+      mandatory_properties = @@cached_canonicalized_resource[0].select do |attribute, value|
+        (mandatory_get_attributes(context) - namevar_attributes(context)).include?(attribute)
+      end
+    end
     names.collect do |name|
       name = { name: name } if name.is_a? String
-      invoke_get_method(context, name)
+      invoke_get_method(context, name.merge(mandatory_properties))
     end
   end
 
@@ -59,7 +118,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @return [Hash] returns a hash indicating whether or not the resource is in the desired state, whether or not it requires a reboot, and any error messages captured.
   def delete(context, name)
     context.debug("Deleting '#{name}'")
-    invoke_set_method(context, name, should)
+    invoke_set_method(context, name, name.merge({dsc_ensure: 'Absent'}))
   end
 
   # Invokes the `Get` method, passing the name_hash as the properties to use with `Invoke-DscResource`
@@ -73,7 +132,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @return [Hash] returns a hash representing the DSC resource munged to the representation the Puppet Type expects
   def invoke_get_method(context, name_hash)
     context.debug("retrieving #{name_hash.inspect}")
-    resource = should_to_resource(name_hash, context, 'get')
+    query_props = name_hash.select{ |k,v| mandatory_get_attributes(context).include?(k) || (k == :dsc_psdscrunascredential && !v.nil?) }
+    resource = should_to_resource(query_props, context, 'get')
     script_content = ps_script_content(resource)
     context.debug("Script:\n #{redact_secrets(script_content)}")
     output = ps_manager.execute(script_content)[:stdout]
@@ -92,9 +152,14 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     data.keys.each do |key|
       type_key = "dsc_#{key.downcase}".to_sym
       data[type_key] = data.delete(key)
+      camelcase_hash_keys!(data[type_key]) if data[type_key].is_a?(Enumerable)
     end
     # If a resource is found, it's present, so refill these two Puppet-only keys
-    data.merge!({ensure: 'present', name: name_hash[:name]})
+    data.merge!({name: name_hash[:name]})
+    if ensurable?(context)
+      ensure_value = data.has_key?(:dsc_ensure) ? data[:dsc_ensure].downcase : 'present'
+      data.merge!({ensure: ensure_value})
+    end
     # TODO: Handle PSDscRunAsCredential flapping
     # Resources do not return the account under which they were discovered, so re-add that
     # if name_hash[:dsc_psdscrunascredential].nil?
@@ -115,7 +180,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @return [Hash] returns a hash indicating whether or not the resource is in the desired state, whether or not it requires a reboot, and any error messages captured.
   def invoke_set_method(context, name, should)
     context.debug("Invoking Set Method for '#{name}' with #{should.inspect}")
-    resource = should_to_resource(should, context, 'set')
+    apply_props = should.reject{ |k,v| !(k.to_s =~ /^dsc_/) }
+    resource = should_to_resource(apply_props, context, 'set')
     script_content = ps_script_content(resource)
     context.debug("Script:\n #{redact_secrets(script_content)}")
 
@@ -178,6 +244,81 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @return [Hash] containing all instantiated variables and the properties that they define
   def instantiated_variables
     @@instantiated_variables ||= {}
+  end
+
+  # Clear the instantiated variables hash to be ready for the next run
+  def clear_instantiated_variables!
+    @@instantiated_variables = {}
+  end
+
+  # Recursively transforms any enumerable, camelCasing any hash keys it finds
+  #
+  # @param enumerable [Enumerable] a string, array, hash, or other object to attempt to recursively downcase
+  # @return [Enumerable] returns the input object with hash keys recursively camelCased
+  def camelcase_hash_keys!(enumerable)
+    if enumerable.is_a?(Hash)
+      enumerable.keys.each do |key|
+        name = key.dup
+        name[0] = name[0].downcase
+        enumerable[name] = enumerable.delete(key)
+        camelcase_hash_keys!(enumerable[name]) if enumerable[name].is_a?(Enumerable)
+      end
+    else
+      enumerable.each{ |item| camelcase_hash_keys!(item) if item.is_a?(Enumerable) }
+    end
+  end
+
+  # Recursively transforms any object, downcasing it to enable case insensitive comparisons
+  #
+  # @param object [Object] a string, array, hash, or other object to attempt to recursively downcase
+  # @return [Object] returns the input object recursively downcased
+  def recursively_downcase(object)
+    case object
+    when String
+      object.downcase
+    when Array
+      object.map{ |item| recursively_downcase(item) }
+    when Hash
+      transformed = {}
+      object.transform_keys(&:downcase).each do |key, value|
+        transformed[key] = recursively_downcase(value)
+      end
+      transformed
+    else
+      object
+    end
+  end
+
+  # Checks to see whether the DSC resource being managed is defined as ensurable
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @return [Bool] returns true if the DSC Resource is ensurable, otherwise false.
+  def ensurable?(context)
+    context.type.attributes.keys.include?(:ensure)
+  end
+
+  # Parses the DSC resource type definition to retrieve the names of any attributes which are specified as mandatory for get operations
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @return [Array] returns an array of attribute names as symbols which are mandatory for get operations
+  def mandatory_get_attributes(context)
+    context.type.attributes.select{ |attribute,properties| properties[:mandatory_for_get] }.keys
+  end
+
+  # Parses the DSC resource type definition to retrieve the names of any attributes which are specified as mandatory for set operations
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @return [Array] returns an array of attribute names as symbols which are mandatory for set operations
+  def mandatory_set_attributes(context)
+    context.type.attributes.select{ |attribute,properties| properties[:mandatory_for_set] }.keys
+  end
+
+  # Parses the DSC resource type definition to retrieve the names of any attributes which are specified as namevars
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @return [Array] returns an array of attribute names as symbols which are namevars
+  def namevar_attributes(context)
+    context.type.attributes.select{ |attribute,properties| properties[:behaviour] == :namevar }.keys
   end
 
   # Look through a fully formatted string, replacing all instances where a value matches the formatted properties
@@ -245,14 +386,16 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
       name = property_name.to_s.gsub(/^dsc_/, '').to_sym
       # Process nested CIM instances first as those neeed to be passed to higher-order
       # instances and must therefore be declared before they must be referenced
-      cim_instance_hashes = nested_cim_instances(property_hash[:value])
-      cim_instance_hashes.flatten!.reject!{ |cim_instance_hash| cim_instance_hash.nil? }
-      cim_instance_hashes.each do |instance|
-        variable_name = random_variable_name
-        instantiated_variables.merge!(variable_name => instance)
-        class_name = instance['cim_instance_type']
-        properties = instance.reject{ |k,v| k == 'cim_instance_type' }
-        cim_instances_block << format_ciminstance(variable_name, class_name, properties)
+      cim_instance_hashes = nested_cim_instances(property_hash[:value]).flatten.reject{ |item| item.nil? }
+      # Sometimes the instances are an empty array
+      unless cim_instance_hashes.count == 0
+        cim_instance_hashes.each do |instance|
+          variable_name = random_variable_name
+          instantiated_variables.merge!(variable_name => instance)
+          class_name = instance['cim_instance_type']
+          properties = instance.reject{ |k,v| k == 'cim_instance_type' }
+          cim_instances_block << format_ciminstance(variable_name, class_name, properties)
+        end
       end
       # We have to handle arrays of CIM instances slightly differently
       if property_hash[:mof_type] =~ %r{\[\]$}
@@ -299,7 +442,10 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   def format_ciminstance(variable_name, class_name, property_hash)
     definition = "$#{variable_name} = New-CimInstance -ClientOnly -ClassName '#{class_name}' -Property #{format(property_hash)}"
     # AWFUL HACK to make New-CimInstance happy ; it can't parse an array unless it's an array of Cim Instances
-    definition = definition.gsub("@(@{'cim_instance_type'","[CimInstance[]]@(@{'cim_instance_type'")
+    # definition = definition.gsub("@(@{'cim_instance_type'","[CimInstance[]]@(@{'cim_instance_type'")
+    # EVEN WORSE HACK - this one we can't even be sure it's a cim instance...
+    # but I don't _think_ anything but nested cim instances show up as hashes inside an array
+    definition = definition.gsub('@(@{','[CimInstance[]]@(@{')
     definition = interpolate_variables(definition)
     definition
   end
@@ -362,6 +508,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     credential_block    = prepare_credentials(resource)
     cim_instances_block = prepare_cim_instances(resource)
     parameters_block    = invoke_params(resource)
+    # clean them out of the temporary cache now that they're not needed; failure to do so can goof up future executions in this run
+    clear_instantiated_variables!
 
     content = [preamble, credential_block, cim_instances_block, parameters_block, postscript].join("\n")
     content

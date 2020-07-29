@@ -62,21 +62,23 @@ Describe $script {
       }
     }
     It "lists all dsc_psrepository resources" -Pending {
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet resource dsc_psrepository --verbose --debug --trace' -SuccessFilterScript {
+      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet resource dsc_psrepository' -SuccessFilterScript {
         $_ -match "dsc_psrepository {"
       }
     }
     It "shows a specific dsc_psrepository resource" {
       # PSGallery is the default repo always installed
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet resource dsc_psrepository PSGallery --verbose --debug --trace' -SuccessFilterScript {
-        $_ -match "dsc_psrepository {" -and $_ -match "PSGallery"
+      $Result = Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet resource dsc_psrepository title dsc_name=PSGallery' -PassThru -SuccessFilterScript {
+        $_ -match "dsc_psrepository { 'title'"
       }
+      $Result -match "dsc_name => 'PSGallery'"
     }
     It "shows a specific dsc_psrepository resource with attributes" -Pending {
       # PSGallery is the default repo always installed
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet resource dsc_psrepository PSGallery --verbose --debug --trace' -SuccessFilterScript {
-        $_ -match "dsc_psrepository {" -and $_ -match "PSGallery" -and $_ -match "dsc_installationpolicy.*=>.*'trusted'"
+      $Result = Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet resource dsc_psrepository title dsc_name=PSGallery' -PassThru -SuccessFilterScript {
+        $_ -match "dsc_psrepository { 'title'"
       }
+      $Result -match "dsc_name => 'PSGallery'" -and $Result -match "dsc_installationpolicy => 'Trusted'"
     }
   }
 
@@ -90,43 +92,55 @@ Describe $script {
     It "doesn't do anything" {
       # PSGallery is the default repo always installed
       Set-Content -Path "$expected_base\confirm.pp" -Value "dsc_psrepository { 'PSGallery': }`n"
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --verbose --debug --trace confirm.pp' -ErrorFilterScript { $_ -match 'Notice:.*Dsc_psrepository\[PSGallery\]' }
+      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply confirm.pp' -ErrorFilterScript { $_ -match 'Notice:.*Dsc_psrepository\[PSGallery\]' }
     }
   }
 
   Context "when creating a new repository with 'puppet apply'" {
     It "works" {
       # create new arbitrary repo location
-      $manifest = 'dsc_psrepository { "foo":
-          dsc_ensure             => present,
+      $manifest = 'dsc_psrepository { "Foo":
+          dsc_name               => "Foo",
+          dsc_ensure             => "Present",
           dsc_sourcelocation     => "c:\\program files",
-          dsc_installationpolicy => untrusted,
+          dsc_installationpolicy => "Untrusted",
         }'
       Set-Content -Path "$expected_base\new_repo.pp" -Value $manifest
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --verbose --debug --trace --color=false new_repo.pp' -SuccessFilterScript {
-        # TODO: fix this to match closer to the changes
-        # ($_ -match "Dsc_psrepository\[foo\]/dsc_installationpolicy: dsc_installationpolicy changed  to 'untrusted'") -and ($_ -match "Notice: dsc_psrepository\[foo\]: Updating: Finished")
-        $_ -match "Notice: dsc_psrepository\[foo\]: Updating: Finished"
+      $Command = 'pdk bundle exec puppet apply --color=false new_repo.pp'
+      $SuccessFilterScript = {
+        $_ -match 'Creating: Finished'
       }
+      $ErrorFilterScript = {
+        $_ -match 'Error'
+      }
+      Invoke-PdkCommand -Path $expected_base -Command $Command -SuccessFilterScript $SuccessFilterScript -ErrorFilterScript $ErrorFilterScript
     }
     # remove previous testcase when enabling this
-    It "works with non-canonical elements" -Pending {
+    It "works with non-canonical elements" {
       # create new arbitrary repo location with a title and non-lowercase source location
-      $manifest = 'dsc_psrepository { "bar"
-          dsc_name               => "foo":
-          dsc_ensure             => present,
-          dsc_sourcelocation     => "C:\\Program Files",
-          dsc_installationpolicy => untrusted,
+      $manifest = 'dsc_psrepository { "bar":
+          dsc_name               => "baz",
+          dsc_ensure             => "Present",
+          dsc_sourcelocation     => "C:\\Program Files (x86)",
+          dsc_installationpolicy => "Untrusted",
         }'
       Set-Content -Path "$expected_base\new_repo.pp" -Value $manifest
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --verbose --debug --trace --color=false new_repo.pp' -SuccessFilterScript {
-        # reminder: this -match didn't work previously, even though it should.
-        ($_ -match "Dsc_psrepository\[foo\]/dsc_installationpolicy: dsc_installationpolicy changed  to 'untrusted'") -and ($_ -match "Notice: dsc_psrepository\[foo\]: Creating: Finished")
+      $Command = 'pdk bundle exec puppet apply --color=false new_repo.pp'
+      $SuccessFilterScript = {
+        $_ -match 'Creating: Finished'
       }
+      $ErrorFilterScript = {
+        $_ -match 'Error'
+      }
+      Invoke-PdkCommand -Path $expected_base -Command $Command -SuccessFilterScript $SuccessFilterScript -ErrorFilterScript $ErrorFilterScript
     }
 
     It 'is idempotent' {
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --verbose --debug --trace --color=false new_repo.pp' -ErrorFilterScript { $_ -match 'Notice:.*Dsc_psrepository\[foo\]' }
+      $Command = 'pdk bundle exec puppet apply --color=false new_repo.pp'
+      $ErrorFilterScript = {
+        $_ -match 'Notice:.*Dsc_psrepository'
+      }
+      Invoke-PdkCommand -Path $expected_base -Command $Command -ErrorFilterScript $ErrorFilterScript
     }
   }
 
@@ -134,12 +148,13 @@ Describe $script {
     It "reports the error" {
       # re-use previous repo location, with a new name this will trip up the DSC resource
       $manifest = 'dsc_psrepository { "foo2":
-          dsc_ensure             => present,
+          dsc_name               => "foo2",
+          dsc_ensure             => "Present",
           dsc_sourcelocation     => "c:\\program files",
-          dsc_installationpolicy => untrusted,
+          dsc_installationpolicy => "Untrusted",
         }'
       Set-Content -Path "$expected_base\reuse_repo.pp" -Value $manifest
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --verbose --debug --trace --color=false reuse_repo.pp' -SuccessFilterScript {
+      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --color=false reuse_repo.pp' -SuccessFilterScript {
         $_ -match "The repository could not be registered because there exists a registered repository with Name"
       }
     }
@@ -156,6 +171,7 @@ $expected_base = '../bar/nuget'
 
 Remove-Item $expected_base -Force -Recurse -ErrorAction Ignore
 
+If (Test-path C:\nugetlocal) { Remove-Item C:\nugetlocal -recurse -force }
 new-item C:\nugetlocal -itemtype directory
 
 & $script -PowerShellModuleName "NuGet" -PowerShellModuleVersion "1.3.3"  -PuppetModuleAuthor 'testuser' -OutputDirectory "../bar"
@@ -219,7 +235,7 @@ Describe $script {
   Context "when managing an existing repository with 'puppet apply'" {
     It "doesn't do anything" -Pending {
       Set-Content -Path "$expected_base\confirm_nuget.pp" -Value "dsc_nuget { 'testname': }`n"
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --verbose --debug --trace confirm_nuget.pp' -ErrorFilterScript { $_ -match 'Notice:.*Dsc_nuget\[testname\]' }
+      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply confirm_nuget.pp' -ErrorFilterScript { $_ -match 'Notice:.*Dsc_nuget\[testname\]' }
     }
   }
 
@@ -237,7 +253,7 @@ Describe $script {
       dsc_apikey                    => "testapi",
     }'
       Set-Content -Path "$expected_base\manage_module_nuget.pp" -Value $manifest
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --verbose --debug --trace --color=false manage_module_nuget.pp' -SuccessFilterScript {
+      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --color=false manage_module_nuget.pp' -SuccessFilterScript {
         $_ -match "Notice: dsc_nuget\[nugetlocaltesting\]: Updating: Finished"
       }
     }
@@ -252,13 +268,13 @@ Describe $script {
       dsc_apikey                    => "testapi",
     }'
       Set-Content -Path "$expected_base\manage_module_nuget.pp" -Value $manifest
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --verbose --debug --trace --color=false manage_module_nuget.pp' -SuccessFilterScript {
+      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --color=false manage_module_nuget.pp' -SuccessFilterScript {
         ($_ -match "Dsc_nuget\[nugetlocaltesting\]/dsc_allownugetpackagepush: dsc_allownugetpackagepush changed  to false") -and ($_ -match "Notice: dsc_nuget\[nugetlocaltesting\]: Creating: Finished")
       }
     }
 
     It 'is idempotent' {
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --verbose --debug --trace --color=false manage_module_nuget.pp' -ErrorFilterScript { $_ -match 'Notice:.*Dsc_nuget\[nugetlocaltesting\]' }
+      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --color=false manage_module_nuget.pp' -ErrorFilterScript { $_ -match 'Notice:.*Dsc_nuget\[nugetlocaltesting\]' }
     }
   }
 
@@ -273,7 +289,7 @@ Describe $script {
       dsc_apikey                    => "testapi",
     }'
       Set-Content -Path "$expected_base\reuse_repo_nuget.pp" -Value $manifest
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --verbose --debug --trace --color=false reuse_repo_nuget.pp' -SuccessFilterScript {
+      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet apply --color=false reuse_repo_nuget.pp' -SuccessFilterScript {
         $_ -match "The repository could not be registered because there exists a registered repository with Name"
       }
     }
@@ -281,19 +297,19 @@ Describe $script {
 
   Context "test created resource,since no default resources are available" {
     It "lists all dsc_nuget resources" -Pending {
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet resource dsc_nuget --verbose --debug --trace' -SuccessFilterScript {
+      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet resource dsc_nuget' -SuccessFilterScript {
         $_ -match "dsc_nuget {"
       }
     }
     It "shows a specific dsc_nuget resource" -Pending {
       #No default values for local nuget repository
-      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet resource dsc_nuget testname --verbose --debug --trace' -SuccessFilterScript {
+      Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet resource dsc_nuget testname' -SuccessFilterScript {
         $_ -match "dsc_nuget {" -and $_ -match "testname"
       }
     }
     It "shows a specific dsc_nuget resource with attributes" -Pending {
        #No default values for local nuget repository
-       Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet resource dsc_nuget testname --verbose --debug --trace' -SuccessFilterScript {
+       Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec puppet resource dsc_nuget testname' -SuccessFilterScript {
          $_ -match "dsc_nuget {" -and $_ -match "testname" -and $_ -match "dsc_packagesource.*=>.*'nugetlocal'"
       }
     }

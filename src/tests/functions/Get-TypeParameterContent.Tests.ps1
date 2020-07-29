@@ -7,6 +7,7 @@ Describe 'Get-TypeParameterContent' {
           DefaultValue      = $null
           Type              = "Optional[Boolean]"
           Help              = "Some string of help content`nSplit on a new line"
+          is_namevar        = 'false'
           mandatory_for_get = 'false'
           mandatory_for_set = 'false'
           mof_is_embedded   = 'false'
@@ -17,6 +18,18 @@ Describe 'Get-TypeParameterContent' {
           DefaultValue      = 'foo'
           Type              = "Enum['foo', 'bar']"
           Help              = $null
+          is_namevar        = 'true'
+          mandatory_for_get = 'true'
+          mandatory_for_set = 'true'
+          mof_is_embedded   = 'false'
+          mof_type          = 'string'
+        },
+        @{
+          Name              = 'cookie'
+          DefaultValue      = 'foo'
+          Type              = "String"
+          Help              = $null
+          is_namevar        = 'false'
           mandatory_for_get = 'true'
           mandatory_for_set = 'true'
           mof_is_embedded   = 'false'
@@ -40,6 +53,12 @@ Describe 'Get-TypeParameterContent' {
         $Result[1] | Should -MatchExactly 'mandatory_for_set: true,'
         $Result[1] | Should -MatchExactly "mof_type: 'string',"
         $Result[1] | Should -MatchExactly 'mof_is_embedded: false,'
+        $Result[2] | Should -MatchExactly 'dsc_cookie: {'
+        $Result[2] | Should -MatchExactly 'desc: %q{},'
+        $Result[2] | Should -MatchExactly 'mandatory_for_get: true,'
+        $Result[2] | Should -MatchExactly 'mandatory_for_set: true,'
+        $Result[2] | Should -MatchExactly "mof_type: 'string',"
+        $Result[2] | Should -MatchExactly 'mof_is_embedded: false,'
       }
     }
   }

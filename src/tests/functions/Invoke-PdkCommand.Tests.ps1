@@ -50,6 +50,11 @@ Describe 'Invoke-PdkCommand' {
             Assert-MockCalled Start-Job -Times 1
             Assert-MockCalled Wait-Job  -Times 1
           }
+
+          It 'Returns data if specified' {
+            Invoke-PdkCommand -Command $CommandFoo -SuccessFilterScript { $_ -eq $SuccessOutput } | Should -BeNullOrEmpty
+            Invoke-PdkCommand -Command $CommandFoo -SuccessFilterScript { $_ -eq $SuccessOutput } -PassThru | Should -Be $SuccessOutput
+          }
         }
       }
     }

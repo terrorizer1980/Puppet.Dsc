@@ -48,7 +48,7 @@ Function Get-DscResourceParameterInfoByCimClass {
           # Capture the metadata in order to parse the Puppet type definition and retrieve the cim instance types.
           $EmbeddedInstanceMetadata = @{}
           $EmbeddedInstanceMetadata.$InstanceType = @{
-            cim_instance_type = "'$($InstanceType.ToLowerInvariant())'"
+            cim_instance_type = "'$InstanceType'"
           }
           $CimClassProperties = Get-CimClassPropertiesList -ClassName $InstanceType
           ForEach($Property in $CimClassProperties) {
@@ -72,7 +72,7 @@ Function Get-DscResourceParameterInfoByCimClass {
           # Nested CIM instances need to be reassembled into readable Structs; but we want to increase the indentation level by one
           # so that it's more visually distinct in the end file
           $StructComponents = $EmbeddedInstanceMetadata.$InstanceType.Keys |
-            ForEach-Object -Process { "$($_.ToLowerInvariant()) => $($EmbeddedInstanceMetadata.$InstanceType.$_ -replace "`n", "`n  ")" }
+            ForEach-Object -Process { "$_ => $($EmbeddedInstanceMetadata.$InstanceType.$_ -replace "`n", "`n  ")" }
           # Assemble the current CIM instance as a struct, strip out any double quotes to prevent breaking parsing
           $DefinedEmbeddedInstances.$InstanceType = "Struct[{`n  $($StructComponents -join ",`n  " -replace '"')`n}]"
         }
@@ -102,8 +102,9 @@ Function Get-DscResourceParameterInfoByCimClass {
         # only retrieve default values by parsing the AST, so this is acceptable, if not ideal.
         DefaultValue = $null
         Help = $Property.Qualifiers['Description'].Value
-        mandatory_for_get = ($Property.Flags -Match 'Required').ToString().ToLowerInvariant()
-        mandatory_for_set = ($Property.Flags -Match 'Required').ToString().ToLowerInvariant()
+        is_namevar        = ($Property.Flags -Match 'Key').ToString().ToLowerInvariant()
+        mandatory_for_get = ($Property.Flags -Match '(Required|Key)').ToString().ToLowerInvariant()
+        mandatory_for_set = ($Property.Flags -Match '(Required|Key)').ToString().ToLowerInvariant()
         mof_is_embedded   = 'false'
       }
       If ($Property.ReferenceClassName -in $DefinedEmbeddedInstances.Keys) {
@@ -130,7 +131,7 @@ Function Get-DscResourceParameterInfoByCimClass {
         $DscResourceMetadata.$($Property.Name).mof_type = $Property.CimType -Replace '(\S+)Array$','$1[]'
         $DscResourceMetadata.$($Property.Name).Type     = Get-PuppetDataType -DscResourceProperty @{
           Values       = $Property.Qualifiers['Values'].Value
-          IsMandatory  = $Property.Flags -Match 'Required'
+          IsMandatory  = $Property.Flags -Match '(Required|Key)'
           # Replace the Array identifier with [] to match current expectations
           PropertyType = $Property.CimType -Replace '(\S+)Array$','[$1[]]'
         }

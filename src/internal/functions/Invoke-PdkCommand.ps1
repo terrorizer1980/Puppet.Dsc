@@ -37,7 +37,8 @@ Function Invoke-PdkCommand {
     [Parameter(Mandatory = $True)]
     [System.String]$Command,
     [System.Management.Automation.ScriptBlock]$SuccessFilterScript,
-    [System.Management.Automation.ScriptBlock]$ErrorFilterScript
+    [System.Management.Automation.ScriptBlock]$ErrorFilterScript,
+    [switch]$PassThru
   )
 
   begin {
@@ -84,6 +85,9 @@ Function Invoke-PdkCommand {
     }
 
     Write-PSFMessage -Level Debug -Message "Command '$Command' executed successfully:`n$($PdkJob.Output)"
+    if ($PassThru) {
+      $PdkJob.Output
+    }
   }
 
   end { }

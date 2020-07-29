@@ -38,12 +38,11 @@ $(
   }
 )
 $(
-  If ($Parameter.mandatory_for_get -eq 'true'){
-    "      behaviour: :namevar,`n      mandatory_for_get: $($Parameter.mandatory_for_get),"
-  } Else {
-    "      mandatory_for_get: $($Parameter.mandatory_for_get),"
+  If ($Parameter.is_namevar -eq 'true'){
+    "      behaviour: :namevar,"
   }
 )
+      mandatory_for_get: $($Parameter.mandatory_for_get),
       mandatory_for_set: $($Parameter.mandatory_for_set),
       mof_type: '$($Parameter.mof_type)',
       mof_is_embedded: $($Parameter.mof_is_embedded),
