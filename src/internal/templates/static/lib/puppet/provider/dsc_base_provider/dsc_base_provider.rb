@@ -8,13 +8,21 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # Initializes the provider, preparing the class variable which caches the canonicalized resources across calls.
   def initialize
     @@cached_canonicalized_resource = []
+    @@cached_query_results = []
   end
 
-  # Verify that the canonicalized value cache does not already have any entries
+  # Look through a cache to retrieve the hashes specified, if they have been cached.
+  # Does so by seeing if each of the specified hashes is a subset of any of the hashes
+  # in the cache, so {foo: 1, bar: 2} would return if {foo: 1} was the search hash.
   #
-  # @return [Bool] returns true if the cache is empty, otherwise false
-  def canonical_cache_empty?
-    @@cached_canonicalized_resource.empty?
+  # @param cache [Array] the class variable containing cached hashes to search through
+  # @param hashes [Array] the list of hashes to search the cache for
+  # @return [Array] an array containing the matching hashes for the search condition, if any
+  def fetch_cached_hashes(cache, hashes)
+    cache.select do |item|
+      matching_hash = hashes.select{ |hash| (hash.to_a - item.to_a).empty?}
+      !matching_hash.empty?
+    end.flatten
   end
 
   # Implements the canonicalize feature of the Resource API; this method is called first against any resources
@@ -30,7 +38,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   def canonicalize(context, resources)
     canonicalized_resources = []
     resources.collect do |r|
-      if canonical_cache_empty?
+      if fetch_cached_hashes(@@cached_canonicalized_resource, [r]).empty?
         canonicalized = invoke_get_method(context, r)
         canonicalized[:name] = r[:name]
         if r[:dsc_psdscrunascredential].nil?
@@ -44,11 +52,8 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
           canonicalized[key] = r[key] unless downcased_resource[key] == value
           canonicalized.delete(key) unless downcased_resource.keys.include?(key)
         end
-        # If the resource is ensurable & the canonicalized result does not include it, set it
-        if ensurable?(context)
-          canonicalized[:ensure] = context.type.attributes[:ensure][:default] unless canonicalized.keys.include?(:ensure)
-        end
-        @@cached_canonicalized_resource << canonicalized
+        # Cache the actually canonicalized resource separately
+        @@cached_canonicalized_resource << canonicalized.dup
       else
         canonicalized = r
       end
@@ -72,6 +77,11 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     # This hash is functionally the same as a should hash as
     # passed to the should_to_resource method.
     context.debug('Collecting data from the DSC Resource')
+
+    # If the resource has already been queried, do not bother querying for it again
+    cached_results = fetch_cached_hashes(@@cached_query_results, names)
+    return cached_results unless cached_results.empty?
+
     if @@cached_canonicalized_resource.empty?
       mandatory_properties = {}
     else
@@ -162,12 +172,14 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     end
     # TODO: Handle PSDscRunAsCredential flapping
     # Resources do not return the account under which they were discovered, so re-add that
-    # if name_hash[:dsc_psdscrunascredential].nil?
-    #   data.delete(:dsc_psdscrunascredential)
-    # else
-    #   data.merge!({dsc_psdscrunascredential: name_hash[:dsc_psdscrunascredential]})
-    # end
-    context.debug(data)
+    if name_hash[:dsc_psdscrunascredential].nil?
+      data.delete(:dsc_psdscrunascredential)
+    else
+      data.merge!({dsc_psdscrunascredential: name_hash[:dsc_psdscrunascredential]})
+    end
+    # Cache the query to prevent a second lookup
+    @@cached_query_results << data.dup if fetch_cached_hashes(@@cached_query_results, [data]).empty?
+    context.debug("Returned to Puppet as #{data}")
     data
   end
 
@@ -554,7 +566,6 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
       modified_text
     end
   end
-
 
   # Instantiate a PowerShell manager via the ruby-pwsh library and use it to invoke PowerShell.
   # Definiing it here allows re-use of a single instance instead of continually instantiating and
