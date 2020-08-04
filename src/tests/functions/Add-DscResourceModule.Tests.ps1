@@ -9,7 +9,7 @@ Describe 'Vendoring a DSC module' {
       Mock Move-Item
       Mock Remove-Item
 
-      Add-DscResourceModule -Name SomeDSCModule -Path 'TestDrive:\target\' -RequiredVersion '1.0.0'
+      Add-DscResourceModule -Name SomeDSCModule -Path 'TestDrive:\target\' -RequiredVersion '1.0.0' -Repository 'PSGallery'
 
       It 'downloads the latest version of the module' {
         Assert-VerifiableMock
@@ -18,7 +18,8 @@ Describe 'Vendoring a DSC module' {
         Assert-MockCalled Save-Module -Times 1 -Debug -ParameterFilter {
           ($Name -eq 'SomeDSCModule') `
             -and ($path -eq 'TestDrive:\target_tmp') `
-            -and ($RequiredVersion -eq '1.0.0')
+            -and ($RequiredVersion -eq '1.0.0') `
+            -and ($Repository -eq 'PSGallery')
         }
         Assert-MockCalled Remove-Item -Times 1 -ParameterFilter { $path -eq 'TestDrive:\target_tmp' }
       }

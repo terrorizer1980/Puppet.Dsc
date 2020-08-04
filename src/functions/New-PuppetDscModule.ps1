@@ -28,8 +28,11 @@ Function New-PuppetDscModule {
       Prompts for confirmation before creating the Puppet module
     .PARAMETER WhatIf
       Shows what would happen if the function runs.
+    .PARAMETER Repository
+      Specifies a non-default PSRepository.
+      If left blank, will default to PSGallery.
     .EXAMPLE
-      New-PuppetDscModule -PowerShellModuleName PowerShellGet -PowerShellModuleVersion 2.2.3
+      New-PuppetDscModule -PowerShellModuleName PowerShellGet -PowerShellModuleVersion 2.2.3 -Repository PSGallery
 
       This function will create a new Puppet module, powershellget, which vendors and puppetizes the PowerShellGet
       PowerShell module at version 2.2.3 and its dependencies, exposing the DSC resources as Puppet resources.
@@ -42,7 +45,8 @@ Function New-PuppetDscModule {
     [string]$PuppetModuleName,
     [string]$PuppetModuleAuthor,
     [string]$OutputDirectory,
-    [switch]$PassThru
+    [switch]$PassThru,
+    [string]$Repository
   )
 
   Begin {
@@ -76,6 +80,7 @@ Function New-PuppetDscModule {
   Process {
     $ShouldProcessMessage = "Puppetize the '$PowerShellModuleName' module"
     If (![string]::IsNullOrEmpty($PowerShellModuleVersion)) { $ShouldProcessMessage += " at version '$PowerShellModule'"}
+    If ([string]::IsNullOrEmpty($Repository)) { $Repository = "PSGallery"}
     If ($PSCmdlet.ShouldProcess($OutputDirectory, $ShouldProcessMessage)) {
       Try {
         $ErrorActionPreference = 'Stop'
@@ -85,7 +90,7 @@ Function New-PuppetDscModule {
 
         # Vendor the PowerShell module and all of its dependencies
         Write-PSFMessage -Message 'Vendoring the DSC Resources'
-        Add-DscResourceModule -Name $PowerShellModuleName -Path $VendoredDscResourcesDirectory -RequiredVersion $PowerShellModuleVersion
+        Add-DscResourceModule -Name $PowerShellModuleName -Path $VendoredDscResourcesDirectory -RequiredVersion $PowerShellModuleVersion -Repository $Repository
 
         # Update the Puppet module metadata
         Write-PSFMessage -Message 'Updating the Puppet Module metadata'
