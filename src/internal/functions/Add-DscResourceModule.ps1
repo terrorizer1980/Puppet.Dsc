@@ -18,8 +18,11 @@ function Add-DscResourceModule {
     Specifies the exact version number of the module to save.
     If left blank, will default to latest available.
 
+  .PARAMETER Repository
+    Specifies a PSRepository.
+
   .EXAMPLE
-    Add-DscResourceModule -TargetDir ./tmp -Name PowerShellGet -Version 2.2.3
+    Add-DscResourceModule -TargetDir ./tmp -Name PowerShellGet -Version 2.2.3 -Repository PSGallery
 
     This example will search the PowerShell gallery for version `2.2.3` of the PowerShellGet and,
     if it finds it, save the module and its dependencies into a folder called `./tmp`.
@@ -28,7 +31,8 @@ function Add-DscResourceModule {
   param (
     $Name,
     $Path,
-    $RequiredVersion
+    $RequiredVersion,
+    $Repository
   )
 
   Begin { }
@@ -42,7 +46,7 @@ function Add-DscResourceModule {
       if (-not(Test-Path $PathTmp)) {
         $null = New-Item -Path $PathTmp -Force -ItemType 'Directory'
       }
-      Save-Module -Name $Name -Path $PathTmp -RequiredVersion $RequiredVersion
+      Save-Module -Name $Name -Path $PathTmp -RequiredVersion $RequiredVersion -Repository $Repository
       ForEach ($ModuleFolder in (Get-ChildItem $PathTmp)) {
         Move-Item -Path (Get-ChildItem $ModuleFolder.FullName).FullName -Destination "$Path/$($ModuleFolder.Name)"
       }

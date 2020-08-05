@@ -47,7 +47,8 @@ Describe "New-PuppetDscModule" {
       It 'Vendors the PowerShell module' {
         Assert-MockCalled Add-DscResourceModule -ParameterFilter {
           $Name -ceq 'Foo' -and
-          $Path -match 'import(/|\\)foo'
+          $Path -match 'import(/|\\)foo' -and
+          $Repository -match 'PSGallery'
         } -Times 1
       }
       It 'Updates the Puppet metadata based on the PowerShell metadata' {
@@ -157,7 +158,8 @@ Describe "New-PuppetDscModule" {
       It 'Vendors the PowerShell module' {
         Assert-MockCalled Add-DscResourceModule -ParameterFilter {
           $Name -ceq 'Foo' -and
-          $Path -match 'import(/|\\)foo'
+          $Path -match 'import(/|\\)foo' -and
+          $Repository -match 'PSGallery'
         } -Times 1
       }
       It 'Updates the Puppet metadata based on the PowerShell metadata' {
@@ -230,7 +232,7 @@ Describe "New-PuppetDscModule" {
         Mock Add-PuppetReferenceDocumentation {}
         Mock Get-Item {}
 
-        New-PuppetDscModule -PowerShellModuleName Foo -OutputDirectory  TestDrive:\Bar
+        New-PuppetDscModule -PowerShellModuleName Foo -OutputDirectory  TestDrive:\Bar -Repository FooRepo
         It 'Respects the specified path' {
           Assert-MockCalled Initialize-PuppetModule -ParameterFilter {
             $OutputFolderPath -eq 'TestDrive:\Bar' -and
@@ -238,7 +240,8 @@ Describe "New-PuppetDscModule" {
           } -Times 1
           Assert-MockCalled Add-DscResourceModule -ParameterFilter {
             $Name -ceq 'Foo' -and
-            $Path -match 'bar(/|\\)foo'
+            $Path -match 'bar(/|\\)foo' -and
+            $Repository -match 'FooRepo'
           } -Times 1
           Assert-MockCalled Update-PuppetModuleMetadata -ParameterFilter {
             $PuppetModuleFolderPath       -match 'bar(/|\\)foo' -and
@@ -283,7 +286,8 @@ Describe "New-PuppetDscModule" {
             } -Times 1
             Assert-MockCalled Add-DscResourceModule -ParameterFilter {
               $Name -ceq 'Foo' -and
-              $Path -match 'bar(/|\\)foo'
+              $Path -match 'bar(/|\\)foo' -and
+              $Repository -match 'PSGallery'
             } -Times 1
             Assert-MockCalled Update-PuppetModuleMetadata -ParameterFilter {
               $PuppetModuleFolderPath       -match 'bar(/|\\)foo' -and
@@ -351,7 +355,8 @@ Describe "New-PuppetDscModule" {
             $PuppetModuleName -ceq 'foo'
           } -Times 1
           Assert-MockCalled Add-DscResourceModule -ParameterFilter {
-            $Path -match 'import(/|\\)foo'
+            $Path -match 'import(/|\\)foo' -and
+            $Repository -match 'PSGallery'
           } -Times 1
           Assert-MockCalled Update-PuppetModuleMetadata -ParameterFilter {
             $PuppetModuleFolderPath       -match 'import(/|\\)foo' -and
@@ -369,7 +374,8 @@ Describe "New-PuppetDscModule" {
             $PuppetModuleName -ceq 'bar_baz'
           } -Times 1
           Assert-MockCalled Add-DscResourceModule -ParameterFilter {
-            $Path -match 'import(/|\\)bar_baz'
+            $Path -match 'import(/|\\)bar_baz' -and
+            $Repository -match 'PSGallery'
           } -Times 1
           Assert-MockCalled Update-PuppetModuleMetadata -ParameterFilter {
             $PuppetModuleFolderPath       -match 'import(/|\\)bar_baz' -and
