@@ -5,10 +5,14 @@ require 'pathname'
 require 'json'
 
 class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
-  # Initializes the provider, preparing the class variable which caches the canonicalized resources across calls.
+  # Initializes the provider, preparing the class variables which cache:
+  # - the canonicalized resources across calls
+  # - query results
+  # - logon failures
   def initialize
     @@cached_canonicalized_resource = []
     @@cached_query_results = []
+    @@logon_failures = []
   end
 
   # Look through a cache to retrieve the hashes specified, if they have been cached.
@@ -20,7 +24,7 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @return [Array] an array containing the matching hashes for the search condition, if any
   def fetch_cached_hashes(cache, hashes)
     cache.select do |item|
-      matching_hash = hashes.select{ |hash| (hash.to_a - item.to_a).empty?}
+      matching_hash = hashes.select{ |hash| (item.to_a - hash.to_a).empty? || (hash.to_a - item.to_a).empty?}
       !matching_hash.empty?
     end.flatten
   end
@@ -40,20 +44,25 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     resources.collect do |r|
       if fetch_cached_hashes(@@cached_canonicalized_resource, [r]).empty?
         canonicalized = invoke_get_method(context, r)
-        canonicalized[:name] = r[:name]
-        if r[:dsc_psdscrunascredential].nil?
-          canonicalized.delete(:dsc_psdscrunascredential)
+        if canonicalized.nil?
+          canonicalized = r.dup
+          @@cached_canonicalized_resource << r.dup
         else
-          canonicalized[:dsc_psdscrunascredential] = r[:dsc_psdscrunascredential]
+          canonicalized[:name] = r[:name]
+          if r[:dsc_psdscrunascredential].nil?
+            canonicalized.delete(:dsc_psdscrunascredential)
+          else
+            canonicalized[:dsc_psdscrunascredential] = r[:dsc_psdscrunascredential]
+          end
+          downcased_result = recursively_downcase(canonicalized)
+          downcased_resource = recursively_downcase(r)
+          downcased_result.each do |key, value|
+            canonicalized[key] = r[key] unless downcased_resource[key] == value
+            canonicalized.delete(key) unless downcased_resource.keys.include?(key)
+          end
+          # Cache the actually canonicalized resource separately
+          @@cached_canonicalized_resource << canonicalized.dup
         end
-        downcased_result = recursively_downcase(canonicalized)
-        downcased_resource = recursively_downcase(r)
-        downcased_result.each do |key, value|
-          canonicalized[key] = r[key] unless downcased_resource[key] == value
-          canonicalized.delete(key) unless downcased_resource.keys.include?(key)
-        end
-        # Cache the actually canonicalized resource separately
-        @@cached_canonicalized_resource << canonicalized.dup
       else
         canonicalized = r
       end
@@ -85,9 +94,12 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
     if @@cached_canonicalized_resource.empty?
       mandatory_properties = {}
     else
-      mandatory_properties = @@cached_canonicalized_resource[0].select do |attribute, value|
+      canonicalized_resource = @@cached_canonicalized_resource[0].dup
+      mandatory_properties = canonicalized_resource.select do |attribute, value|
         (mandatory_get_attributes(context) - namevar_attributes(context)).include?(attribute)
       end
+      # If dsc_psdscrunascredential was specified, re-add it here.
+      mandatory_properties[:dsc_psdscrunascredential] = canonicalized_resource[:dsc_psdscrunascredential] if canonicalized_resource.keys.include?(:dsc_psdscrunascredential)
     end
     names.collect do |name|
       name = { name: name } if name.is_a? String
@@ -142,6 +154,12 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @return [Hash] returns a hash representing the DSC resource munged to the representation the Puppet Type expects
   def invoke_get_method(context, name_hash)
     context.debug("retrieving #{name_hash.inspect}")
+
+    # Do not bother running if the logon credentials won't work
+    unless name_hash[:dsc_psdscrunascredential].nil?
+      return name_hash if logon_failed_already?(name_hash[:dsc_psdscrunascredential])
+    end
+
     query_props = name_hash.select{ |k,v| mandatory_get_attributes(context).include?(k) || (k == :dsc_psdscrunascredential && !v.nil?) }
     resource = should_to_resource(query_props, context, 'get')
     script_content = ps_script_content(resource)
@@ -151,7 +169,23 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
 
     data   = JSON.parse(output)
     context.debug("raw data received: #{data.inspect}")
-    context.err(data['errormessage']) if data['errormessage']
+    error = data['errormessage']
+    unless error.nil?
+      # NB: We should have a way to stop processing this resource *now* without blowing up the whole Puppet run
+      # Raising an error stops processing but blows things up while context.err alerts but continues to process
+      if error =~ /Logon failure: the user has not been granted the requested logon type at this computer/
+        logon_error = "PSDscRunAsCredential account specified (#{name_hash[:dsc_psdscrunascredential]['user']}) does not have appropriate logon rights; are they an administrator?"
+        require 'pry'; binding.pry;
+        name_hash[:name].nil? ? context.err(logon_error) : context.err(name_hash[:name], logon_error)
+        @@logon_failures << name_hash[:dsc_psdscrunascredential].dup
+        # This is a hack to handle the query cache to prevent a second lookup
+        @@cached_query_results << name_hash # if fetch_cached_hashes(@@cached_query_results, [data]).empty?
+      else
+         context.err(error)
+      end
+      # Either way, something went wrong and we didn't get back a good result, so return nil
+      return nil
+    end
     # DSC gives back information we don't care about; filter down to only
     # those properties exposed in the type definition.
     valid_attributes = context.type.attributes.keys.collect{ |k| k.to_s }
@@ -192,6 +226,12 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @return [Hash] returns a hash indicating whether or not the resource is in the desired state, whether or not it requires a reboot, and any error messages captured.
   def invoke_set_method(context, name, should)
     context.debug("Invoking Set Method for '#{name}' with #{should.inspect}")
+
+    # Do not bother running if the logon credentials won't work
+    unless should[:dsc_psdscrunascredential].nil?
+      return nil if logon_failed_already?(should[:dsc_psdscrunascredential])
+    end
+
     apply_props = should.reject{ |k,v| !(k.to_s =~ /^dsc_/) }
     resource = should_to_resource(apply_props, context, 'set')
     script_content = ps_script_content(resource)
@@ -261,6 +301,17 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # Clear the instantiated variables hash to be ready for the next run
   def clear_instantiated_variables!
     @@instantiated_variables = {}
+  end
+
+  # Return true if the specified credential hash has already failed to execute a DSC resource due to
+  # a logon error, as when the account is not an administrator on the machine; otherwise returns false.
+  #
+  # @param [Hash] a credential hash with a user and password keys where the password is a sensitive string
+  # @return [Bool] true if the credential_hash has already failed logon, false otherwise
+  def logon_failed_already?(credential_hash)
+    @@logon_failures.any? do  |failure_hash|
+      failure_hash['user'] == credential_hash['user'] && failure_hash['password'].unwrap == credential_hash['password'].unwrap
+    end
   end
 
   # Recursively transforms any enumerable, camelCasing any hash keys it finds
@@ -534,10 +585,40 @@ class Puppet::Provider::DscBaseProvider < Puppet::ResourceApi::SimpleProvider
   # @param value [Object] The object to format into valid PowerShell
   # @return [String] A string representation of the input value as valid PowerShell
   def format(value)
-    if value.class.name == 'Puppet::Pops::Types::PSensitiveType::Sensitive'
-      "'#{escape_quotes(value.unwrap)}' # PuppetSensitive"
-    else
+    begin
       Pwsh::Util.format_powershell_value(value)
+    rescue RuntimeError => e
+      if e.message =~ /Sensitive \[value redacted\]/
+        string = Pwsh::Util.format_powershell_value(unwrap(value))
+        string.gsub(/#PuppetSensitive'}/,"'} # PuppetSensitive")
+      else
+        raise
+      end
+    end
+  end
+
+  # Unwrap sensitive strings for formatting, even inside an enumerable, appending '#PuppetSensitive'
+  # to the end of the string in preparation for gsub cleanup.
+  #
+  # @param value [Object] The object to unwrap sensitive data inside of
+  # @return [Object] The object with any sensitive strings unwrapped and annotated
+  def unwrap(value)
+    if value.class.name == 'Puppet::Pops::Types::PSensitiveType::Sensitive'
+      "#{value.unwrap}#PuppetSensitive"
+    elsif value.class.name == 'Hash'
+      unwrapped = {}
+      value.each do |key, value|
+        unwrapped[key] = unwrap(value)
+      end
+      unwrapped
+    elsif value.class.name == 'Array'
+      unwrapped = []
+      value.each do |value|
+        unwrapped << unwrap(value)
+      end
+      unwrapped
+    else
+      value
     end
   end
 
