@@ -144,6 +144,53 @@ Describe $script {
     }
   }
 
+  Context "when using a PSDscRunAsCredential with 'puppet apply'" {
+    # NB: The username/password is re-stated because something with scoping causes them to be inaccessible otherwise.
+    BeforeAll {
+      $Username = 'Foo'
+      $Password = 'This is a pretty long phrase, to be quite honest! :)'
+      New-LocalUser -Name $Username -Password (ConvertTo-SecureString -AsPlainText -Force $Password)
+      Add-LocalGroupMember -Group Administrators -Member $Username
+    }
+    AfterAll {
+      $Username = 'Foo'
+      Remove-LocalGroupMember -Group Administrators -Member $Username
+      Remove-LocalUser -Name $Username
+    }
+    It "works" {
+      $Username = 'Foo'
+      $Password = 'This is a pretty long phrase, to be quite honest! :)'
+      # create new arbitrary repo location
+      $manifest = "dsc_psrepository { 'Foo':
+          dsc_name               => 'Foo',
+          dsc_ensure             => 'Present',
+          dsc_sourcelocation     => 'c:\program files',
+          dsc_installationpolicy => 'Untrusted',
+          dsc_psdscrunascredential => {
+            user     => '$Username',
+            password => Sensitive('$Password'),
+          },
+        }"
+      Set-Content -Path "$expected_base\new_repo.pp" -Value $manifest
+      $Command = 'pdk bundle exec puppet apply --color=false new_repo.pp'
+      $SuccessFilterScript = {
+        $_ -match 'Creating: Finished'
+      }
+      $ErrorFilterScript = {
+        $_ -match 'Error'
+      }
+      Invoke-PdkCommand -Path $expected_base -Command $Command -SuccessFilterScript $SuccessFilterScript -ErrorFilterScript $ErrorFilterScript
+    }
+
+    It 'is idempotent' {
+      $Command = 'pdk bundle exec puppet apply --color=false new_repo.pp'
+      $ErrorFilterScript = {
+        $_ -match 'Notice:.*Dsc_psrepository'
+      }
+      Invoke-PdkCommand -Path $expected_base -Command $Command -ErrorFilterScript $ErrorFilterScript
+    }
+  }
+
   Context "when a valid manifest causes a run-time error" {
     It "reports the error" {
       # re-use previous repo location, with a new name this will trip up the DSC resource

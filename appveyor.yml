@@ -13,6 +13,7 @@ environment:
 test_script:
   - ps: |
       $ErrorActionPreference = "Stop"
+
       & .\src\tests\pester.ps1
 
       $testResultsFile = ".\AcceptanceTestsResults.xml"
