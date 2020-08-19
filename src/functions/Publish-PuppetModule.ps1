@@ -16,7 +16,7 @@ function Publish-PuppetModule {
         Flag whether to publish the package.
       .EXAMPLE
         Publish-PuppetModule -PuppetModuleFolderPath C:\output\testmodule -ForgeUploadUrl https://forgeapi.puppetlabs.com/v3/releases -ForgeToken testmoduletoken -Build true -Publish true
-        This command will createo or use existing pkg and Publishes the <tarball> to the Forge , for the `testmodule` depends on the options passed for pdk release command.
+        This command will create or use existing pkg and Publishes the <tarball> to the Forge , for the `testmodule` depends on the options passed for pdk release command.
     #>
     #>
     [CmdletBinding()]
