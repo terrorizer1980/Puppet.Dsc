@@ -25,8 +25,8 @@ function Publish-PuppetModule {
       $PuppetModuleFolderPath,
       [string]$ForgeToken,
       [string]$ForgeUploadUrl,
-      [bool]$Build,
-      [bool]$Publish
+      [switch]$Build,
+      [switch]$Publish
     )
 
     begin {
@@ -38,7 +38,7 @@ function Publish-PuppetModule {
           $CommandPublish = "pdk release publish --forge-token $ForgeToken --forge-upload-url $ForgeUploadUrl"
         }
       }
-      If ((![string]::IsNullOrEmpty($Build)) -AND ($Build -eq 'true')) {
+      If ($Build) {
         $CommandBuild = 'pdk build'
       }
     }

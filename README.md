@@ -53,7 +53,9 @@ pdk bundle exec puppet module install --verbose pkg/*.tar.gz'
 
 Generated tar file can be uploaded to the forge manually or by using the function `Publish-PuppetModule`
 
-`Publish-PuppetModule -PuppetModuleFolderPath C:\output\testmodule -ForgeUploadUrl https://testforgeapi.test.com/releases -ForgeToken testmoduletoken -Build true -Publish true `
+```powershell
+Publish-PuppetModule -PuppetModuleFolderPath C:\output\testmodule -ForgeUploadUrl https://testforgeapi.test.com/releases -ForgeToken testmoduletoken -Build -Publish
+```
 
 This command will create or use existing pkg and publish the <tarball> to the Forge, for the `testmodule` depends on the options passed for pdk release command.
 
