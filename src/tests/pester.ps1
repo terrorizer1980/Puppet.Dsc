@@ -3,6 +3,8 @@ param (
 
   $TestFunctions = $true,
 
+  $testResultsFile = ".\GeneralTestsResults.xml",
+
   [ValidateSet('None', 'Default', 'Passed', 'Failed', 'Pending', 'Skipped', 'Inconclusive', 'Describe', 'Context', 'Summary', 'Header', 'Fails', 'All')]
   $Show = ('Summary', 'Failed'),
 
@@ -25,7 +27,6 @@ $totalFailed = 0
 #region Run General Tests
 if ($TestGeneral)
 {
-  $testResultsFile = ".\GeneralTestsResults.xml"
   Write-PSFMessage -Level Important -Message "Modules imported, proceeding with general tests"
   foreach ($file in (Get-ChildItem "$PSScriptRoot\general" | Where-Object Name -like "*.Tests.ps1"))
   {
