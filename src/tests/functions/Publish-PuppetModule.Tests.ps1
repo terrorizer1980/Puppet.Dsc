@@ -8,19 +8,19 @@ Describe 'Publish-PuppetModule' {
 
       Initialize-PuppetModule -OutputFolderPath TestDrive:\ -PuppetModuleName Foo
 
-      Publish-PuppetModule -PuppetModuleFolderPath 'TestDrive:\Foo' -ForgeToken  'abcdefghijk' -ForgeUploadUrl 'https://localhost' -Build $True -Publish $False
+      Publish-PuppetModule -PuppetModuleFolderPath 'TestDrive:\Foo' -ForgeToken  'abcdefghijk' -ForgeUploadUrl 'https://localhost' -Build
 
       It 'Uses the PDK to generate the package' {
         Assert-MockCalled Invoke-PdkCommand -ParameterFilter {$Command -match 'pdk build'} -Times 1
       }
 
-      Publish-PuppetModule -PuppetModuleFolderPath 'TestDrive:\Foo' -ForgeToken  'abcdefghijk' -ForgeUploadUrl 'https://localhost' -Publish $True -Build $False
+      Publish-PuppetModule -PuppetModuleFolderPath 'TestDrive:\Foo' -ForgeToken  'abcdefghijk' -ForgeUploadUrl 'https://localhost' -Publish
 
       It 'Uses the PDK to publish the module' {
         Assert-MockCalled Invoke-PdkCommand -ParameterFilter {$Command -match 'pdk release publish'} -Times 1
       }
 
-      Publish-PuppetModule -PuppetModuleFolderPath 'TestDrive:\Foo' -Publish $True -Build $False
+      Publish-PuppetModule -PuppetModuleFolderPath 'TestDrive:\Foo' -Publish
 
       It 'Uses the PDK to publish to default url' {
         Assert-MockCalled Invoke-PdkCommand -ParameterFilter {$Command -match 'pdk release publish'} -Times 1
@@ -34,7 +34,7 @@ Describe 'Publish-PuppetModule' {
       Mock Resolve-Path      {$Path}
 
       It 'Rethrows the exception' {
-        { Publish-PuppetModule -PuppetModuleFolderPath 'TestDrive:\Foo' -ForgeUploadUrl 'https://localhost' -Publish 1 -Build 0} | Should -Throw 'foo'
+        { Publish-PuppetModule -PuppetModuleFolderPath 'TestDrive:\Foo' -ForgeUploadUrl 'https://localhost' -Publish } | Should -Throw 'foo'
       }
     }
 
@@ -46,7 +46,7 @@ Describe 'Publish-PuppetModule' {
       Mock Resolve-Path      {$Path}
 
       It 'Rethrows the exception' {
-        { Publish-PuppetModule -PuppetModuleFolderPath 'TestDrive:\' -ForgeToken  'abcdefghijk' -ForgeUploadUrl 'https://localhost' -Publish 1 -Build 0} | Should -Throw 'foo'
+        { Publish-PuppetModule -PuppetModuleFolderPath 'TestDrive:\' -ForgeToken  'abcdefghijk' -ForgeUploadUrl 'https://localhost' -Publish } | Should -Throw 'foo'
       }
     }
   }
