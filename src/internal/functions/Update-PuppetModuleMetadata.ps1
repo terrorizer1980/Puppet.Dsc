@@ -90,6 +90,12 @@ function Update-PuppetModuleMetadata {
     )
     # Clarify Puppet lower bound
     $PuppetMetadata.requirements[0].version_requirement = '>= 6.0.0 < 7.0.0'
+    # Tag the module as coming from the builder so that it becomes searchable on the Forge.
+    $PuppetMetadata | Add-Member -MemberType NoteProperty -Name tags -Value @(
+      'windows',
+      'puppetdsc',
+      'dsc'
+    )
     # Add new metadata sections
     $PuppetMetadata | Add-Member -MemberType NoteProperty -Name dsc_module_metadata -Value @{
       name    = Get-Module -ListAvailable -Name $PowerShellModuleManifestPath | Select-Object -ExpandProperty Name
