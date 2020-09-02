@@ -73,7 +73,7 @@ function Update-PuppetModuleMetadata {
     $PuppetMetadata.dependencies = @(
       @{
         name = 'puppetlabs/pwshlib'
-        version_requirement = '>= 0.4.0 < 2.0.0'
+        version_requirement = '>= 0.5.0 < 2.0.0'
       }
     )
     # Update the operating sytem to only support windows *for now*.
