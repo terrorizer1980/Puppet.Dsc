@@ -79,7 +79,7 @@ Function New-PuppetDscModule {
 
   Process {
     $ShouldProcessMessage = "Puppetize the '$PowerShellModuleName' module"
-    If (![string]::IsNullOrEmpty($PowerShellModuleVersion)) { $ShouldProcessMessage += " at version '$PowerShellModule'"}
+    If (![string]::IsNullOrEmpty($PowerShellModuleVersion)) { $ShouldProcessMessage += " at version '$PowerShellModuleVersion'"}
     If ([string]::IsNullOrEmpty($Repository)) { $Repository = "PSGallery"}
     If ($PSCmdlet.ShouldProcess($OutputDirectory, $ShouldProcessMessage)) {
       Try {
