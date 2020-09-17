@@ -86,6 +86,11 @@ Describe 'Update-PuppetModuleMetadata' {
         It 'Updates the Puppet lower bound' {
           $Result.requirements[0].version_requirement | Should -Be '>= 6.0.0 < 7.0.0'
         }
+        It 'Sets the appropriate tags' {
+          $Result.tags[0] | Should -Be 'windows'
+          $Result.tags[1] | Should -Be 'puppetdsc'
+          $Result.tags[2] | Should -Be 'dsc'
+        }
         It 'Adds metadata about the Puppetized PowerShell module' {
           $Result.dsc_module_metadata.name    | Should -BeExactly 'PowerShellGet'
           $Result.dsc_module_metadata.version | Should -BeExactly '2.2.3'
