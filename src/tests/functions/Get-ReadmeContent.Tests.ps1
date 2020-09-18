@@ -38,7 +38,7 @@ Describe 'Get-ReadmeContent' {
         $Result | Should -MatchExactly '\[narrative documentation\]\(.+\)'
       }
       It 'Links to the issues page for the builder, the pwslib module, and the upstream module' {
-        $Result | Should -MatchExactly "\[file an issue\]\(.+puppetlabs/PuppetDscBuilder/issues/new/choose\)"
+        $Result | Should -MatchExactly "\[file an issue\]\(.+puppetlabs/Puppet.Dsc/issues/new/choose\)"
         $Result | Should -MatchExactly "\[file an issue\]\(.+puppetlabs/ruby-pwsh/issues/new/choose\)"
         $Result | Should -MatchExactly "\[file an issue\]\($($Parameters.PowerShellModuleProjectUri)\)"
       }
