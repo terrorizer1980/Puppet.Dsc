@@ -1,6 +1,6 @@
 @{
   # Script module or binary module file associated with this manifest
-  RootModule = 'puppet.dsc.psm1'
+  RootModule = 'Puppet.Dsc.psm1'
 
   # Version number of this module.
   ModuleVersion = '0.1.0'
@@ -73,6 +73,8 @@
       Tags = @(
         'Puppet'
         'DSC'
+        'PSEdition_Desktop'
+        'Windows'
       )
 
       # A URL to the license for this module.
