@@ -28,6 +28,7 @@
   RequiredModules = @(
     @{ ModuleName='PSFramework'; ModuleVersion='1.1.59' }
     'PSDesiredStateConfiguration'
+    'PSDscResources'
     'powershell-yaml'
   )
 
@@ -68,6 +69,12 @@
 
     #Support for PowerShellGet galleries.
     PSData = @{
+
+      # PSDesiredStateConfiguration is not installable from the gallery but **is** required.
+      # Since it is available on every machine that has Windows PowerShell 5.1, this is fine.
+      ExternalModuleDependencies = @(
+        'PSDesiredStateConfiguration'
+      )
 
       # Tags applied to this module. These help with module discovery in online galleries.
       Tags = @(
