@@ -51,7 +51,14 @@ Function New-PuppetDscModule {
 
   Begin {
     # Unless specified, use a valid Puppet module name
-    If ([string]::IsNullOrEmpty($PuppetModuleName)) { $PuppetModuleName = Get-PuppetizedModuleName -Name $PowerShellModuleName }
+    If ([string]::IsNullOrEmpty($PuppetModuleName)) {
+      $PuppetModuleName = Get-PuppetizedModuleName -Name $PowerShellModuleName
+    } Else {
+      $PuppetizedName = Get-PuppetizedModuleName -Name $PuppetModuleName
+      if ($PuppetizedName -ne $PuppetModuleName) {
+        Throw "Invalid puppet module name '$PuppetModuleName' specified; must include only lowercase letters, digits, and underscores and not start with a digit"
+      }
+    }
     # If specified, canonicalize the Puppet module author name
     If (![string]::IsNullOrEmpty($PuppetModuleAuthor)) { $PuppetModuleAuthor = ConvertTo-CanonicalPuppetAuthorName -AuthorName $PuppetModuleAuthor }
     # Default to the `import` folder in the current path
@@ -79,7 +86,7 @@ Function New-PuppetDscModule {
 
   Process {
     $ShouldProcessMessage = "Puppetize the '$PowerShellModuleName' module"
-    If (![string]::IsNullOrEmpty($PowerShellModuleVersion)) { $ShouldProcessMessage += " at version '$PowerShellModule'"}
+    If (![string]::IsNullOrEmpty($PowerShellModuleVersion)) { $ShouldProcessMessage += " at version '$PowerShellModuleVersion'"}
     If ([string]::IsNullOrEmpty($Repository)) { $Repository = "PSGallery"}
     If ($PSCmdlet.ShouldProcess($OutputDirectory, $ShouldProcessMessage)) {
       Try {
