@@ -1,6 +1,6 @@
 @{
   # Script module or binary module file associated with this manifest
-  RootModule = 'puppet.dsc.psm1'
+  RootModule = 'Puppet.Dsc.psm1'
 
   # Version number of this module.
   ModuleVersion = '0.1.0'
@@ -28,6 +28,7 @@
   RequiredModules = @(
     @{ ModuleName='PSFramework'; ModuleVersion='1.1.59' }
     'PSDesiredStateConfiguration'
+    'PSDscResources'
     'powershell-yaml'
   )
 
@@ -69,17 +70,25 @@
     #Support for PowerShellGet galleries.
     PSData = @{
 
+      # PSDesiredStateConfiguration is not installable from the gallery but **is** required.
+      # Since it is available on every machine that has Windows PowerShell 5.1, this is fine.
+      ExternalModuleDependencies = @(
+        'PSDesiredStateConfiguration'
+      )
+
       # Tags applied to this module. These help with module discovery in online galleries.
       Tags = @(
         'Puppet'
         'DSC'
+        'PSEdition_Desktop'
+        'Windows'
       )
 
       # A URL to the license for this module.
-      LicenseUri = 'https://github.com/puppetlabs/PuppetDscBuilder/blob/master/LICENSE'
+      LicenseUri = 'https://github.com/puppetlabs/Puppet.Dsc/blob/master/LICENSE'
 
       # A URL to the main website for this project.
-      ProjectUri = 'https://github.com/puppetlabs/PuppetDscBuilder'
+      ProjectUri = 'https://github.com/puppetlabs/Puppet.Dsc'
 
       # A URL to an icon representing this module.
       # IconUri = ''
