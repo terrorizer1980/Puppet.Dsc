@@ -40,16 +40,17 @@ function Get-ReadmeContent {
   )
 
   Begin {
-    $BuilderModuleGalleryUri  = 'https://www.powershellgallery.com/packages/puppet.dsc'
-    $BuilderModuleRepository  = 'https://github.com/puppetlabs/Puppet.Dsc'
-    $BaseProviderSource       = 'https://github.com/puppetlabs/ruby-pwsh/blob/master/lib/puppet/provider/dsc_base_provider.rb'
-    $ResourceApiOverview      = 'https://puppet.com/docs/puppet/latest/create_types_and_providers_resource_api.html'
-    $ResourceApiDocumentation = 'https://puppet.com/docs/puppet/latest/about_the_resource_api.html'
-    $dscForgePage             = 'https://forge.puppet.com/dsc'
-    $pwshlibForgePage         = 'https://forge.puppet.com/puppetlabs/pwshlib'
-    $pwshlibIssuesPage        = 'https://github.com/puppetlabs/ruby-pwsh/issues/new/choose'
-    $PowerShellGetUri         = 'https://github.com/PowerShell/PowerShellGet'
-    $NarrativeDocumentation   = 'https://puppetlabs.github.io/iac/news/roadmap/2020/03/30/dsc-announcement.html'
+    $BuilderModuleGalleryUri      = 'https://www.powershellgallery.com/packages/puppet.dsc'
+    $BuilderModuleRepository      = 'https://github.com/puppetlabs/Puppet.Dsc'
+    $BaseProviderSource           = 'https://github.com/puppetlabs/ruby-pwsh/blob/master/lib/puppet/provider/dsc_base_provider.rb'
+    $ResourceApiOverview          = 'https://puppet.com/docs/puppet/latest/create_types_and_providers_resource_api.html'
+    $ResourceApiDocumentation     = 'https://puppet.com/docs/puppet/latest/about_the_resource_api.html'
+    $dscForgePage                 = 'https://forge.puppet.com/dsc'
+    $pwshlibForgePage             = 'https://forge.puppet.com/puppetlabs/pwshlib'
+    $pwshlibIssuesPage            = 'https://github.com/puppetlabs/ruby-pwsh/issues/new/choose'
+    $PowerShellGetUri             = 'https://github.com/PowerShell/PowerShellGet'
+    $NarrativeDocumentation       = 'https://puppetlabs.github.io/iac/news/roadmap/2020/03/30/dsc-announcement.html'
+    $TroubleshootingDocumentation = 'https://github.com/puppetlabs/Puppet.Dsc#troubleshooting'
   }
 
   Process {
@@ -95,7 +96,7 @@ You can specify any of the DSC resources from this module like a normal Puppet r
 The examples below use DSC resources from from the [`PowerShellGet`]($PowerShellGetUri) repository, regardless of what module you're looking at here;
 the syntax, not the specifics, is what's important.
 
-For reference documentation about the DSC resources exposed in this module, see the [Reference](REFERENCE.md) file.
+For reference documentation about the DSC resources exposed in this module, see the *Reference* Forge tab, or the `REFERENCE.md` file.
 
 ``````puppet
 # Include a meaningful title for your resource declaration
