@@ -148,6 +148,11 @@ We'll investigate and prioritize a fix and update the `puppetlabs/pwshlib` modul
 Updating to the pwshlib version with the fix will immediately take advantage of the improved functionality without waiting for this module to be reconverted and published.
 
 For specific information on troubleshooting a generated module, check the [troubleshooting guide]($TroubleshootingDocumentation) for the `puppet.dsc` module.
+
+## Known Limitations
+
+Currently, because of the way Puppet caches files on agents, use of the legacy [``puppetlabs-dsc``]($LegacyDscForgePage) module is **not** compatible with this or any auto-generated DSC module.
+Inclusion of both will lead to pluginsync conflicts.
 "@
   }
 
