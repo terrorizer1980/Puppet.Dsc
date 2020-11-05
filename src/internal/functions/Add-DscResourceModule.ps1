@@ -46,7 +46,7 @@ function Add-DscResourceModule {
       if (-not(Test-Path $PathTmp)) {
         $null = New-Item -Path $PathTmp -Force -ItemType 'Directory'
       }
-      Save-Module -Name $Name -Path $PathTmp -RequiredVersion $RequiredVersion -Repository $Repository
+      Save-Module -Name $Name -Path $PathTmp -RequiredVersion $RequiredVersion -Repository $Repository -AllowPrerelease
       ForEach ($ModuleFolder in (Get-ChildItem $PathTmp)) {
         Move-Item -Path (Get-ChildItem $ModuleFolder.FullName).FullName -Destination "$Path/$($ModuleFolder.Name)"
       }
