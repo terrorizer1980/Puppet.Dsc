@@ -28,13 +28,10 @@ Function Get-TypeParameterContent {
       type: $($Parameter.Type -split "`n" -join "`n            "),
 $(
   If ([string]::IsNullOrEmpty($Parameter.Help)) {
-    "      desc: %q{},"
+    "      desc: ' ',"
   } Else {
     # Assemble the Description String with appropriate indentation
-    $DescStrings = @('      desc: %q{')
-    $Parameter.Help.Split("`n") | ForEach-Object -Process {$DescStrings += "        $_"}
-    $DescStrings += '      },'
-    $DescStrings -Join "`n"
+    "      desc: '$($Parameter.Help.Split("`n") -Join ' ')',"
   }
 )
 $(
