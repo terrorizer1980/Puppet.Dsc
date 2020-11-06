@@ -47,14 +47,14 @@ Describe 'Get-TypeParameterContent' {
         $Result[0] | Should -MatchExactly "mof_type: 'bool',"
         $Result[0] | Should -MatchExactly 'mof_is_embedded: false,'
         $Result[1] | Should -MatchExactly 'dsc_banana: {'
-        $Result[1] | Should -MatchExactly 'desc: %q{},'
+        $Result[1] | Should -MatchExactly "desc: ' ',"
         $Result[1] | Should -MatchExactly 'behaviour: :namevar,'
         $Result[1] | Should -MatchExactly 'mandatory_for_get: true,'
         $Result[1] | Should -MatchExactly 'mandatory_for_set: true,'
         $Result[1] | Should -MatchExactly "mof_type: 'string',"
         $Result[1] | Should -MatchExactly 'mof_is_embedded: false,'
         $Result[2] | Should -MatchExactly 'dsc_cookie: {'
-        $Result[2] | Should -MatchExactly 'desc: %q{},'
+        $Result[2] | Should -MatchExactly "desc: ' ',"
         $Result[2] | Should -MatchExactly 'mandatory_for_get: true,'
         $Result[2] | Should -MatchExactly 'mandatory_for_set: true,'
         $Result[2] | Should -MatchExactly "mof_type: 'string',"
