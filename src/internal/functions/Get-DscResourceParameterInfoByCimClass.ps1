@@ -95,6 +95,7 @@ Function Get-DscResourceParameterInfoByCimClass {
 
     # Similarly to how the properties were resolved for embedded CIM instances, resolve them for each property
     ForEach($Property in $DscResourceCimClassProperties) {
+      $IsMandatory = $Property.Flags -Match '(Required|Key)'
       $DscResourceMetadata.$($Property.Name) = [ordered]@{
         Name = $Property.Name.ToLowerInvariant()
         # The one thing we *can't* retrieve here is the default values; they still apply, but they're
@@ -103,8 +104,8 @@ Function Get-DscResourceParameterInfoByCimClass {
         DefaultValue = $null
         Help = $Property.Qualifiers['Description'].Value
         is_namevar        = ($Property.Flags -Match 'Key').ToString().ToLowerInvariant()
-        mandatory_for_get = ($Property.Flags -Match '(Required|Key)').ToString().ToLowerInvariant()
-        mandatory_for_set = ($Property.Flags -Match '(Required|Key)').ToString().ToLowerInvariant()
+        mandatory_for_get = $IsMandatory.ToString().ToLowerInvariant()
+        mandatory_for_set = $IsMandatory.ToString().ToLowerInvariant()
         mof_is_embedded   = 'false'
       }
       If ($Property.ReferenceClassName -in $DefinedEmbeddedInstances.Keys) {
@@ -123,9 +124,15 @@ Function Get-DscResourceParameterInfoByCimClass {
           Where-Object -FilterScript {$_ -notmatch "cim_instance_type => '$($Property.ReferenceClassName)'"}
         # Recombine the struct definition appropriately mapped as an array or singleton
         If ($Property.CimType -match 'Array') {
-          $DscResourceMetadata.$($Property.Name).Type = """Array[$($SplitDefinition -Join "`n")]"""
+          $PuppetType = "Array[$($SplitDefinition -Join "`n")]"
+          $DscResourceMetadata.$($Property.Name).Type
         } Else {
-          $DscResourceMetadata.$($Property.Name).Type = """$($SplitDefinition -Join "`n")"""
+          $PuppetType = "$($SplitDefinition -Join "`n")"
+        }
+        If ($IsMandatory -or ($PuppetType -match '^Optional\[')) {
+          $DscResourceMetadata.$($Property.Name).Type = """$PuppetType"""
+        } Else {
+          $DscResourceMetadata.$($Property.Name).Type = """Optional[$PuppetType]"""
         }
       } Else {
         $DscResourceMetadata.$($Property.Name).mof_type = $Property.CimType -Replace '(\S+)Array$','$1[]'
