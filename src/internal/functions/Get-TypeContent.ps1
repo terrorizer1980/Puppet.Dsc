@@ -36,6 +36,13 @@ function Get-TypeContent {
       } Else {
         $FriendlyName = $Resource.FriendlyName
       }
+      # It is not *currently* possible to reliably programmatically retrieve
+      # the description information for a DSC Resource via CIM instances or
+      # Get-DscResource or Get-Help.
+      $ResourceDescription = @(
+        "The DSC $FriendlyName resource type."
+        "Automatically generated from version $($Resource.Version)"
+      ) -join "`n         "
       New-Object -TypeName System.String @"
 require 'puppet/resource_api'
 
@@ -45,10 +52,7 @@ Puppet::ResourceApi.register_type(
   dscmeta_resource_name: '$($Resource.ResourceType)',
   dscmeta_module_name: '$($Resource.ModuleName)',
   dscmeta_module_version: '$($Resource.Version)',
-  docs: %q{
-    The DSC $FriendlyName resource type.
-    Automatically generated from version $($Resource.Version)
-  },
+  docs: $(ConvertTo-PuppetRubyString $ResourceDescription),
   features: ['simple_get_filter', 'canonicalize'],
   attributes: {
     ensure: {
