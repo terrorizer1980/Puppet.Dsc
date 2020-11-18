@@ -12,7 +12,7 @@ Describe 'Get-DscResourceParameterInfo' {
           Select-Object -Last 1
         $ParameterToInspect.Name | Should -BeExactly 'validate'
         $ParameterToInspect.DefaultValue | Should -BeExactly '$false'
-        $ParameterToInspect.Type | Should -BeExactly '"Optional[Boolean]"'
+        $ParameterToInspect.Type | Should -BeExactly 'Optional[Boolean]'
         $ParameterToInspect.Help | Should -MatchExactly '^Specifies whether or not'
         $ParameterToInspect.is_namevar        | Should -BeExactly 'false'
         $ParameterToInspect.mandatory_for_get | Should -BeExactly 'false'
@@ -32,7 +32,7 @@ Describe 'Get-DscResourceParameterInfo' {
         $ParameterToInspect.Name | Should -BeExactly 'destinationpath'
         # The default value for a parameter can only be discovered via the AST
         $ParameterToInspect.DefaultValue | Should -BeNullOrEmpty
-        $ParameterToInspect.Type | Should -BeExactly '"String"'
+        $ParameterToInspect.Type | Should -BeExactly 'String'
         # The help info for a parameter can only be discovered via the AST
         $ParameterToInspect.Help | Should -BeNullOrEmpty
         $ParameterToInspect.is_namevar        | Should -BeExactly 'true'

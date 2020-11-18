@@ -130,9 +130,9 @@ Function Get-DscResourceParameterInfoByCimClass {
           $PuppetType = "$($SplitDefinition -Join "`n")"
         }
         If ($IsMandatory -or ($PuppetType -match '^Optional\[')) {
-          $DscResourceMetadata.$($Property.Name).Type = """$PuppetType"""
+          $DscResourceMetadata.$($Property.Name).Type = $PuppetType
         } Else {
-          $DscResourceMetadata.$($Property.Name).Type = """Optional[$PuppetType]"""
+          $DscResourceMetadata.$($Property.Name).Type = "Optional[$PuppetType]"
         }
       } Else {
         $DscResourceMetadata.$($Property.Name).mof_type = $Property.CimType -Replace '(\S+)Array$','$1[]'

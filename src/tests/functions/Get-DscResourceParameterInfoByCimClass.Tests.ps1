@@ -17,7 +17,7 @@ Describe 'Get-DscResourceParameterInfoByCimClass' {
         $CimlessParameterToInspect.Name              | Should -BeExactly 'validate'
         # This function currently cannot discover default values
         $CimlessParameterToInspect.DefaultValue      | Should -BeNullOrEmpty
-        $CimlessParameterToInspect.Type              | Should -BeExactly '"Optional[Boolean]"'
+        $CimlessParameterToInspect.Type              | Should -BeExactly 'Optional[Boolean]'
         $CimlessParameterToInspect.Help              | Should -MatchExactly '^Specifies whether or not'
         $CimlessParameterToInspect.is_namevar        | Should -BeExactly 'false'
         $CimlessParameterToInspect.mandatory_for_get | Should -BeExactly 'false'
@@ -42,7 +42,7 @@ Describe 'Get-DscResourceParameterInfoByCimClass' {
         $AclProperty.Name              | Should -BeExactly 'accesscontrollist'
         # This function currently cannot discover default values
         $AclProperty.DefaultValue      | Should -BeNullOrEmpty
-        $AclProperty.Type              | Should -MatchExactly ([Regex]::Escape('"Array[Struct[{'))
+        $AclProperty.Type              | Should -MatchExactly ([Regex]::Escape('Array[Struct[{'))
         $AclProperty.Help              | Should -MatchExactly '^Indicates the access control information'
         $AclProperty.is_namevar        | Should -BeExactly 'false'
         $AclProperty.mandatory_for_get | Should -BeExactly 'true'
