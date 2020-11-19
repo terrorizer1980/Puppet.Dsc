@@ -28,6 +28,8 @@ Function Get-TypeParameterContent {
       type: $(ConvertTo-PuppetRubyString -String ($Parameter.Type -split "`n" -join "`n            ")),
 $(
   If ([string]::IsNullOrEmpty($Parameter.Help)) {
+    # This has to be a string with a single space to prevent writing `''` in the reference doc
+    # See: https://github.com/puppetlabs/puppet-strings/issues/264
     "      desc: ' ',"
   } Else {
     # Assemble the Description String with appropriate indentation
