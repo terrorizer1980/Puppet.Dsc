@@ -25,13 +25,15 @@ Function Get-TypeParameterContent {
   ForEach ($Parameter in $ParameterInfo) {
     New-Object -TypeName System.String @"
     dsc_$($Parameter.name): {
-      type: $($Parameter.Type -split "`n" -join "`n            "),
+      type: $(ConvertTo-PuppetRubyString -String ($Parameter.Type -split "`n" -join "`n            ")),
 $(
   If ([string]::IsNullOrEmpty($Parameter.Help)) {
+    # This has to be a string with a single space to prevent writing `''` in the reference doc
+    # See: https://github.com/puppetlabs/puppet-strings/issues/264
     "      desc: ' ',"
   } Else {
     # Assemble the Description String with appropriate indentation
-    "      desc: '$($Parameter.Help.Split("`n") -Join ' ')',"
+    "      desc: $(ConvertTo-PuppetRubyString -String ($Parameter.Help.Split("`n") -Join ' ')),"
   }
 )
 $(
@@ -41,7 +43,7 @@ $(
 )
       mandatory_for_get: $($Parameter.mandatory_for_get),
       mandatory_for_set: $($Parameter.mandatory_for_set),
-      mof_type: '$($Parameter.mof_type)',
+      mof_type: $(ConvertTo-PuppetRubyString -String $Parameter.mof_type),
       mof_is_embedded: $($Parameter.mof_is_embedded),
     },
 "@
