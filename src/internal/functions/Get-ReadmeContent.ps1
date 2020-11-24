@@ -129,6 +129,12 @@ dsc_psmodule { 'Make Ruby manageable via uru':
 
 For more information about using a built module, check out our [narrative documentation]($NarrativeDocumentation).
 
+### Properties
+
+Note that the only properties specified in a resource declaration which are passed to `Invoke-Dsc` are all prepended with `dsc_`.
+If a property does _not_ start with `dsc_` it is used to control how Puppet interacts with DSC/other Puppet resources - for example,
+specifying a unique name for the resource for Puppet to distinguish between declarations or Puppet metaparameters (``notifies`, ``before`, etc).
+
 ## Troubleshooting
 
 In general, there are three broad categories of problems:
