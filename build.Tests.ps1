@@ -177,7 +177,7 @@ Describe $script {
         $_ -match 'Creating: Finished'
       }
       $ErrorFilterScript = {
-        $_ -match 'Error'
+        $_ -match '(Error|has not provided canonicalized values)'
       }
       Invoke-PdkCommand -Path $expected_base -Command $Command -SuccessFilterScript $SuccessFilterScript -ErrorFilterScript $ErrorFilterScript
     }

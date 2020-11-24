@@ -37,8 +37,13 @@ $(
   }
 )
 $(
-  If ($Parameter.is_namevar -eq 'true'){
-    "      behaviour: :namevar,"
+  $Behaviours = @()
+  If ($Parameter.is_namevar -eq 'true') { $Behaviours += ':namevar' }
+  If ($Parameter.is_parameter -eq $true) { $Behaviours += ':parameter' }
+  If ($Behaviours.count -eq 1) {
+    "      behaviour: $($Behaviours[0]),"
+  } ElseIf ($Behaviours.count -gt 1) {
+    "      behaviour: [$($Behaviours -join ', ')],"
   }
 )
       mandatory_for_get: $($Parameter.mandatory_for_get),
