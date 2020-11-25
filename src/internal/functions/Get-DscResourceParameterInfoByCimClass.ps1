@@ -103,6 +103,7 @@ Function Get-DscResourceParameterInfoByCimClass {
         # only retrieve default values by parsing the AST, so this is acceptable, if not ideal.
         DefaultValue = $null
         Help = $Property.Qualifiers['Description'].Value
+        is_parameter      = Test-DscResourcePropertyParameterStatus -Property $Property
         is_namevar        = ($Property.Flags -Match 'Key').ToString().ToLowerInvariant()
         mandatory_for_get = $IsMandatory.ToString().ToLowerInvariant()
         mandatory_for_set = $IsMandatory.ToString().ToLowerInvariant()

@@ -91,6 +91,7 @@ function Get-DscResourceParameterInfo {
         # # Turn a boolean into a string and downcase for Puppet language
         mandatory_for_get = $MandatoryGet.ToString().ToLowerInvariant()
         mandatory_for_set = $MandatorySet.ToString().ToLowerInvariant()
+        is_parameter      = Test-DscResourcePropertyParameterStatus -Property $Parameter
         # Because we can't check the flags per resource, we have to assume any mandatory params are also namevars
         # This is *not* accurate - properties with the Key flag are namevars whereas ones with Required are merely mandatory
         is_namevar        = $MandatoryGet.ToString().ToLowerInvariant()

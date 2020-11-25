@@ -55,11 +55,6 @@ Puppet::ResourceApi.register_type(
   docs: $(ConvertTo-PuppetRubyString $ResourceDescription),
   features: ['simple_get_filter', 'canonicalize'],
   attributes: {
-    ensure: {
-      type:    'Enum[present, absent]',
-      desc:    'Whether this resource should be present or absent on the target system.',
-      default: 'present',
-    },
     name: {
       type:      'String',
       desc:      'Description of the purpose for this resource declaration.',

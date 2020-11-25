@@ -102,9 +102,6 @@ For reference documentation about the DSC resources exposed in this module, see 
 # Include a meaningful title for your resource declaration
 dsc_psrepository { 'Add team module repo':
     dsc_name               => 'foo',
-    # Note that we specify dsc_ensure; do NOT specify the Puppet
-    # ensure property, it exists only for the underlying system.
-    # You will always use dsc_ensure.
     dsc_ensure             => present,
     # This location is nonsense, can be any valid folder on your
     # machine or in a share, any location the SourceLocation param
