@@ -23,7 +23,8 @@ Function Get-TypeParameterContent {
   )
 
   ForEach ($Parameter in $ParameterInfo) {
-    New-Object -TypeName System.String @"
+    if (![string]::IsNullOrEmpty($Parameter.name)) {
+      New-Object -TypeName System.String @"
     dsc_$($Parameter.name): {
       type: $(ConvertTo-PuppetRubyString -String ($Parameter.Type -split "`n" -join "`n            ")),
 $(
@@ -52,5 +53,6 @@ $(
       mof_is_embedded: $($Parameter.mof_is_embedded),
     },
 "@
+    }
   }
 }
