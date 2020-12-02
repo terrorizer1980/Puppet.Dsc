@@ -40,6 +40,7 @@ $(
   $Behaviours = @()
   If ($Parameter.is_namevar -eq 'true') { $Behaviours += ':namevar' }
   If ($Parameter.is_parameter -eq $true) { $Behaviours += ':parameter' }
+  If ($Parameter.is_read_only -eq $true) { $Behaviours += ':read_only' }
   If ($Behaviours.count -eq 1) {
     "      behaviour: $($Behaviours[0]),"
   } ElseIf ($Behaviours.count -gt 1) {

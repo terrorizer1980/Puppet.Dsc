@@ -86,10 +86,7 @@ Function Get-DscResourceParameterInfoByCimClass {
     # - https://github.com/PowerShell/PowerShell/blob/master/src/System.Management.Automation/DscSupport/CimDSCParser.cs#L1203
     $PropertiesToDiscard = @('ConfigurationName', 'DependsOn', 'ModuleName', 'ModuleVersion', 'ResourceID', 'SourceInfo')
     $DscResourceCimClassProperties = Get-CimClassPropertiesList -ClassName $DscResource.ResourceType |
-      Where-Object {
-        $_.Name -notin $PropertiesToDiscard -and
-        -not $_.Flags.HasFlag([Microsoft.Management.Infrastructure.CimFlags]::ReadOnly)
-      }
+      Where-Object { $_.Name -notin $PropertiesToDiscard }
 
     $DscResourceMetadata = @{}
 
@@ -105,6 +102,7 @@ Function Get-DscResourceParameterInfoByCimClass {
         Help = $Property.Qualifiers['Description'].Value
         is_parameter      = Test-DscResourcePropertyParameterStatus -Property $Property
         is_namevar        = ($Property.Flags -Match 'Key').ToString().ToLowerInvariant()
+        is_read_only      = $Property.Flags.HasFlag([Microsoft.Management.Infrastructure.CimFlags]::ReadOnly)
         mandatory_for_get = $IsMandatory.ToString().ToLowerInvariant()
         mandatory_for_set = $IsMandatory.ToString().ToLowerInvariant()
         mof_is_embedded   = 'false'
