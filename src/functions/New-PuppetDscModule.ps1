@@ -22,6 +22,8 @@ Function New-PuppetDscModule {
       The name of the Puppet module author; if not specified, will default to your PDK configuration's author.
     .PARAMETER OutputDirectory
       The folder in which to build the Puppet module. Defaults to a folder called import in the current location.
+    .PARAMETER AllowPrerelease
+      Allows you to Puppetize a module marked as a prerelease.
     .PARAMETER PassThru
       If specified, the function returns the path to the root folder of the Puppetized module on the filesystem.
     .PARAMETER Confirm
@@ -45,6 +47,7 @@ Function New-PuppetDscModule {
     [string]$PuppetModuleName,
     [string]$PuppetModuleAuthor,
     [string]$OutputDirectory,
+    [switch]$AllowPrerelease,
     [switch]$PassThru,
     [string]$Repository
   )
@@ -97,7 +100,7 @@ Function New-PuppetDscModule {
 
         # Vendor the PowerShell module and all of its dependencies
         Write-PSFMessage -Message 'Vendoring the DSC Resources'
-        Add-DscResourceModule -Name $PowerShellModuleName -Path $VendoredDscResourcesDirectory -RequiredVersion $PowerShellModuleVersion -Repository $Repository
+        Add-DscResourceModule -Name $PowerShellModuleName -Path $VendoredDscResourcesDirectory -RequiredVersion $PowerShellModuleVersion -Repository $Repository -AllowPrerelease:$AllowPrerelease
 
         # Update the Puppet module metadata
         Write-PSFMessage -Message 'Updating the Puppet Module metadata'

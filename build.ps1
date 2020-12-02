@@ -21,6 +21,8 @@
       The name of the Puppet module author; if not specified, will default to your PDK configuration's author.
     .PARAMETER OutputDirectory
       The folder in which to build the Puppet module. Defaults to a folder called import in the current location.
+    .PARAMETER AllowPrerelease
+      Allows you to Puppetize a module marked as a prerelease.
     .PARAMETER PassThru
       If specified, the function returns the path to the root folder of the Puppetized module on the filesystem.
     .PARAMETER Confirm
@@ -41,6 +43,7 @@
     [string]$PuppetModuleName,
     [string]$PuppetModuleAuthor,
     [string]$OutputDirectory,
+    [switch]$AllowPrerelease,
     [switch]$PassThru
   )
 
