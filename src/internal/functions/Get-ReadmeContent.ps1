@@ -145,7 +145,7 @@ You'll need to [file an issue]($PowerShellModuleProjectUri) with the upstream ma
 
 Problems with the type definition are when a value that should be valid according to the DSC resource's documentation and code is not accepted by the Puppet wrapper. If and when you run across one of these, please [file an issue]($BuilderModuleRepository/issues/new/choose) with the Puppet DSC Builder; this is where the conversion happens and once we know of a problem we can fix it and regenerate the Puppet modules. To help us identify the issue, please specify the DSC module, version, resource, property and values that are giving you issues. Once a fix is available we will regenerate and release updated versions of this Puppet wrapper.
 
-Problems with calling the underlying DSC resource become apparent by comparing `<value passed in in puppet>` with `<value received by DSC>`.
+Problems with calling the underlying DSC resource become apparent by comparing ``<value passed in in puppet>`` with ``<value received by DSC>``.
 In this case, please [file an issue]($pwshlibIssuesPage) with the [`puppetlabs/pwshlib`]($pwshlibForgePage) module, which is where the DSC base provider actually lives.
 We'll investigate and prioritize a fix and update the `puppetlabs/pwshlib` module.
 Updating to the pwshlib version with the fix will immediately take advantage of the improved functionality without waiting for this module to be reconverted and published.
