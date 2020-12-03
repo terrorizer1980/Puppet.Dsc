@@ -21,6 +21,9 @@ function Add-DscResourceModule {
   .PARAMETER Repository
     Specifies a PSRepository.
 
+  .PARAMETER AllowPrerelease
+    Allows you to Puppetize a module marked as a prerelease.
+
   .EXAMPLE
     Add-DscResourceModule -TargetDir ./tmp -Name PowerShellGet -Version 2.2.3 -Repository PSGallery
 
@@ -32,7 +35,8 @@ function Add-DscResourceModule {
     $Name,
     $Path,
     $RequiredVersion,
-    $Repository
+    $Repository,
+    [switch]$AllowPrerelease
   )
 
   Begin { }
@@ -46,7 +50,7 @@ function Add-DscResourceModule {
       if (-not(Test-Path $PathTmp)) {
         $null = New-Item -Path $PathTmp -Force -ItemType 'Directory'
       }
-      Save-Module -Name $Name -Path $PathTmp -RequiredVersion $RequiredVersion -Repository $Repository -AllowPrerelease
+      Save-Module -Name $Name -Path $PathTmp -RequiredVersion $RequiredVersion -Repository $Repository -AllowPrerelease:$AllowPrerelease
       ForEach ($ModuleFolder in (Get-ChildItem $PathTmp)) {
         Move-Item -Path (Get-ChildItem $ModuleFolder.FullName).FullName -Destination "$Path/$($ModuleFolder.Name)"
       }
