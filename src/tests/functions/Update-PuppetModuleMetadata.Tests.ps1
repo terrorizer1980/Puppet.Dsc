@@ -74,7 +74,7 @@ Describe 'Update-PuppetModuleMetadata' {
         }
         It 'Updates the dependencies' {
           $Result.dependencies[0].Name | Should -Be 'puppetlabs/pwshlib'
-          $Result.dependencies[0].version_requirement | Should -Be '>= 0.5.1 < 2.0.0'
+          $Result.dependencies[0].version_requirement | Should -Be '>= 0.6.1 < 2.0.0'
         }
         It 'Updates the supported operating system list' {
           $Result.operatingsystem_support[0].operatingsystem | Should -Be 'windows'
@@ -84,7 +84,7 @@ Describe 'Update-PuppetModuleMetadata' {
           $Result.operatingsystem_support[0].operatingsystemrelease | Should -Contain '2019'
         }
         It 'Updates the Puppet lower bound' {
-          $Result.requirements[0].version_requirement | Should -Be '>= 6.0.0 < 7.0.0'
+          $Result.requirements[0].version_requirement | Should -Be '>= 6.0.0 < 8.0.0'
         }
         It 'Sets the appropriate tags' {
           $Result.tags[0] | Should -Be 'windows'

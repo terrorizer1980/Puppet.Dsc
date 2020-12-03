@@ -73,7 +73,7 @@ function Update-PuppetModuleMetadata {
     $PuppetMetadata.dependencies = @(
       @{
         name = 'puppetlabs/pwshlib'
-        version_requirement = '>= 0.5.1 < 2.0.0'
+        version_requirement = '>= 0.6.1 < 2.0.0'
       }
     )
     # Update the operating sytem to only support windows *for now*.
@@ -89,7 +89,7 @@ function Update-PuppetModuleMetadata {
       }
     )
     # Clarify Puppet lower bound
-    $PuppetMetadata.requirements[0].version_requirement = '>= 6.0.0 < 7.0.0'
+    $PuppetMetadata.requirements[0].version_requirement = '>= 6.0.0 < 8.0.0'
     # Tag the module as coming from the builder so that it becomes searchable on the Forge.
     $PuppetMetadata | Add-Member -MemberType NoteProperty -Name tags -Value @(
       'windows',
