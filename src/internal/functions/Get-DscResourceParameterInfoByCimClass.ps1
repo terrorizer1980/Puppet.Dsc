@@ -71,7 +71,7 @@ Function Get-DscResourceParameterInfoByCimClass {
           }
           # Nested CIM instances need to be reassembled into readable Structs; but we want to increase the indentation level by one
           # so that it's more visually distinct in the end file
-          $StructComponents = $EmbeddedInstanceMetadata.$InstanceType.Keys |
+          $StructComponents = $EmbeddedInstanceMetadata.$InstanceType.Keys.toLowerInvariant() |
             ForEach-Object -Process { "$_ => $($EmbeddedInstanceMetadata.$InstanceType.$_ -replace "`n", "`n  ")" }
           # Assemble the current CIM instance as a struct, strip out any double quotes to prevent breaking parsing
           $DefinedEmbeddedInstances.$InstanceType = "Struct[{`n  $($StructComponents -join ",`n  " -replace '"')`n}]"
