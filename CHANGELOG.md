@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2020-12-04
+
 ### Added
 
 - Known limitations section to generated README ([#56](https://github.com/puppetlabs/Puppet.Dsc/pull/56))
@@ -36,5 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation and release
 
-[Unreleased]: https://github.com/puppetlabs/Puppet.Dsc/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/Puppet.Dsc/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/puppetlabs/Puppet.Dsc/releases/tag/0.2.0
 [0.1.0]: https://github.com/puppetlabs/Puppet.Dsc/releases/tag/0.1.0
