@@ -24,6 +24,7 @@ if ($ENV:CI -ne 'True') {
     'googlechrome'
     'git'
     'poshgit'
+    'curl'
   )
   $PowerShellModules += @(
     @{ Name = 'RubyInstaller' }

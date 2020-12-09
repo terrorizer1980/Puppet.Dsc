@@ -37,7 +37,7 @@ Process {
 
     # Convert and write documentation
     Import-Module "$BuildFolder\Puppet.Dsc.psd1" -Force
-    New-MarkdownHelp -Module 'Puppet.Dsc' -OutputFolder $MarkdownDocsFolder
+    New-MarkdownHelp -Module 'Puppet.Dsc' -OutputFolder $MarkdownDocsFolder -Force
     New-ExternalHelp -Path $MarkdownDocsFolder -OutputPath "$BuildFolder\en-us\"
 
     # Publish the module and tag if desired
