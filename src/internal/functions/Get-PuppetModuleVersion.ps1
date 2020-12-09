@@ -29,9 +29,15 @@ Function Get-PuppetModuleVersion {
     [version]$Version,
     [int]$BuildNumber = 0
   )
-  If ($Version.Revision -gt 0) {
-    "$($Version.Major).$($Version.Minor).$($Version.Build)-$($Version.Revision)-$BuildNumber"
-  } Else {
-    "$($Version.Major).$($Version.Minor).$($Version.Build)-0-$BuildNumber"
+  $PuppetVersion = [PSCustomObject]@{
+    Major    = $Version.Major
+    Minor    = $Version.Minor
+    Build    = $Version.Build
+    Revision = $Version.Revision
   }
+  If ($PuppetVersion.Minor -lt 0) { $PuppetVersion.Minor = 0 }
+  If ($PuppetVersion.Major -lt 0) { $PuppetVersion.Major = 0 }
+  If ($PuppetVersion.Build -lt 0) { $PuppetVersion.Build = 0 }
+  If ($PuppetVersion.Revision -lt 0) { $PuppetVersion.Revision = 0 }
+  "$($PuppetVersion.Major).$($PuppetVersion.Minor).$($PuppetVersion.Build)-$($PuppetVersion.Revision)-$BuildNumber"
 }
