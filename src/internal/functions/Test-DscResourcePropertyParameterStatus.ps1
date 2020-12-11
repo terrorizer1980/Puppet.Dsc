@@ -26,6 +26,7 @@ Function Test-DscResourcePropertyParameterStatus {
 
   $KnownParameters = @(
     'Force'
+    'JoinOU'
     'Purge'
     'Validate'
   )
