@@ -11,6 +11,7 @@ Describe "New-PuppetDscModule" {
       Mock Update-PuppetModuleMetadata {}
       Mock Update-PuppetModuleFixture {}
       Mock Update-PuppetModuleReadme {}
+      Mock Update-PuppetModuleChangelog {}
       Mock Set-PSModulePath {}
       Mock Get-DscResource {
         [Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo[]]@(
@@ -68,6 +69,12 @@ Describe "New-PuppetDscModule" {
           $PowerShellModuleManifestPath -match 'import(/|\\)foo\S+(/|\\)foo(/|\\)foo.psd1'
         }
       }
+      It 'Updates the Puppet CHANGELOG based on the PowerShell metadata' {
+        Assert-MockCalled Update-PuppetModuleChangelog -ParameterFilter {
+          $PuppetModuleFolderPath       -match 'import(/|\\)foo' -and
+          $PowerShellModuleManifestPath -match 'import(/|\\)foo\S+(/|\\)foo(/|\\)foo.psd1'
+        }
+      }
       It 'Temporarily sets the PSModulePath' {
         Assert-MockCalled Set-PSModulePath -ParameterFilter {
           $Path -match 'import(/|\\)foo\S*dsc_resources$'
@@ -119,6 +126,7 @@ Describe "New-PuppetDscModule" {
       Mock Update-PuppetModuleMetadata {}
       Mock Update-PuppetModuleFixture {}
       Mock Update-PuppetModuleReadme {}
+      Mock Update-PuppetModuleChangelog {}
       Mock Set-PSModulePath {}
       Mock Get-DscResource {
         [Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo[]]@(
@@ -224,6 +232,7 @@ Describe "New-PuppetDscModule" {
         Mock Update-PuppetModuleMetadata {}
         Mock Update-PuppetModuleFixture {}
         Mock Update-PuppetModuleReadme {}
+        Mock Update-PuppetModuleChangelog {}
         Mock Set-PSModulePath {}
         Mock Get-DscResource {}
         Mock ConvertTo-PuppetResourceApi {}
@@ -270,6 +279,7 @@ Describe "New-PuppetDscModule" {
           Mock Update-PuppetModuleMetadata {}
           Mock Update-PuppetModuleFixture {}
           Mock Update-PuppetModuleReadme {}
+          Mock Update-PuppetModuleChangelog {}
           Mock Set-PSModulePath {}
           Mock Get-DscResource {}
           Mock ConvertTo-PuppetResourceApi {}
@@ -313,6 +323,7 @@ Describe "New-PuppetDscModule" {
         Mock Update-PuppetModuleMetadata {}
         Mock Update-PuppetModuleFixture {}
         Mock Update-PuppetModuleReadme {}
+        Mock Update-PuppetModuleChangelog {}
         Mock Set-PSModulePath {}
         Mock Get-DscResource {}
         Mock ConvertTo-PuppetResourceApi {}
@@ -340,6 +351,7 @@ Describe "New-PuppetDscModule" {
         Mock Update-PuppetModuleMetadata {}
         Mock Update-PuppetModuleFixture {}
         Mock Update-PuppetModuleReadme {}
+        Mock Update-PuppetModuleChangelog {}
         Mock Set-PSModulePath {}
         Mock Get-DscResource {}
         Mock ConvertTo-PuppetResourceApi {}

@@ -120,6 +120,10 @@ Function New-PuppetDscModule {
         Write-PSFMessage -Message 'Writing the Puppet Module readme'
         Update-PuppetModuleReadme -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory -PowerShellModuleManifestPath $PowerShellModuleManifestPath
 
+        # Write the Puppet module changelog based on PowerShell module
+        Write-PSFMessage -Message 'Writing the Puppet Module changelog'
+        Update-PuppetModulechangelog -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory -PowerShellModuleManifestPath $PowerShellModuleManifestPath
+
         # The PowerShell Module path needs to be munged because the Get-DscResource function always and only
         # checks the PSModulePath for DSC modules; you CANNOT point to a module by path.
         Write-PSFMessage -Message 'Converting the DSC resources to Puppet types and providers'

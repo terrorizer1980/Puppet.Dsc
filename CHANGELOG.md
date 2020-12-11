@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `JoinOU` to the static list of DSC Resource properties which are Puppet parameters ([#107](https://github.com/puppetlabs/Puppet.Dsc/pulls/107))
+## Fixed
+
+- Ensure changelog is actually updated during module Puppetization ([#108](https://github.com/puppetlabs/Puppet.Dsc/pull/))
 
 ## [0.2.0] - 2020-12-04
 
