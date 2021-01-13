@@ -281,7 +281,8 @@ Function Publish-NewDscModuleVersion {
   Process {
     $ModuleInformation = Get-UnreleasedDscModuleVersion -Name $Name
     ForEach ($Module in $ModuleInformation) {
-      $OutputFolder = "$(Get-Location)/import/$($Module.Name)"
+      $PuppetModuleName = Get-PuppetizedModuleName $Module.Name
+      $OutputFolder = "$(Get-Location)/import/$PuppetModuleName"
       ForEach ($Version in $Module.Versions) {
         If (Test-Path $OutputFolder) {
           Remove-Item $OutputFolder -Force -Recurse
@@ -305,7 +306,7 @@ Function Publish-NewDscModuleVersion {
         ) -Join ' '
         Write-Host "Executing: $PublishCommand"
         Invoke-PdkCommand -Path $OutputFolder -Command $PublishCommand -SuccessFilterScript { $_ -match "Publish to Forge was successful" }
-        Write-Host "Published $($Module.Name) at $Version"
+        Write-Host "Published $($Module.Name) as $PuppetModuleName at $Version"
       }
     }
   }
