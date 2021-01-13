@@ -44,6 +44,7 @@ function Update-PuppetModuleMetadata {
     }
     $PuppetMetadata.version = Get-PuppetModuleVersion -Version $PowerShellMetadata.ModuleVersion
     $summary = $PowerShellMetadata.Description -Replace "(`r`n|`n)", '`n'
+    $summary = $PowerShellMetadata.Description -Replace '"', '\"'
     # summary needs to be 144 chars or less (see https://github.com/voxpupuli/metadata-json-lint/blob/5ab67f9404ee65da0efd84a597b2ee86152d2659/lib/metadata-json-lint/schema.rb#L99 )
     if ($summary.length -gt 144) {
       $summary = $summary.substring(0, 144 - 3) + "..."

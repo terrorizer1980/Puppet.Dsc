@@ -58,7 +58,7 @@ Describe 'Update-PuppetModuleMetadata' {
           $Result.version | Should -Be '2.2.3-0-0'
         }
         It 'Updates the summary' {
-          $Result.summary | Should -Be 'PowerShell module with commands for discovering, installing, updating and publishing the PowerShell artifacts like Modules, DSC Resources, Ro...'
+          $Result.summary | Should -Be 'PowerShell module with commands for discovering, installing, updating and publishing the \"PowerShell\" artifacts like Modules, DSC Resources...'
         }
         It 'Has the summary shorter or equal to 144 chars' {
           $Result.summary.length | Should -LE 144
