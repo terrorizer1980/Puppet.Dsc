@@ -73,7 +73,7 @@ Function New-PuppetDscModule {
     $OutputDirectory = New-Item -Path $OutputDirectory -ItemType "directory" -Force
 
     $PuppetModuleRootFolderDirectory = Join-Path -Path $OutputDirectory                 -ChildPath $PuppetModuleName
-    $VendoredDscResourcesDirectory   = Join-Path -Path $OutputDirectory                 -ChildPath "$PuppetModuleName/lib/puppet_x/dsc_resources"
+    $VendoredDscResourcesDirectory   = Join-Path -Path $OutputDirectory                 -ChildPath "$PuppetModuleName/lib/puppet_x/$PuppetModuleName/dsc_resources"
     $PuppetModuleTypeDirectory       = Join-Path -Path $PuppetModuleRootFolderDirectory -ChildPath 'lib/puppet/type'
     $PuppetModuleProviderDirectory   = Join-Path -Path $PuppetModuleRootFolderDirectory -ChildPath 'lib/puppet/provider'
     $InitialPSModulePath          = $Env:PSModulePath
