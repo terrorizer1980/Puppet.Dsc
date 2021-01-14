@@ -51,6 +51,10 @@ function Update-PuppetModuleMetadata {
     }
     $PuppetMetadata.summary = $summary
     $PuppetMetadata.source  = $PowerShellMetadata.PrivateData.PSData.ProjectUri
+    if ([string]::IsNullOrEmpty($PuppetMetadata.source)) {
+      $PowerShellModuleName = Get-Item $PowerShellModuleManifestPath | Select-Object -ExpandProperty BaseName
+      $PuppetMetadata.source = "https://www.powershellgallery.com/packages/$PowerShellModuleName/$($PowerShellMetadata.ModuleVersion)/Content/$PowerShellModuleName.psd1"
+    }
     # If we can find the issues page, link to it, otherwise default to project page.
     Switch -Regex ($PowerShellMetadata.PrivateData.PSData.ProjectUri) {
       '(github\.com|gitlab\.com|bitbucket\.com)' {

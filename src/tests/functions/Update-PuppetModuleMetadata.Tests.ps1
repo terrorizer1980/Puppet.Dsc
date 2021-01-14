@@ -11,6 +11,8 @@ Describe 'Update-PuppetModuleMetadata' {
       $ManifestData = Import-PSFPowerShellDataFile -Path $ManifestFixtureFile
       $ManifestDataNoHelpUri = Import-PSFPowerShellDataFile -Path $ManifestFixtureFile
       $ManifestDataNoHelpUri.Remove('HelpInfoURI')
+      $ManifestDataNoProjectUri = Import-PSFPowerShellDataFile -Path $ManifestFixtureFile
+      $ManifestDataNoProjectUri.PrivateData.PSData.ProjectUri = ''
       $ManifestDataValidGithub = Import-PSFPowerShellDataFile -Path $ManifestFixtureFile
       $ManifestDataValidGithub.PrivateData.PSData.ProjectUri = 'https://github.com/foo'
       $ManifestDataInvalidGithub = Import-PSFPowerShellDataFile -Path $ManifestFixtureFile
@@ -126,6 +128,16 @@ Describe 'Update-PuppetModuleMetadata' {
             Get-Content -Path $ManifestFilePath | Where-Object -FilterScript {$_ -notmatch 'HelpUri' } | Out-File $ManifestFilePath
             Update-PuppetModuleMetadata -PuppetModuleFolderPath $PuppetFolderPath -PowerShellModuleManifestPath $ManifestFilePath |
               Select-Object -ExpandProperty project_page | Should -Be 'https://go.microsoft.com/fwlink/?LinkId=828955'
+          }
+        }
+        Context 'Source' {
+          Mock ConvertTo-UnescapedJson { return $InputObject }
+          Mock Out-Utf8File { return $InputObject }
+          Mock Import-PSFPowerShellDataFile { $ManifestDataNoProjectUri }
+          Mock Invoke-WebRequest {}
+          It 'Defaults to the Gallery page if no Project URI is specified' {
+            Update-PuppetModuleMetadata -PuppetModuleFolderPath $PuppetFolderPath -PowerShellModuleManifestPath $ManifestFilePath |
+              Select-Object -ExpandProperty source | Should -Be 'https://www.powershellgallery.com/packages/PowerShellGet/2.2.3/Content/PowerShellGet.psd1'
           }
         }
       }
