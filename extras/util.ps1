@@ -199,7 +199,7 @@ Function Get-PowerShellDscModule {
     }
 
     ForEach ($NameToSearch in $Name) {
-      $Response = Find-Module -DscResource * -Name $NameToSearch -AllVersions
+      $Response = Find-Module -Name $NameToSearch -AllVersions
       [PSCustomObject]@{
         Name     = $NameToSearch
         Releases = $Response.Version
