@@ -44,12 +44,17 @@ function Update-PuppetModuleMetadata {
     }
     $PuppetMetadata.version = Get-PuppetModuleVersion -Version $PowerShellMetadata.ModuleVersion
     $summary = $PowerShellMetadata.Description -Replace "(`r`n|`n)", '`n'
+    $summary = $PowerShellMetadata.Description -Replace '"', '\"'
     # summary needs to be 144 chars or less (see https://github.com/voxpupuli/metadata-json-lint/blob/5ab67f9404ee65da0efd84a597b2ee86152d2659/lib/metadata-json-lint/schema.rb#L99 )
     if ($summary.length -gt 144) {
       $summary = $summary.substring(0, 144 - 3) + "..."
     }
     $PuppetMetadata.summary = $summary
     $PuppetMetadata.source  = $PowerShellMetadata.PrivateData.PSData.ProjectUri
+    if ([string]::IsNullOrEmpty($PuppetMetadata.source)) {
+      $PowerShellModuleName = Get-Item $PowerShellModuleManifestPath | Select-Object -ExpandProperty BaseName
+      $PuppetMetadata.source = "https://www.powershellgallery.com/packages/$PowerShellModuleName/$($PowerShellMetadata.ModuleVersion)/Content/$PowerShellModuleName.psd1"
+    }
     # If we can find the issues page, link to it, otherwise default to project page.
     Switch -Regex ($PowerShellMetadata.PrivateData.PSData.ProjectUri) {
       '(github\.com|gitlab\.com|bitbucket\.com)' {
