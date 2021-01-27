@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2021-01-27
+
 ### Added
 
 - Explicit dependency on PowerShellGet `2.2.3+` ([#111](https://github.com/puppetlabs/Puppet.Dsc/pull/111))
+
+### Changed
+
+- Vendored modules now namespaced by Puppet module to prevent side-by-side conflicts ([#75](https://github.com/puppetlabs/Puppet.Dsc/pull/75))
+- Updated minimum supported version of the [`pwshlib`](https://forge.puppet.com/puppetlabs/pwshlib) module to [`0.7.0`](https://forge.puppet.com/modules/puppetlabs/pwshlib/changelog#070-2021-01-20) to ensure changes from [#75](https://github.com/puppetlabs/Puppet.Dsc/pull/75) work in the provider.
 
 ## [0.3.0] - 2020-12-14
 
@@ -52,7 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation and release
 
-[Unreleased]: https://github.com/puppetlabs/Puppet.Dsc/compare/0.3.0...main
+[Unreleased]: https://github.com/puppetlabs/Puppet.Dsc/compare/0.4.0...main
+[0.4.0]: https://github.com/puppetlabs/Puppet.Dsc/releases/tag/0.4.0
 [0.3.0]: https://github.com/puppetlabs/Puppet.Dsc/releases/tag/0.3.0
 [0.2.0]: https://github.com/puppetlabs/Puppet.Dsc/releases/tag/0.2.0
 [0.1.0]: https://github.com/puppetlabs/Puppet.Dsc/releases/tag/0.1.0
