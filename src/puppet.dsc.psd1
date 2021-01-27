@@ -30,6 +30,7 @@
     'PSDesiredStateConfiguration'
     'PSDscResources'
     'powershell-yaml'
+    @{ ModuleName = 'PowerShellGet'; ModuleVersion = '2.2.3' }
   )
 
   # Assemblies that must be loaded prior to importing this module

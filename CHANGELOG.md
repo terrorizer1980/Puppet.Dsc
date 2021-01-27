@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Explicit dependency on PowerShellGet `2.2.3+` ([#111](https://github.com/puppetlabs/Puppet.Dsc/pull/111))
+
 ## [0.3.0] - 2020-12-14
 
 ### Added
