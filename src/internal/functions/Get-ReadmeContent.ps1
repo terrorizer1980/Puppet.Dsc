@@ -124,6 +124,63 @@ dsc_psmodule { 'Make Ruby manageable via uru':
 }
 ``````
 
+### Credentials
+
+Credentials are always specified as a hash of the username and password for the account.
+The password **must** use the Puppet [Sensitive type](https://puppet.com/docs/puppet/latest/lang_data_sensitive.html);
+this ensures that logs and reports redact the password, displaying it instead as `<Sensitive [value redacted]>`.
+
+``````puppet
+dsc_psrepository { 'PowerShell Gallery':
+  dsc_name                 => 'psgAllery',
+  dsc_installationpolicy   => 'Trusted',
+  dsc_psdscrunascredential => {
+    user     => 'apple',
+    password => Sensitive('foobar'),
+  },
+}
+``````
+
+### CIM Instances
+
+Because the CIM instances for DSC resources are fully mapped, the types actually explain fairly precisely what the shape of each CIM instance has to be - and, moreover, the type definition means that you get checking at catalog compile time.
+Puppet parses CIM instances are structured hashes (or arrays of structured hashes) that explicitly declare their keys and the valid types of values for each key.
+
+So, for the ``dsc_accesscontrolentry`` property of the ``dsc_ntfsaccessentry`` type, which has a MOF type of ``NTFSAccessControlList[]``, Puppet defines the CIM instance as:
+
+``````ruby
+Array[Struct[{
+  accesscontrolentry => Array[Struct[{
+    accesscontroltype => Enum['Allow', 'Deny'],
+    inheritance => Enum['This folder only', 'This folder subfolders and files', 'This folder and subfolders', 'This folder and files', 'Subfolders and files only', 'Subfolders only', 'Files only'],
+    ensure => Enum['Present', 'Absent'],
+    cim_instance_type => 'NTFSAccessControlEntry',
+    filesystemrights => Array[Enum['AppendData', 'ChangePermissions', 'CreateDirectories', 'CreateFiles', 'Delete', 'DeleteSubdirectoriesAndFiles', 'ExecuteFile', 'FullControl', 'ListDirectory', 'Modify', 'Read', 'ReadAndExecute', 'ReadAttributes', 'ReadData', 'ReadExtendedAttributes', 'ReadPermissions', 'Synchronize', 'TakeOwnership', 'Traverse', 'Write', 'WriteAttributes', 'WriteData', 'WriteExtendedAttributes']]
+  }]],
+  forceprincipal => Optional[Boolean],
+  principal => Optional[String],
+}]]
+``````
+
+A valid example of that in a puppet manifest looks like this:
+
+``````puppet
+dsc_accesscontrollist => [
+  {
+    accesscontrolentry => [
+      {
+        accesscontroltype => 'Allow',
+        inheritance       => 'This folder only',
+        ensure            => 'Present',
+        filesystemrights  => 'ChangePermissions',
+        cim_instance_type => 'NTFSAccessControlEntry',
+      },
+    ],
+    principal          => 'veryRealUserName',
+  },
+]
+``````
+
 For more information about using a built module, check out our [narrative documentation]($NarrativeDocumentation).
 
 ### Properties
