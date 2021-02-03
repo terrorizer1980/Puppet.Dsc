@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `KeyUsage` and `OID` to the list of DSC Resource properties which should be treated as parameters in Puppet ([#111](https://github.com/puppetlabs/Puppet.Dsc/pull/111))
+
 ## [0.4.0] - 2021-01-27
 
 ### Added
 
-- Explicit dependency on PowerShellGet `2.2.3+` ([#111](https://github.com/puppetlabs/Puppet.Dsc/pull/111))
+- Explicit dependency on PowerShellGet `2.2.3+` ([#124](https://github.com/puppetlabs/Puppet.Dsc/pull/124))
 
 ### Changed
 
