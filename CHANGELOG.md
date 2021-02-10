@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2021-2-10
+
 ### Added
 
 - `KeyUsage` and `OID` to the list of DSC Resource properties which should be treated as parameters in Puppet ([#111](https://github.com/puppetlabs/Puppet.Dsc/pull/111))
@@ -69,7 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation and release
 
-[Unreleased]: https://github.com/puppetlabs/Puppet.Dsc/compare/0.4.0...main
+[Unreleased]: https://github.com/puppetlabs/Puppet.Dsc/compare/0.5.0...main
+[0.5.0]: https://github.com/puppetlabs/Puppet.Dsc/releases/tag/0.5.0
 [0.4.0]: https://github.com/puppetlabs/Puppet.Dsc/releases/tag/0.4.0
 [0.3.0]: https://github.com/puppetlabs/Puppet.Dsc/releases/tag/0.3.0
 [0.2.0]: https://github.com/puppetlabs/Puppet.Dsc/releases/tag/0.2.0
