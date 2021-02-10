@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `KeyUsage` and `OID` to the list of DSC Resource properties which should be treated as parameters in Puppet ([#111](https://github.com/puppetlabs/Puppet.Dsc/pull/111))
 - Logic for vendoring dependency modules which are not found in the specified PowerShell module repository but _are_ available on the machine the module is being Puppetized on ([#113](https://github.com/puppetlabs/Puppet.Dsc/issues/113))
+- Entries for PSCredential and CIM instance examples to generated READMEs ([#114](https://github.com/puppetlabs/Puppet.Dsc/issues/114))
+
+### Fixed
+
+- Ensure metadata summary is correctly parsed and defined ([#123](https://github.com/puppetlabs/Puppet.Dsc/issues/123))
 
 ## [0.4.0] - 2021-01-27
 
