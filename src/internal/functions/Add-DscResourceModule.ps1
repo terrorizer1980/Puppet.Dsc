@@ -51,6 +51,22 @@ function Add-DscResourceModule {
         $null = New-Item -Path $PathTmp -Force -ItemType 'Directory'
       }
       Save-Module -Name $Name -Path $PathTmp -RequiredVersion $RequiredVersion -Repository $Repository -AllowPrerelease:$AllowPrerelease
+      # Validate dependency modules are in the temp path
+      $SavedModule = Get-Module -Name "$PathTmp/$Name" -ListAvailable
+      ForEach ($RequiredModule in $SavedModule.RequiredModules) {
+        # If the required module does not exist, as when it is not available on the gallery,
+        # Try to find it locally and copy it over
+        If ((Test-Path "$PathTmp/$RequiredModule")) {
+          continue
+        }
+        Try {
+          $Module = Get-Module -Name $RequiredModule -ListAvailable -ErrorAction Stop
+          Copy-Item -Path (Split-Path -Path $Module.Path -Parent) -Destination $PathTmp -Container -Recurse -ErrorAction Stop
+        } Catch {
+          $PSCmdlet.ThrowTerminatingError($_)
+        }
+      }
+      # Move the modules to the appropriate folder
       ForEach ($ModuleFolder in (Get-ChildItem $PathTmp)) {
         Move-Item -Path (Get-ChildItem $ModuleFolder.FullName).FullName -Destination "$Path/$($ModuleFolder.Name)"
       }
