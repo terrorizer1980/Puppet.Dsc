@@ -1,9 +1,11 @@
+[cmdletbinding()]
+Param(
+  [switch]$Full
+)
+
 $ErrorActionPreference = "Stop"
 
-$ChocolateyPackages = @(
-  'pester'
-  'pdk'
-)
+$ChocolateyPackages = @('Pester')
 
 $PowerShellModules = @(
   @{ Name = 'PSFramework' }
@@ -17,7 +19,11 @@ $PowerShellModules = @(
   @{ Name = 'AccessControlDsc' ; RequiredVersion = '1.4.0.0' }
 )
 
-if ($ENV:CI -ne 'True') {
+If ($Full) {
+  $ChocolateyPackages += 'pdk'
+}
+
+if ($ENV:CI -ne 'True' -and $Full) {
   $ChocolateyPackages += @(
     'vscode'
     'vscode-powershell'
