@@ -28,7 +28,43 @@ fixtures:
         # Must start with yaml indicator for Puppet to be happy
         $Result | Should -Match '^---'
         # Must include all needed dependencies
-        $Result | Should -Match 'pwshlib: puppetlabs/pwshlib'
+        $Result | Should -Match 'pwshlib:'
+        $Result | Should -Match 'repo: puppetlabs/pwshlib'
+      }
+      It 'Throws if either Section or Repo are left unspecified' {
+        { Update-PuppetModuleFixture -PuppetModuleFolderPath TestDrive:\ -Fixture @{
+          Section = 'forge_modules'
+        } } | Should -Throw 'Passed fixture is missing a mandatory key*'
+      }
+      It 'Throws if the specified Section is invalid' {
+        { Update-PuppetModuleFixture -PuppetModuleFolderPath TestDrive:\ -Fixture @{
+          Section = 'Incorrect'
+          Repo    = 'puppetlabs/pwshlib'
+        } } | Should -Throw 'Invalid fixture section passed*'
+      }
+      It 'Throws if the Repo key is null or an empty string' {
+        { Update-PuppetModuleFixture -PuppetModuleFolderPath TestDrive:\ -Fixture @{
+          Section = 'repositories'
+          Repo    = ''
+        } } | Should -Throw 'Fixture repo cannot be null or empty*'
+      }
+      It 'Writes a reference for the fixture if specified' {
+        $Result = Update-PuppetModuleFixture -PuppetModuleFolderPath TestDrive:\ -Fixture @{
+          Section   = 'forge_modules'
+          Repo      = 'puppetlabs/pwshlib'
+          Ref       = '0.7.4'
+        }
+        $Result | Should -Match 'repo: puppetlabs/pwshlib'
+        $Result | Should -Match 'ref: 0.7.4'
+      }
+      It 'Writes a branch for the fixture if specified' {
+        $Result = Update-PuppetModuleFixture -PuppetModuleFolderPath TestDrive:\ -Fixture @{
+          Section   = 'repositories'
+          Repo      = 'git://github.com/puppetlabs/ruby-pwsh.git'
+          Branch    = 'maint/main/test-branch'
+        }
+        $Result | Should -Match 'repo: git://github.com/puppetlabs/ruby-pwsh.git'
+        $Result | Should -Match 'branch: maint/main/test-branch'
       }
     }
   }
