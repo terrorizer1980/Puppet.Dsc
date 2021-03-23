@@ -13,6 +13,7 @@ Describe "New-PuppetDscModule" {
         Mock ConvertTo-CanonicalPuppetAuthorName {$AuthorName}
         Mock Initialize-PuppetModule {}
         Mock Write-PSFMessage {}
+        Mock Test-WSMan {}
         Mock Test-RunningElevated { return $true }
         Mock Test-SymLinkedItem   { return $false }
         Mock Add-DscResourceModule {}
@@ -405,6 +406,18 @@ Describe "New-PuppetDscModule" {
               Should -Throw -PassThru |
               Select-Object -ExpandProperty Exception |
               Should -Match "The specified output folder '.+' has a symlink in the path; CIM class parsing will not work in a symlinked folder, specify another path"
+          }
+        }
+        Context 'When running elevated and PSRemoting is disabled' {
+          BeforeAll {
+            Mock Test-WSMan { Throw 'Oops' }
+          }
+
+          It 'throws an explanatory exception' {
+            { New-PuppetDscModule -PowerShellModuleName Foo } |
+              Should -Throw -PassThru |
+              Select-Object -ExpandProperty Exception |
+              Should -Match 'PSRemoting does not appear to be enabled'
           }
         }
       }

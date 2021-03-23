@@ -93,6 +93,11 @@ Function New-PuppetDscModule {
       If (Test-SymLinkedItem -Path $OutputDirectory -Recurse) {
         Stop-PsfFunction -EnableException $true -Message "The specified output folder '$OutputDirectory' has a symlink in the path; CIM class parsing will not work in a symlinked folder, specify another path"
       }
+      Try {
+        $null = Test-WSMan -ErrorAction Stop
+      } Catch {
+        Stop-PsfFunction -EnableException $true -Message "PSRemoting does not appear to be enabled; in order to parse CIM instances, the function needs to do a stubbed DSC invocation; this will fail without PSRemoting enabled. Enable PSRemoting (possibly via the Enable-PSRemoting command) before retrying. Exception:`r`n$($_.Exception | Format-List -Force * | Out-String )"
+      }
     }
   }
 
