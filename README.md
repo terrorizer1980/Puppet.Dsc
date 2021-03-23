@@ -13,7 +13,7 @@ Lets go through the workflow for building the Puppet Module.
 New-PuppetDscModule -PowerShellModuleName 'PowerShellGet' -PowerShellModuleVersion '2.1.3'  -PuppetModuleAuthor 'testuser' -OutputDirectory '../bar'
 ```
 
-This function will create a new Puppet module, powershellget, which vendors and puppetizes the PowerShellGet PowerShell module at version 2.2.3 and its dependencies, exposing the DSC resources as Puppet resources. 
+This function will create a new Puppet module, powershellget, which vendors and puppetizes the PowerShellGet PowerShell module at version 2.2.3 and its dependencies, exposing the DSC resources as Puppet resources.
 By default, it will fetch from the public PSGallery but this behavior can be overridden,.
 
 The module is generated successfully in the `import` folder at the current path location.
@@ -131,6 +131,58 @@ Finally, it tells you what the outcome of that run was.
 
 In particular, when there is an esoteric error it can be useful to copy the invocation from the debug output to a text file you can invoke directly or investigate more thoroughly, especially around the invocation parameters.
 Because the code being run is just a PowerShell script, you should then be able to use your usual debugging and investigation tools the same way you would with any other PowerShell script.
+
+## Testing the Module
+
+You can run the unit tests locally with the following code (the unit tests can be run in PowerShell 5.1+):
+
+```powershell
+Import-Module .\src\Puppet.Dsc.psd1
+Invoke-Pester -Output Detailed -Path .\src\functions, .\src\internal\functions
+```
+
+You can run the static analysis/general tests locally with the following code:
+
+```powershell
+Invoke-Pester -Output Detailed -Path .\src\tests\general
+```
+
+You can run the acceptance tests locally with the following code (NB: you _must_ run as administrator and with Windows PowerShell 5.1 for the tests to function correctly as DSC requires admin privileges and this module does not work with 7x yet):
+
+```powershell
+Invoke-Pester -Output Detailed -Path .\Acceptance.Tests.ps1
+```
+
+By default the acceptance tests will run using the latest released version of `puppetlabs-pwshlib` on the Forge - this ensures anything being changed does not break extant functionality for users.
+
+If you are developing a feature in tandem with changes to the [underlying base provider](), you will want to run the acceptance tests slightly differently:
+
+```powershell
+$container = New-PesterContainer -Path .\Acceptance.Tests.ps1 -Data @{ FixtureHash = @{
+  Section = 'repositories'
+  Repo    = 'git://github.com/puppetlabs/ruby-pwsh.git'
+  Branch  = 'main'
+} }
+Invoke-Pester -Output Detailed -Container $container
+```
+
+If your work is on a different branch and/or repository, you will want to update the `Branch` and `Repo` values in the hash above;
+for example, if I wanted to validate the `maint/main/some-improvement` branch on the `michaeltlombardi` fork, I would instead run:
+
+```powershell
+$container = New-PesterContainer -Path .\Acceptance.Tests.ps1 -Data @{ FixtureHash = @{
+  Section = 'repositories'
+  Repo    = 'git://github.com/michaeltlombardi/ruby-pwsh.git'
+  Branch  = 'maint/main/some-improvement'
+} }
+Invoke-Pester -Output Detailed -Container $container
+```
+
+### Validating Against a Branch in CI
+
+To validate a PR against a repo/branch other than puppetlabs:main in Appveyor, you'll need to edit lines 102-106 in the `appveyor.yml` file, similar to overriding the repo and branch in the local testing scenario above.
+This will cause the `acceptance-github` tests to run against your specifications while doing code review and validation;
+these changes to the `appveyor.yml` file should be dropped prior to merge, once the changes to the base provider code are merged to `main` in `ruby-pwsh`.
 
 ## Platform Support
 
