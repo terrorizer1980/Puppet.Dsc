@@ -9,7 +9,8 @@ install:
 configuration:
   - unit
   - general
-  - acceptance
+  - acceptance-forge
+  - acceptance-github
 build: off
 environment:
   PDK_DISABLE_ANALYTICS: 'true'
@@ -52,7 +53,7 @@ for:
   -
     matrix:
       only:
-        - configuration: acceptance
+        - configuration: acceptance-forge
     install:
       - ps: |
           $ErrorActionPreference = "Stop"
@@ -68,7 +69,43 @@ for:
             (Resolve-Path .\Acceptance.Tests.ps1)
           )
 
-          $Results = Invoke-Pester -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru -Path $TestPath
+          $container = New-PesterContainer -Path $TestPath -Data @{ FixtureHash = @{
+            Section = 'forge_modules'
+            Repo    = 'pupptlabs/pwshlib'
+          } }
+          $Results = Invoke-Pester -Container $container -PassThru -Output Detailed
+          $Results | ConvertTo-NunitReport -AsString | Out-File $testResultsFile
+
+          (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
+          if ($Results.FailedCount -gt 0) {
+            throw "$($Results.FailedCount) tests failed."
+          }
+  -
+    matrix:
+      only:
+        - configuration: acceptance-github
+    install:
+      - ps: |
+          $ErrorActionPreference = "Stop"
+          & .\extras\install.ps1 -Full
+          if ($LastExitCode -ne 0) { $host.SetShouldExit($LastExitCode)  }
+    test_script:
+      - ps: |
+          $ErrorActionPreference = "Stop"
+          Import-Module .\src\puppet.dsc.psd1
+
+          $testResultsFile = ".\AcceptanceTestsResults.xml"
+          $TestPath = @(
+            (Resolve-Path .\Acceptance.Tests.ps1)
+          )
+
+          $container = New-PesterContainer -Path $TestPath -Data @{ FixtureHash = @{
+            Section = 'repositories'
+            Repo    = 'git://github.com/puppetlabs/ruby-pwsh.git'
+            Branch  = 'main'
+          } }
+          $Results = Invoke-Pester -Container $container -PassThru -Output Detailed
+          $Results | ConvertTo-NunitReport -AsString | Out-File $testResultsFile
 
           (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
           if ($Results.FailedCount -gt 0) {

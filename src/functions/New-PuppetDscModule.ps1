@@ -20,6 +20,14 @@ Function New-PuppetDscModule {
       the module to adhere to Puppet naming conventions.
     .PARAMETER PuppetModuleAuthor
       The name of the Puppet module author; if not specified, will default to your PDK configuration's author.
+    .PARAMETER PuppetModuleFixture
+      The fixture reference for the puppetlabs-pwshlib dependency, defined as a hash with the mandatory keys
+      `Section` ('forge_modules' or 'repositories') and `Repo` (the name of the module on the forge, like
+      'puppetlabs/pwshlib', or the git repo url) and the optional keys `Ref` (the version on the forge or the
+      git ref - tag or commit sha) and `Branch` (source code repository only, identifying the branch to be
+      pulled from).
+
+      Defaults to retrieving the latest released version of pwshlib from the forge.
     .PARAMETER OutputDirectory
       The folder in which to build the Puppet module. Defaults to a folder called import in the current location.
     .PARAMETER AllowPrerelease
@@ -46,6 +54,7 @@ Function New-PuppetDscModule {
     [string]$PowerShellModuleVersion,
     [string]$PuppetModuleName,
     [string]$PuppetModuleAuthor,
+    [hashtable]$PuppetModuleFixture,
     [string]$OutputDirectory,
     [switch]$AllowPrerelease,
     [switch]$PassThru,
@@ -114,7 +123,11 @@ Function New-PuppetDscModule {
 
         # Update the Puppet module test fixtures
         Write-PSFMessage -Message 'Updating the Puppet Module test fixtures'
-        Update-PuppetModuleFixture -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory
+        If ($null -eq $PuppetModuleFixture) {
+          Update-PuppetModuleFixture -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory
+        } Else {
+          Update-PuppetModuleFixture -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory -Fixture $PuppetModuleFixture
+        }
 
         # Write the Puppet module README
         Write-PSFMessage -Message 'Writing the Puppet Module readme'

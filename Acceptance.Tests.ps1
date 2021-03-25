@@ -1,3 +1,7 @@
+Param (
+  [hashtable]$FixtureHash
+)
+
 BeforeDiscovery {
 }
 BeforeAll {
@@ -164,6 +168,11 @@ Describe "Acceptance Tests" -Tag 'acceptance' {
       }
       # TODO: Class-based resource scenario
     )
+    if ($null -ne $FixtureHash) {
+      $Scenarios | ForEach-Object -Process {
+        $_.BuildParameters.PuppetModuleFixture = $FixtureHash
+      }
+    }
   }
   Context "when passing in invalid values" {
     It "reports the error" {

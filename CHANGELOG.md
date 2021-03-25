@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Ability to set generated modules fixtures to something other than the latest released version of `puppetlabs-pwshlib` on the Forge ([#93](https://github.com/puppetlabs/Puppet.Dsc/issues/93))
+
 ## [0.5.0] - 2021-2-10
 
 ### Added

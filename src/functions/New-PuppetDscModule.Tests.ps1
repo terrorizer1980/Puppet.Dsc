@@ -48,7 +48,7 @@ Describe "New-PuppetDscModule" {
         It 'does not throw' {
           { New-PuppetDscModule -PowerShellModuleName Foo } | Should -Not -Throw
         }
-  
+
         It 'Does not canonicalize the author name because none was specified' {
           Should -Invoke ConvertTo-CanonicalPuppetAuthorName -Times 0 -Scope Context
         }
@@ -133,11 +133,11 @@ Describe "New-PuppetDscModule" {
           Mock Test-SymLinkedItem {}
           Mock Test-Path {$true}
         }
-  
+
         It 'does not throw' {
           { New-PuppetDscModule -PowerShellModuleName Foo -PuppetModuleAuthor 'foobar' } | Should -Not -Throw
         }
-  
+
         It 'Warns that the function is running in an unelevated context' {
           Should -Invoke Write-PSFMessage -ParameterFilter {$Message -match '^Running un-elevated' } -Times 1 -Scope Context
         }
@@ -216,7 +216,7 @@ Describe "New-PuppetDscModule" {
             Mock ConvertTo-PuppetResourceApi {}
             New-PuppetDscModule -PowerShellModuleName Foo -OutputDirectory  TestDrive:\Bar -Repository FooRepo
           }
-  
+
           It 'Respects the specified path' {
             Should -Invoke Initialize-PuppetModule -ParameterFilter {
               $OutputFolderPath -eq 'TestDrive:\Bar' -and
@@ -242,6 +242,25 @@ Describe "New-PuppetDscModule" {
             } -Times 1 -Scope Context
           }
         }
+        Context 'Puppet Module Fixture' {
+          BeforeAll {
+            Mock New-Item {$Path}
+            Mock Resolve-Path {$Path}
+            Mock Get-DscResource {}
+            Mock ConvertTo-PuppetResourceApi {}
+            $FixtureHash = @{
+              Section = 'repositories'
+              Repo    = 'https://github.com/puppetlabs/ruby-pwsh.git'
+            }
+            New-PuppetDscModule -PowerShellModuleName Foo -PuppetModuleFixture $FixtureHash
+          }
+
+          It 'Passes the fixture reference to Update-PuppetModuleFixture' {
+            Should -Invoke Update-PuppetModuleFixture -ParameterFilter {
+              $Fixture -eq $FixtureHash
+            } -Times 1 -Scope Context
+          }
+        }
         Context 'Puppet Module Name' {
           Context 'Output Directory' {
             BeforeAll {
@@ -251,7 +270,7 @@ Describe "New-PuppetDscModule" {
 
               New-PuppetDscModule -PowerShellModuleName Foo -OutputDirectory  TestDrive:\Bar
             }
-  
+
             It 'Respects the specified path' {
               # Need to find the actual path since the mock won't see the test drive alias
               $TestDrivePath = Get-ChildItem TestDrive:\ -Filter 'Bar' | Select-Object -ExpandProperty FullName
@@ -277,7 +296,7 @@ Describe "New-PuppetDscModule" {
               } -Times 1 -Scope Context
             }
           }
-  
+
         }
         Context 'Function Output' {
           BeforeAll {
@@ -286,7 +305,7 @@ Describe "New-PuppetDscModule" {
             Mock New-Item { 'TestDrive:\OutputDirectory' }
             Mock Get-Item {'Output'}
           }
-  
+
           It 'Only returns output if PassThru is specified' {
             $ExpectNoOutputResult = New-PuppetDscModule -PowerShellModuleName Foo
             $ExpectOutputResult   = New-PuppetDscModule -PowerShellModuleName Foo -PassThru
@@ -300,11 +319,11 @@ Describe "New-PuppetDscModule" {
             Mock Get-DscResource {}
             Mock ConvertTo-PuppetResourceApi {}
             Mock Get-Item {$Path}
-  
+
             $UnspecifiedResult = New-PuppetDscModule -PowerShellModuleName Foo -PassThru
             $SpecifiedResult   = New-PuppetDscModule -PowerShellModuleName Foo -PassThru -PuppetModuleName bar_baz
           }
-  
+
           It 'Puppetizes the PowerShell module name if a Puppet module name is not specified' {
             Should -Invoke Initialize-PuppetModule -ParameterFilter {
               $PuppetModuleName -ceq 'foo'
@@ -364,7 +383,7 @@ Describe "New-PuppetDscModule" {
               Mock -CommandName $Function {}
             }
           }
-  
+
           It 'surfaces the underlying error and stops executing' {
             { New-PuppetDscModule -PowerShellModuleName Foo } | Should -Throw 'Failure!'
             ForEach ($Function in $UncalledFunctions) {
@@ -380,7 +399,7 @@ Describe "New-PuppetDscModule" {
           BeforeAll {
             Mock Test-SymLinkedItem   { return $true }
           }
-  
+
           It 'throws an explanatory exception' {
             { New-PuppetDscModule -PowerShellModuleName Foo } |
               Should -Throw -PassThru |
