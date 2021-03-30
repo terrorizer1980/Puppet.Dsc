@@ -81,7 +81,7 @@ Function Get-DscResourceParameterInfoByCimClass {
 
     # Do some slight property handling to ignore properties we don't care about.
     # Minimally adapted from Ansible's implementation:
-    # - https://github.com/ansible-collections/ansible.windows/blob/master/plugins/modules/win_dsc.ps1#L42-L62
+    # - https://github.com/ansible-collections/ansible.windows/blob/main/plugins/modules/win_dsc.ps1#L42-L62
     # Which itself borrows from core DSC:
     # - https://github.com/PowerShell/PowerShell/blob/master/src/System.Management.Automation/DscSupport/CimDSCParser.cs#L1203
     $PropertiesToDiscard = @('ConfigurationName', 'DependsOn', 'ModuleName', 'ModuleVersion', 'ResourceID', 'SourceInfo')
