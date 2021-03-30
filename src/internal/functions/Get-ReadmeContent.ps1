@@ -42,7 +42,7 @@ function Get-ReadmeContent {
   Begin {
     $BuilderModuleGalleryUri      = 'https://www.powershellgallery.com/packages/puppet.dsc'
     $BuilderModuleRepository      = 'https://github.com/puppetlabs/Puppet.Dsc'
-    $BaseProviderSource           = 'https://github.com/puppetlabs/ruby-pwsh/blob/master/lib/puppet/provider/dsc_base_provider.rb'
+    $BaseProviderSource           = 'https://github.com/puppetlabs/ruby-pwsh/blob/main/lib/puppet/provider/dsc_base_provider/dsc_base_provider.rb'
     $ResourceApiOverview          = 'https://puppet.com/docs/puppet/latest/create_types_and_providers_resource_api.html'
     $ResourceApiDocumentation     = 'https://puppet.com/docs/puppet/latest/about_the_resource_api.html'
     $dscForgePage                 = 'https://forge.puppet.com/dsc'
