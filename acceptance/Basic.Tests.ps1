@@ -167,6 +167,89 @@ Describe 'Acceptance Tests: Basic' -Tag @('Acceptance', 'Basic') {
           }
         )
       }
+      @{
+        Scenario                                    = 'puppetizing a module which cannot be idempotent in property mode'
+        # We need to know where the module will be built and what properties to build it with
+        expected_base                               = '../bar/securitypolicydsc'
+        PuppetModuleName                            = 'securitypolicydsc'
+        BuildParameters                             = @{
+          PowerShellModuleName    = 'SecurityPolicyDsc'
+          PowerShellModuleVersion = '2.10.0.0'
+          PuppetModuleAuthor      = 'testuser'
+          OutputDirectory         = '../bar'
+        }
+        # Any modified resources need to be cleaned up prior to each test run
+        DscResetInvocations                         = @(
+          @{
+            Name       = 'SecurityOption'
+            Method     = 'Set'
+            Property   = @{ Name = 'Enforce Anonymous SID Translation'; NetworkAccessAllowAnonymousSidNameTranslation = 'Enabled' }
+            ModuleName = @{
+              ModuleName      = 'C:/ProgramData/PuppetLabs/code/modules/securitypolicydsc/lib/puppet_x/securitypolicydsc/dsc_resources/SecurityPolicyDsc/SecurityPolicyDsc.psd1'
+              RequiredVersion = '2.10.0.0'
+            }
+          }
+        )
+        # The module should be uninstalled prior to each run if it exists
+        PdkModuleUninstallationInvocationParameters = @{
+          Path                = '../bar/securitypolicydsc'
+          Command             = 'pdk bundle exec puppet module uninstall testuser-securitypolicydsc'
+          SuccessFilterScript = { $true }
+        }
+        # Each of these types should be created and defined for puppet
+        TypesToValidateTestCases                    = @(
+          @{ Type = 'dsc_securityoption' }
+        )
+        # We need to validate that `puppet resource` works with the built module
+        TestResource                                = 'dsc_securityoption'
+        MinimalProperties                           = 'dsc_name="Enforce Anonymous SID Translation"'
+        MinimalExpectation                          = "dsc_name => 'Enforce Anonymous SID Translation'"
+        PropertyExpectation                         = "dsc_network_access_allow_anonymous_sid_name_translation => 'Enabled'"
+        # These are scenarios for child contexts that validate expected invocation behavior
+        ApplicationScenarios                        = @(
+          @{
+            ApplicationScenarioTitle     = 'when setting a security policy with "puppet apply"'
+            ApplicationScenarioTestCases = @(
+              @{
+                TestName               = 'works'
+                ManifestFileName       = 'security_option.pp'
+                ManifestFileValue      = @(
+                  'dsc_securityoption { "Enforce Anonymous SID Translation":'
+                  '  dsc_name => "Enforce Anonymous SID Translation",'
+                  '  dsc_network_access_allow_anonymous_sid_name_translation => "Disabled",'
+                  "}`n"
+                ) -join "`n"
+                PdkSuccessFilterScript = { $_ -match 'Updating: Finished' }
+                PdkErrorFilterScript   = { $_ -match 'Error' }
+              }
+              @{
+                TestName               = 'is not idempotent in property validation mode'
+                ManifestFileName       = 'non_idempotent_security_option.pp'
+                ManifestFileValue      = @(
+                  'dsc_securityoption { "Enforce Anonymous SID Translation":'
+                  '  dsc_name => "Enforce Anonymous SID Translation",'
+                  '  dsc_network_access_allow_anonymous_sid_name_translation => "Disabled",'
+                  "}`n"
+                ) -join "`n"
+                PdkSuccessFilterScript = { $_ -match 'Updating: Finished' }
+                PdkErrorFilterScript   = { $_ -match 'Error' }
+              }
+              @{
+                TestName             = 'is idempotent in resource validation mode'
+                ManifestFileName     = 'non_idempotent_security_option.pp'
+                ManifestFileValue    = @(
+                  'dsc_securityoption { "Enforce Anonymous SID Translation":'
+                  '  validation_mode        => "resource",'
+                  '  dsc_name               => "Enforce Anonymous SID Translation",'
+                  '  dsc_network_access_allow_anonymous_sid_name_translation => "Disabled",'
+                  "}`n"
+                ) -join "`n"
+                PdkErrorFilterScript = { $_ -match 'Updating: Finished' }
+              }
+            )
+          }
+        )
+      }
       # TODO: Class-based resource scenario
     )
     if ($null -ne $PwshLibSource) {
