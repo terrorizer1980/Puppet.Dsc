@@ -3,7 +3,7 @@ Param(
   [switch]$Full
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = 'Stop'
 
 $ChocolateyPackages = @('Pester')
 
@@ -37,18 +37,42 @@ if ($ENV:CI -ne 'True' -and $Full) {
   )
 }
 
+Write-Host 'Ensuring WinRM is configured for DSC'
+Get-ChildItem WSMan:\localhost\Listener\ -OutVariable Listeners | Format-List * -Force
+$HTTPListener = $Listeners | Where-Object -FilterScript { $_.Keys.Contains('Transport=HTTP') }
+If ($HTTPListener.Count -eq 0) {
+  winrm create winrm/config/Listener?Address=*+Transport=HTTP
+  winrm e winrm/config/listener
+}
+
 Write-Host "Installing with choco: $ChocolateyPackages"
 
 choco install $ChocolateyPackages --yes --no-progress --stop-on-first-failure
 if ($LastExitCode -ne 0) {
-  throw "Installation with choco failed."
+  throw 'Installation with choco failed.'
 }
 
+Get-Module -ListAvailable -Name $PowerShellModules.Name -ErrorAction SilentlyContinue
+
 Write-Host "Installing $($PowerShellModules.Count) modules with Install-Module"
-Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -Verbose:$false
 ForEach ($Module in $PowerShellModules) {
-  Install-Module @Module -Force
+  $InstalledModuleVersions = Get-Module -ListAvailable $Module.Name -ErrorAction SilentlyContinue |
+  Select-Object -ExpandProperty Version
+  If ($Module.ContainsKey('RequiredVersion')) {
+    $AlreadyInstalled = $null -ne ($InstalledModuleVersions | Where-Object -FilterScript { $_ -eq $Module.RequiredVersion })
+  } Else {
+    $AlreadyInstalled = $null -ne $InstalledModuleVersions
+  }
+  If ($AlreadyInstalled) {
+    Write-Verbose "Skipping $($Module.Name) as it is already installed at $($InstalledModuleVersions)"
+  } Else {
+    Write-Verbose "Installing $($Module.Name)"
+    Install-Module @Module -Force -SkipPublisherCheck -AllowClobber
+  }
 }
+
+Get-Module -ListAvailable -Name $PowerShellModules.Name
 
 if ($ENV:CI -ne 'True') {
   Import-Module 'RubyInstaller'
