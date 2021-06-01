@@ -3,5 +3,5 @@ import
 .vagrant/
 *Results.xml
 Puppet.Dsc/
-docs/
-!docs/about*
+docs/*
+!docs/about_*
