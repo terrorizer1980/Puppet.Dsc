@@ -52,6 +52,8 @@ function Get-ReadmeContent {
     $NarrativeDocumentation       = 'https://puppetlabs.github.io/iac/news/roadmap/2020/03/30/dsc-announcement.html'
     $TroubleshootingDocumentation = 'https://github.com/puppetlabs/Puppet.Dsc#troubleshooting'
     $MicrosoftLongPathSupportDocs = 'https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=powershell#enable-long-paths-in-windows-10-version-1607-and-later'
+    $PuppetModuleInstallIssue     = 'https://tickets.puppetlabs.com/browse/PUP-10924'
+    $r10kInstallationIssue        = 'https://github.com/puppetlabs/r10k/issues/1117'
   }
 
   Process {
@@ -234,6 +236,27 @@ For specific information on troubleshooting a generated module, check the [troub
 
 Currently, because of the way Puppet caches files on agents, use of the legacy [``puppetlabs-dsc``]($LegacyDscForgePage) module is **not** compatible with this or any auto-generated DSC module.
 Inclusion of both will lead to pluginsync conflicts.
+
+### Module Installation
+
+If you're using this module with Puppet Enterprise and Code Manager, everything should "just work" - no errors or issues acquiring and deploying this or any Puppetized DSC module to nodes.
+
+Unfortunately, due a bug in minitar which prevents it from unpacking archives with long file paths, both [``r10k``]($r10kInstallationIssue) and [serverless Puppet (via ``puppet module install``)]($PuppetModuleInstallIssue) methods of installing modules with long path names will fail.
+In short, minitar is unable to unpack modules that contain long file paths (though it can create them).
+
+As a workaround, you can retrieve DSC modules from the forge via PowerShell and 7zip:
+
+``````powershell
+`$ModuleAuthor = 'dsc'
+`$ModuleName = 'xremotedesktopsessionhost'
+`$ModuleVersion = '2.0.0-0-1'
+`$ArchiveFileName = "`$ModuleAuthor-`$ModuleName-`$ModuleVersion.tar.gz"
+`$DownloadUri = "https://forge.puppet.com/v3/files/`$ArchiveFileName"
+# Download the module tar.gz to the current directory
+Invoke-WebRequest -Uri `$DownloadUri -OutFile ./`$ArchiveFileName
+# Use 7zip to extract the module to the current directory
+& 7z x `$ArchiveFileName -so | & 7z x -aoa -si -ttar
+``````
 "@
   }
 
