@@ -47,5 +47,93 @@ Describe 'Get-ReadmeContent' {
         $Result | Should -MatchExactly "\[file an issue\]\($($Parameters.PowerShellModuleProjectUri)\)"
       }
     }
+    Context 'Parameter handling' {
+      It 'Errors if the PowerShellModuleName is not specified' {
+        $Parameters = @{
+          PowerShellModuleDescription = 'Foo and bar and baz!'
+          PowerShellModuleGalleryUri  = 'https://powershellgallery.com/Foo.Bar/1.0.0'
+          PowerShellModuleProjectUri  = 'https://github.com/Baz/Foo.Bar'
+          PowerShellModuleVersion     = '1.0.0'
+          PuppetModuleName            = 'foo_bar'
+        }
+        { Get-ReadmeContent @Parameters  } | Should -Throw "Cannot process command because of one or more missing mandatory parameters: PowerShellModuleName."
+      }
+      It 'Errors if the PuppetModuleName is not specified' {
+        $Parameters = @{
+          PowerShellModuleName        = 'Foo.Bar'
+          PowerShellModuleDescription = 'Foo and bar and baz!'
+          PowerShellModuleGalleryUri  = 'https://powershellgallery.com/Foo.Bar/1.0.0'
+          PowerShellModuleProjectUri  = 'https://github.com/Baz/Foo.Bar'
+          PowerShellModuleVersion     = '1.0.0'
+        }
+        { Get-ReadmeContent @Parameters  } | Should -Throw "Cannot process command because of one or more missing mandatory parameters: PuppetModuleName."
+      }
+      It 'Errors if the PowerShellModuleName is specified as an empty string' {
+        $Parameters = @{
+          PowerShellModuleName        = ''
+          PowerShellModuleDescription = 'Foo and bar and baz!'
+          PowerShellModuleGalleryUri  = 'https://powershellgallery.com/Foo.Bar/1.0.0'
+          PowerShellModuleProjectUri  = 'https://github.com/Baz/Foo.Bar'
+          PowerShellModuleVersion     = '1.0.0'
+          PuppetModuleName            = 'foo_bar'
+        }
+        { Get-ReadmeContent @Parameters  } | Should -Throw "Cannot validate argument on parameter 'PowerShellModuleName'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+      }
+      It 'Errors if the PowerShellModuleDescription is specified as an empty string' {
+        $Parameters = @{
+          PowerShellModuleName        = 'Foo.Bar'
+          PowerShellModuleDescription = ''
+          PowerShellModuleGalleryUri  = 'https://powershellgallery.com/Foo.Bar/1.0.0'
+          PowerShellModuleProjectUri  = 'https://github.com/Baz/Foo.Bar'
+          PowerShellModuleVersion     = '1.0.0'
+          PuppetModuleName            = 'foo_bar'
+        }
+        { Get-ReadmeContent @Parameters  } | Should -Throw "Cannot validate argument on parameter 'PowerShellModuleDescription'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+      }
+      It 'Errors if the PowerShellModuleGalleryUri is specified as an empty string' {
+        $Parameters = @{
+          PowerShellModuleName        = 'Foo.Bar'
+          PowerShellModuleDescription = 'Foo and bar and baz!'
+          PowerShellModuleGalleryUri  = ''
+          PowerShellModuleProjectUri  = 'https://github.com/Baz/Foo.Bar'
+          PowerShellModuleVersion     = '1.0.0'
+          PuppetModuleName            = 'foo_bar'
+        }
+        { Get-ReadmeContent @Parameters  } | Should -Throw "Cannot validate argument on parameter 'PowerShellModuleGalleryUri'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+      }
+      It 'Errors if the PowerShellModuleProjectUri is specified as an empty string' {
+        $Parameters = @{
+          PowerShellModuleName        = 'Foo.Bar'
+          PowerShellModuleDescription = 'Foo and bar and baz!'
+          PowerShellModuleGalleryUri  = 'https://powershellgallery.com/Foo.Bar/1.0.0'
+          PowerShellModuleProjectUri  = ''
+          PowerShellModuleVersion     = '1.0.0'
+          PuppetModuleName            = 'foo_bar'
+        }
+        { Get-ReadmeContent @Parameters  } | Should -Throw "Cannot validate argument on parameter 'PowerShellModuleProjectUri'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+      }
+      It 'Errors if the PowerShellModuleVersion is specified as an empty string' {
+        $Parameters = @{
+          PowerShellModuleName        = 'Foo.Bar'
+          PowerShellModuleDescription = 'Foo and bar and baz!'
+          PowerShellModuleGalleryUri  = 'https://powershellgallery.com/Foo.Bar/1.0.0'
+          PowerShellModuleProjectUri  = 'https://github.com/Baz/Foo.Bar'
+          PowerShellModuleVersion     = ''
+          PuppetModuleName            = 'foo_bar'
+        }
+        { Get-ReadmeContent @Parameters  } | Should -Throw "Cannot validate argument on parameter 'PowerShellModuleVersion'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+      }
+      It 'Errors if the PuppetModuleName is specified as an empty string' {
+        $Parameters = @{
+          PowerShellModuleName        = 'Foo.Bar'
+          PowerShellModuleDescription = 'Foo and bar and baz!'
+          PowerShellModuleGalleryUri  = 'https://powershellgallery.com/Foo.Bar/1.0.0'
+          PowerShellModuleProjectUri  = 'https://github.com/Baz/Foo.Bar'
+          PowerShellModuleVersion     = '1.0.0'
+          PuppetModuleName            = ''
+        }
+        { Get-ReadmeContent @Parameters  } | Should -Throw "Cannot validate argument on parameter 'PuppetModuleName'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+      }
+    }
   }
 }
