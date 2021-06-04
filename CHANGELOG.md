@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ability to set generated modules fixtures to something other than the latest released version of `puppetlabs-pwshlib` on the Forge ([#93](https://github.com/puppetlabs/Puppet.Dsc/issues/93))
 - A check to `New-PuppetDscModule` which validates that PSRemoting is enabled and errors clearly if not in order to prevent unexpected execution failures later in the process ([#133](https://github.com/puppetlabs/Puppet.Dsc/issues/133))
 
+### Fixed
+
+- Ensure that the auto-generated readme of a Puppetized module contains both the PowerShell and Puppet module names ([#153](https://github.com/puppetlabs/Puppet.Dsc/issues/153))
+- Make all `Update-PuppetModuleReadme` parameters except `PuppetModuleName` mandatory and do not accept null or empty values ([#153](https://github.com/puppetlabs/Puppet.Dsc/issues/153))
+- Make the  `PowerShellModuleName` and `PuppetModuleName` parameters in `Get-Readmecontent` mandatory and do not accept null or empty values for any parameters ([#153](https://github.com/puppetlabs/Puppet.Dsc/issues/153))
+
 ## [0.5.0] - 2021-2-10
 
 ### Added

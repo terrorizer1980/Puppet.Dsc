@@ -136,7 +136,7 @@ Function New-PuppetDscModule {
 
         # Write the Puppet module README
         Write-PSFMessage -Message 'Writing the Puppet Module readme'
-        Update-PuppetModuleReadme -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory -PowerShellModuleManifestPath $PowerShellModuleManifestPath
+        Update-PuppetModuleReadme -PuppetModuleName $PuppetModuleName -PowerShellModuleName $PowerShellModuleName -PuppetModuleFolderPath $PuppetModuleRootFolderDirectory -PowerShellModuleManifestPath $PowerShellModuleManifestPath
 
         # Write the Puppet module changelog based on PowerShell module
         Write-PSFMessage -Message 'Writing the Puppet Module changelog'

@@ -31,12 +31,12 @@ function Get-ReadmeContent {
   [cmdletbinding()]
   param (
     [OutputType([String])]
-    [string]$PowerShellModuleName,
-    [string]$PowerShellModuleDescription,
-    [string]$PowerShellModuleGalleryUri,
-    [string]$PowerShellModuleProjectUri,
-    [string]$PowerShellModuleVersion,
-    [string]$PuppetModuleName
+    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PowerShellModuleName,
+    [ValidateNotNullOrEmpty()][string]$PowerShellModuleDescription,
+    [ValidateNotNullOrEmpty()][string]$PowerShellModuleGalleryUri,
+    [ValidateNotNullOrEmpty()][string]$PowerShellModuleProjectUri,
+    [ValidateNotNullOrEmpty()][string]$PowerShellModuleVersion,
+    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PuppetModuleName
   )
 
   Begin {

@@ -51,6 +51,30 @@ Describe 'Update-PuppetModuleReadme' {
           }
           { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot find path 'TestDrive:\foo\bar' because it does not exist."
         }
+        It 'Errors if the PowerShellModuleManifestPath is not specified' {
+          $Parameters = @{
+            PowerShellModuleName = 'PowerShellGet'
+            PuppetModuleFolderPath = $PuppetFolderPath
+            PuppetModuleName = 'powershellget'
+          }
+          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot process command because of one or more missing mandatory parameters: PowerShellModuleManifestPath."
+        }
+        It 'Errors if the PowerShellModuleName is not specified' {
+          $Parameters = @{
+            PowerShellModuleManifestPath = 'TestDrive:\foo\bar'
+            PuppetModuleFolderPath = $PuppetFolderPath
+            PuppetModuleName = 'powershellget'
+          }
+          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot process command because of one or more missing mandatory parameters: PowerShellModuleName."
+        }
+        It 'Errors if the PuppetModuleFolderPath is not specified' {
+          $Parameters = @{
+            PowerShellModuleManifestPath = 'TestDrive:\foo\bar'
+            PowerShellModuleName = 'PowerShellGet'
+            PuppetModuleName = 'powershellget'
+          }
+          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot process command because of one or more missing mandatory parameters: PuppetModuleFolderPath."
+        }
         It 'Sets the Puppet module name if not specified' {
           $Parameters = @{
             PowerShellModuleManifestPath = $ManifestFilePath
@@ -64,6 +88,47 @@ Describe 'Update-PuppetModuleReadme' {
             $PuppetModuleName -ceq 'override'
           }
           # Unspecified
+          { Update-PuppetModuleReadme @Parameters } | Should -Not -Throw
+          Should -Invoke Get-PuppetizedModuleName -Times 1
+          Should -Invoke Get-ReadmeContent -Times 1 -ParameterFilter {
+            $PuppetModuleName -ceq 'foo'
+          }
+        }
+        It 'Errors if the PowerShellModuleManifestPath is specified as an empty string' {
+          $Parameters = @{
+            PowerShellModuleManifestPath = ''
+            PowerShellModuleName = 'PowerShellGet'
+            PuppetModuleFolderPath = $PuppetFolderPath
+            PuppetModuleName = 'powershellget'
+          }
+          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot validate argument on parameter 'PowerShellModuleManifestPath'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+        }
+        It 'Errors if the PowerShellModuleName is specified as an empty string' {
+          $Parameters = @{
+            PowerShellModuleManifestPath = 'TestDrive:\foo\bar'
+            PowerShellModuleName = ''
+            PuppetModuleFolderPath = $PuppetFolderPath
+            PuppetModuleName = 'powershellget'
+          }
+          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot validate argument on parameter 'PowerShellModuleName'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+        }
+        It 'Errors if the PuppetModuleFolderPath is specified as an empty string' {
+          $Parameters = @{
+            PowerShellModuleManifestPath = 'TestDrive:\foo\bar'
+            PowerShellModuleName = 'PowerShellGet'
+            PuppetModuleFolderPath = ''
+            PuppetModuleName = 'powershellget'
+          }
+          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot validate argument on parameter 'PuppetModuleFolderPath'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+        }
+        It 'Sets the Puppet module name if specified as an empty string' {
+          $Parameters = @{
+            PowerShellModuleManifestPath = $ManifestFilePath
+            PowerShellModuleName = 'PowerShellGet'
+            PuppetModuleFolderPath = $PuppetFolderPath
+            PuppetModuleName = ''
+          }
+          # empty
           { Update-PuppetModuleReadme @Parameters } | Should -Not -Throw
           Should -Invoke Get-PuppetizedModuleName -Times 1
           Should -Invoke Get-ReadmeContent -Times 1 -ParameterFilter {

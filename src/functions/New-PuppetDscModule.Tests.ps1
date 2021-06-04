@@ -79,6 +79,8 @@ Describe "New-PuppetDscModule" {
         }
         It 'Updates the Puppet README based on the PowerShell metadata' {
           Should -Invoke Update-PuppetModuleReadme -ParameterFilter {
+            $PuppetModuleName             -match 'foo' -and
+            $PowerShellModuleName         -match 'Foo' -and
             $PuppetModuleFolderPath       -match 'import(/|\\)foo' -and
             $PowerShellModuleManifestPath -match 'import(/|\\)foo\S+(/|\\)foo(/|\\)foo.psd1'
           } -Scope Context

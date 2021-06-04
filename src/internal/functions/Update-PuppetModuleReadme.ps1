@@ -22,9 +22,9 @@ function Update-PuppetModuleReadme {
   #>
   [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
   param (
-    [string]$PowerShellModuleManifestPath,
-    [string]$PowerShellModuleName,
-    [string]$PuppetModuleFolderPath,
+    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PowerShellModuleManifestPath,
+    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PowerShellModuleName,
+    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PuppetModuleFolderPath,
     [string]$PuppetModuleName
   )
 
