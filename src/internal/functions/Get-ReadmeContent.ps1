@@ -51,6 +51,7 @@ function Get-ReadmeContent {
     $PowerShellGetUri             = 'https://github.com/PowerShell/PowerShellGet'
     $NarrativeDocumentation       = 'https://puppetlabs.github.io/iac/news/roadmap/2020/03/30/dsc-announcement.html'
     $TroubleshootingDocumentation = 'https://github.com/puppetlabs/Puppet.Dsc#troubleshooting'
+    $MicrosoftLongPathSupportDocs = 'https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=powershell#enable-long-paths-in-windows-10-version-1607-and-later'
   }
 
   Process {
@@ -89,6 +90,26 @@ This Puppet module includes two important things: the ruby-pwsh library for runn
 
 All of the actual work being done to call the DSC resources vendored with this module is in [this file]($BaseProviderSource) from the `pwshlib` module.
 This is important for troubleshooting and bug reporting, but doesn't impact your use of the module except that the end result will be that nothing works, as the dependency is not installed alongside this module!
+
+### Long File Path Support
+
+Several PowerShell modules with DSC Resources end up with _very_ long file paths once vendored, many of which exceed the 260 character limit for file paths.
+Luckily in Windows 10 (build 1607+), Windows Server 2016 (build 1607+), and Windows Server 2019 there is now an option for supporting long file paths transparently!
+
+We **strongly recommend** enabling long file path support on any machines using this module to avoid path length issues.
+
+You can set this value using the Puppet ``registry_value`` resource:
+
+``````puppet
+registry_value { 'HKLM\System\CurrentControlSet\Control\FileSystem\LongPathsEnabled':
+  ensure   => 'present',
+  data     => [1],
+  provider => 'registry',
+  type     => 'dword',
+}
+``````
+
+You can also set this value outside of Puppet by [following the Microsoft documentation]($MicrosoftLongPathSupportDocs).
 
 ## Usage
 
