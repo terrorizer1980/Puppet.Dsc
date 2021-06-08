@@ -7,49 +7,12 @@ install:
       & .\extras\install.ps1 -Verbose
       if ($LastExitCode -ne 0) { $host.SetShouldExit($LastExitCode)  }
 configuration:
-  - unit
-  - general
   - acceptance-forge
   - acceptance-github
 build: off
 environment:
   PDK_DISABLE_ANALYTICS: 'true'
 for:
-  -
-    matrix:
-      only:
-        - configuration: unit
-    test_script:
-      - ps: |
-          $ErrorActionPreference = "Stop"
-          Import-Module .\src\puppet.dsc.psd1
-          $testResultsFile = ".\AcceptanceTestsResults.xml"
-          $TestPath = @(
-            (Resolve-Path .\src\functions)
-            (Resolve-Path .\src\internal\functions)
-          )
-          $Results = Invoke-Pester -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru -Path $TestPath
-          (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
-          if ($Results.FailedCount -gt 0) {
-            throw "$($Results.FailedCount) tests failed."
-          }
-  -
-    matrix:
-      only:
-        - configuration: general
-    test_script:
-      - ps: |
-          $ErrorActionPreference = "Stop"
-          Import-Module .\src\puppet.dsc.psd1
-          $testResultsFile = ".\AcceptanceTestsResults.xml"
-          $TestPath = @(
-            (Resolve-Path .\src\tests\general)
-          )
-          $Results = Invoke-Pester -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru -Path $TestPath
-          (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
-          if ($Results.FailedCount -gt 0) {
-            throw "$($Results.FailedCount) tests failed."
-          }
   -
     matrix:
       only:
