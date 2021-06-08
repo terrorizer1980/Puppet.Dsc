@@ -237,6 +237,15 @@ For specific information on troubleshooting a generated module, check the [troub
 Currently, because of the way Puppet caches files on agents, use of the legacy [``puppetlabs-dsc``]($LegacyDscForgePage) module is **not** compatible with this or any auto-generated DSC module.
 Inclusion of both will lead to pluginsync conflicts.
 
+### Configuring the LCM
+
+In order for a Puppetized DSC module to function, the DSC Local Configuration Manager (LCM) ``RefreshMode`` must be set to either ``Push`` or ``Disabled``.
+The default value for ``RefreshMode`` in WMF 5.0 and WMF 5.1 is ``Push`` - so if it has not been set to anything else then there is no action needed on your part.
+However if the value of the LCM has been set to anything other than ``Push`` then the module will not function and so the value must either be changed back or disabled.
+
+The Puppetized DSC modules use the ``Invoke-DscResource`` cmdlet to invoke DSC Resources of the target machine.
+If the ``RefreshMode`` is set to ``Pull``, DSC Resources will only run from a DSC Pull Server - in this setting DSC does not allow any DSC Resources to be run interactively on the host.
+
 ### Module Installation
 
 If you're using this module with Puppet Enterprise and Code Manager, everything should "just work" - no errors or issues acquiring and deploying this or any Puppetized DSC module to nodes.
