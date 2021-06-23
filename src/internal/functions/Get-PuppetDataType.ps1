@@ -42,52 +42,52 @@ Function Get-PuppetDataType {
     'double'
     'decimal'
   )
-  If (![String]::IsNullOrEmpty($DscResourceProperty.Values)){
+  If (![String]::IsNullOrEmpty($DscResourceProperty.Values)) {
     # Enums are handles specially
-    $InnerText = $DscResourceProperty.Values | ForEach-Object -Process {"'$_'"}
+    $InnerText = $DscResourceProperty.Values | ForEach-Object -Process { "'$_'" }
     $PuppetDataTypeText = "Enum[$($InnerText -join ', ')]"
   } Else {
-    If (Test-EmbeddedInstance -PropertyType $DscResourceProperty.PropertyType){
+    If (Test-EmbeddedInstance -PropertyType $DscResourceProperty.PropertyType) {
       # TODO: We SHOULD be able to walk our way to the nested data structure for these Hashes
       $PuppetDataTypeText = 'Hash'
     } Else {
       # Strip the brackets away for easier comparison; arrays are handled later anyway
       $DataTypeName = $DscResourceProperty.PropertyType -replace '(\[|\])', $null
-      $PuppetDataTypeText = switch ($DataTypeName){
-                              {$_ -in 'Bool', 'Boolean' }  { 'Boolean' }
-                              'String' { 'String'  }
-                              # https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/integral-numeric-types
-                              'byte'   { 'Integer[0, 255]' }
-                              'Uint16' { 'Integer[0, 65535]' }
-                              'Uint32' { 'Integer[0, 4294967295]' }
-                              'Uint64' { 'Integer[0, 18446744073709551615]' }
-                              'Real32' { 'Float' }
-                              'Real64' { 'Float' }
-                              'sybte'  { 'Integer[-128, 127]' }
-                              {$_ -in 'int16', 'SInt16'}  { 'Integer[-32768, 32767]' }
-                              {$_ -in 'int', 'int32', 'SInt32'}  { 'Integer[-2147483648, 2147483647]' }
-                              {$_ -in 'int64', 'SInt64'}  { 'Integer[-9223372036854775808, 9223372036854775807]' }
-                              { $_ -in $OtherIntegers } { 'Integer' }
-                              { $_ -in $Floats } { 'Float' }
-                              'PSCredential' { 'Struct[{ user => String[1], password => Sensitive[String[1]] }]' }
-                              # Can we mandate that an attribute be a sensitive string? Does this even make sense?
-                              'SecureString' { 'Sensitive[String]' }
-                              # TODO: Should this just be a string? Do we need/want to validate this?
-                              'DateTime' { 'Timestamp' }
-                              'HashTable' { 'Hash' }
-                              'Char' { 'String[1,1]' }
-                              # This is kinda gross, but this only came up once in 350+ module builds
-                              'Object' {'Any'}
-                              default  {
-                                # Better to scream loudly than write an invalid type?
-                                # Optionally include a Force param to put down `Any` as the data type?
-                                Throw "Cannot convert DSC Type '$($DscResourceProperty.PropertyType)'"
-                              }
-                            }
+      $PuppetDataTypeText = switch ($DataTypeName) {
+        { $_ -in 'Bool', 'Boolean' } { 'Boolean' }
+        'String' { 'String' }
+        # https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/integral-numeric-types
+        'byte' { 'Integer[0, 255]' }
+        'Uint16' { 'Integer[0, 65535]' }
+        'Uint32' { 'Integer[0, 4294967295]' }
+        'Uint64' { 'Integer[0, 18446744073709551615]' }
+        'Real32' { 'Float' }
+        'Real64' { 'Float' }
+        'sybte' { 'Integer[-128, 127]' }
+        { $_ -in 'int16', 'SInt16' } { 'Integer[-32768, 32767]' }
+        { $_ -in 'int', 'int32', 'SInt32' } { 'Integer[-2147483648, 2147483647]' }
+        { $_ -in 'int64', 'SInt64' } { 'Integer[-9223372036854775808, 9223372036854775807]' }
+        { $_ -in $OtherIntegers } { 'Integer' }
+        { $_ -in $Floats } { 'Float' }
+        'PSCredential' { 'Struct[{ user => String[1], password => Sensitive[String[1]] }]' }
+        # Can we mandate that an attribute be a sensitive string? Does this even make sense?
+        'SecureString' { 'Sensitive[String]' }
+        # TODO: Should this just be a string? Do we need/want to validate this?
+        'DateTime' { 'Timestamp' }
+        'HashTable' { 'Hash' }
+        'Char' { 'String[1,1]' }
+        # This is kinda gross, but this only came up once in 350+ module builds
+        'Object' { 'Any' }
+        default {
+          # Better to scream loudly than write an invalid type?
+          # Optionally include a Force param to put down `Any` as the data type?
+          Throw "Cannot convert DSC Type '$($DscResourceProperty.PropertyType)'"
+        }
+      }
     }
   }
 
-  If ($DscResourceProperty.PropertyType -match [Regex]::Escape('[]')){
+  If ($DscResourceProperty.PropertyType -match [Regex]::Escape('[]')) {
     $PuppetDataTypeText = "Array[$($PuppetDataTypeText)]"
   }
 

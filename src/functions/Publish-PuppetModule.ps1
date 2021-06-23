@@ -1,5 +1,5 @@
 function Publish-PuppetModule {
-    <#
+  <#
       .SYNOPSIS
         Build and Publish Puppet Module
       .DESCRIPTION
@@ -18,46 +18,46 @@ function Publish-PuppetModule {
         Publish-PuppetModule -PuppetModuleFolderPath C:\output\testmodule -ForgeUploadUrl https://forgeapi.puppetlabs.com/v3/releases -ForgeToken testmoduletoken -Build true -Publish true
         This command will create or use existing pkg and Publishes the <tarball> to the Forge , for the `testmodule` depends on the options passed for pdk release command.
     #>
-    #>
-    [CmdletBinding()]
-    param (
-      [Parameter(Mandatory=$True)]
-      $PuppetModuleFolderPath,
-      [string]$ForgeToken,
-      [string]$ForgeUploadUrl,
-      [switch]$Build,
-      [switch]$Publish
-    )
+  #>
+  [CmdletBinding()]
+  param (
+    [Parameter(Mandatory = $True)]
+    $PuppetModuleFolderPath,
+    [string]$ForgeToken,
+    [string]$ForgeUploadUrl,
+    [switch]$Build,
+    [switch]$Publish
+  )
 
-    begin {
-      $PuppetModuleFolderPath = Resolve-Path -Path $PuppetModuleFolderPath -ErrorAction Stop
-      If ($Publish) {
-        If ([string]::IsNullOrEmpty($ForgeUploadUrl)) {
-          $CommandPublish = "pdk release publish --forge-token $ForgeToken"
-        } Else {
-          $CommandPublish = "pdk release publish --forge-token $ForgeToken --forge-upload-url $ForgeUploadUrl"
-        }
-      }
-      If ($Build) {
-        $CommandBuild = 'pdk build'
+  begin {
+    $PuppetModuleFolderPath = Resolve-Path -Path $PuppetModuleFolderPath -ErrorAction Stop
+    If ($Publish) {
+      If ([string]::IsNullOrEmpty($ForgeUploadUrl)) {
+        $CommandPublish = "pdk release publish --forge-token $ForgeToken"
+      } Else {
+        $CommandPublish = "pdk release publish --forge-token $ForgeToken --forge-upload-url $ForgeUploadUrl"
       }
     }
-    process {
-      Try {
-        $ErrorActionPreference = 'Stop'
-        If ($Build)  {
-          Invoke-PdkCommand -Path $PuppetModuleFolderPath -Command $CommandBuild -SuccessFilterScript {
-            $_ -match "completed successfully"
-          }
-        }
-        If ($Publish) {
-          Invoke-PdkCommand -Path $PuppetModuleFolderPath -Command $CommandPublish -SuccessFilterScript {
-            $_ -match "Publish to Forge was successful"
-          }
-        }
-      } Catch {
-        $PSCmdlet.ThrowTerminatingError($PSItem)
-      }
+    If ($Build) {
+      $CommandBuild = 'pdk build'
     }
-    end {}
   }
+  process {
+    Try {
+      $ErrorActionPreference = 'Stop'
+      If ($Build) {
+        Invoke-PdkCommand -Path $PuppetModuleFolderPath -Command $CommandBuild -SuccessFilterScript {
+          $_ -match 'completed successfully'
+        }
+      }
+      If ($Publish) {
+        Invoke-PdkCommand -Path $PuppetModuleFolderPath -Command $CommandPublish -SuccessFilterScript {
+          $_ -match 'Publish to Forge was successful'
+        }
+      }
+    } Catch {
+      $PSCmdlet.ThrowTerminatingError($PSItem)
+    }
+  }
+  end {}
+}

@@ -9,7 +9,7 @@ Function ConvertTo-CanonicalPuppetAuthorName {
       The string to convert into a canonicalized Puppet module author name.
     .EXAMPLE
       "foo bar" | ConvertTo-CanonicalPuppetAuthorName
-      
+
       This command will return the string 'foo_bar', which is a valid Puppet module author name.
   #>
   [cmdletbinding()]

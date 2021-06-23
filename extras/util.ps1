@@ -29,13 +29,13 @@ Function Get-LatestBuild {
   Process {
     $VersionAndBuild = ConvertTo-VersionBuild -Version $Version
     $VersionAndBuild.version |
-    Select-Object -Unique |
-    ForEach-Object -Process {
-      $VersionAndBuild |
-      Where-Object -Property Version -eq $_ |
-      Sort-Object -Property Build -Descending |
-      Select-Object -First 1
-    }
+      Select-Object -Unique |
+      ForEach-Object -Process {
+        $VersionAndBuild |
+          Where-Object -Property Version -EQ $_ |
+          Sort-Object -Property Build -Descending |
+          Select-Object -First 1
+        }
   }
   End { }
 }
@@ -102,7 +102,7 @@ Function Get-ForgeDscModules {
     $ForgeSearchParameters = @{
       Method          = 'Get'
       UseBasicParsing = $True
-      Uri             = "https://forgeapi.puppet.com/v3/modules"
+      Uri             = 'https://forgeapi.puppet.com/v3/modules'
       Headers         = @{
         Authotization = "Bearer $ENV:FORGE_TOKEN"
       }
@@ -144,8 +144,7 @@ Function Update-ForgeDscModule {
   Process {
     If ($null -eq $Name) {
       $ModulesToRebuild = Get-ForgeDscModules
-    }
-    Else {
+    } Else {
       $ModulesToRebuild = Get-ForgeModuleInfo -Name $Name
     }
     foreach ($Module in $ModulesToRebuild) {
@@ -174,7 +173,7 @@ Function Update-ForgeDscModule {
           '--force'
         ) -Join ' '
         Write-Host "Executing: $PublishCommand"
-        Invoke-PdkCommand -Path $OutputFolder -Command $PublishCommand -SuccessFilterScript { $_ -match "Publish to Forge was successful" }
+        Invoke-PdkCommand -Path $OutputFolder -Command $PublishCommand -SuccessFilterScript { $_ -match 'Publish to Forge was successful' }
         Write-Host "Published $($Module.Name) at $($VersionAndBuild | ConvertFrom-VersionBuild)"
       }
     }
@@ -195,7 +194,7 @@ Function Get-PowerShellDscModule {
   Process {
     If ($null -eq $Name) {
       $Name = Find-Module -DscResource * -Name * |
-      Select-Object -ExpandProperty Name
+        Select-Object -ExpandProperty Name
     }
 
     ForEach ($NameToSearch in $Name) {
@@ -262,7 +261,7 @@ Function Get-UnreleasedDscModuleVersion {
       $ModuleVersions = ConvertTo-StandardizedVersionString -Version $Module.Releases
       $VersionsToRelease = $ModuleVersions | Where-Object -FilterScript { $_ -notin $VersionsReleasedToForge }
       [PSCustomObject]@{
-        Name = $Module.Name
+        Name     = $Module.Name
         Versions = $VersionsToRelease
       }
     }
@@ -273,9 +272,9 @@ Function Get-UnreleasedDscModuleVersion {
 Function Publish-NewDscModuleVersion {
   [CmdletBinding()]
   param (
-      [Parameter()]
-      [string[]]
-      $Name
+    [Parameter()]
+    [string[]]
+    $Name
   )
   Begin {}
   Process {
@@ -305,7 +304,7 @@ Function Publish-NewDscModuleVersion {
           '--force'
         ) -Join ' '
         Write-Host "Executing: $PublishCommand"
-        Invoke-PdkCommand -Path $OutputFolder -Command $PublishCommand -SuccessFilterScript { $_ -match "Publish to Forge was successful" }
+        Invoke-PdkCommand -Path $OutputFolder -Command $PublishCommand -SuccessFilterScript { $_ -match 'Publish to Forge was successful' }
         Write-Host "Published $($Module.Name) as $PuppetModuleName at $Version"
       }
     }

@@ -17,10 +17,9 @@ if ($puppet.dsc_dotsourcemodule) { $script:doDotSource = $true }
 $importIndividualFiles = Get-PSFConfigValue -FullName puppet.dsc.Import.IndividualFiles -Fallback $false
 if ($puppet.dsc_importIndividualFiles) { $importIndividualFiles = $true }
 if (Test-Path (Resolve-PSFPath -Path "$($script:ModuleRoot)\..\.git" -SingleItem -NewChild)) { $importIndividualFiles = $true }
-if ("<was not compiled>" -eq '<was not compiled>') { $importIndividualFiles = $true }
+if ('<was not compiled>' -eq '<was not compiled>') { $importIndividualFiles = $true }
 
-function Import-ModuleFile
-{
+function Import-ModuleFile {
   <#
     .SYNOPSIS
       Loads files into the module on module import.
@@ -51,22 +50,19 @@ function Import-ModuleFile
 }
 
 #region Load individual files
-if ($importIndividualFiles)
-{
+if ($importIndividualFiles) {
   # Execute Preimport actions
   . Import-ModuleFile -Path "$ModuleRoot\internal\scripts\preimport.ps1"
 
   # Import all internal functions
-  foreach ($function in (Get-ChildItem "$ModuleRoot\internal\functions" -Filter "*.ps1" -Recurse -ErrorAction Ignore))
-  {
+  foreach ($function in (Get-ChildItem "$ModuleRoot\internal\functions" -Filter '*.ps1' -Recurse -ErrorAction Ignore)) {
     If ($function.FullName -notmatch '\.Tests\.ps1') {
       . Import-ModuleFile -Path $function.FullName
     }
   }
 
   # Import all public functions
-  foreach ($function in (Get-ChildItem "$ModuleRoot\functions" -Filter "*.ps1" -Recurse -ErrorAction Ignore))
-  {
+  foreach ($function in (Get-ChildItem "$ModuleRoot\functions" -Filter '*.ps1' -Recurse -ErrorAction Ignore)) {
     If ($function.FullName -notmatch '\.Tests\.ps1') {
       . Import-ModuleFile -Path $function.FullName
     }

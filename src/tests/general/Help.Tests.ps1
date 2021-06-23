@@ -9,21 +9,21 @@ BeforeDiscovery {
   . $ExceptionsFile
 
   $includedNames = Get-ChildItem $CommandPath -Recurse -File |
-    Where-Object Name -like "*.ps1" |
+    Where-Object Name -Like '*.ps1' |
     Select-Object -ExpandProperty BaseName
   $CommandsToValidate = New-Object -TypeName System.Collections.ArrayList
   $null = Get-Command -Module (Get-Module $ModuleName) -CommandType Cmdlet, Function, Workflow |
-    Where-Object Name -in $includedNames |
+    Where-Object Name -In $includedNames |
     ForEach-Object -Process {
       $CommandsToValidate.Add(@{
-        Name = $PSItem.Name
-        Object = $PSItem
-      })
+          Name   = $PSItem.Name
+          Object = $PSItem
+        })
     }
 }
 
 Describe 'Validating function help' -Tag @('Help', 'General') {
-  Context "Validating help for <Name>" -Foreach $CommandsToValidate {
+  Context 'Validating help for <Name>' -Foreach $CommandsToValidate {
     BeforeDiscovery {
       $Help = Get-Help $Name -ErrorAction SilentlyContinue
     }
@@ -43,23 +43,23 @@ Describe 'Validating function help' -Tag @('Help', 'General') {
     It 'has example text' {
       ($Help.Examples.Example.Remarks | Select-Object -First 1).Text | Should -Not -BeNullOrEmpty
     }
-    Context "Test parameter help for <Name>" {
+    Context 'Test parameter help for <Name>' {
       BeforeDiscovery {
         $Common = 'Debug', 'ErrorAction', 'ErrorVariable', 'InformationAction', 'InformationVariable', 'OutBuffer', 'OutVariable', 'PipelineVariable', 'Verbose', 'WarningAction', 'WarningVariable'
         $ParametersToValidate = New-Object -TypeName System.Collections.ArrayList
         $HelpParameterNames = $Help.Parameters.Parameter.Name | Sort-Object -Unique
-        $Parameters = $Object.ParameterSets.Parameters | Sort-Object -Property Name -Unique | Where-Object Name -notin $common
+        $Parameters = $Object.ParameterSets.Parameters | Sort-Object -Property Name -Unique | Where-Object Name -NotIn $common
         $null = $Parameters | ForEach-Object {
           $ParametersToValidate.Add(@{
-            ParameterName   = $PSItem.Name
-            ParameterHelp   = $Help.parameters.parameter | Where-Object Name -eq $PSItem.Name
-          })
+              ParameterName = $PSItem.Name
+              ParameterHelp = $Help.parameters.parameter | Where-Object Name -EQ $PSItem.Name
+            })
         }
-        
+
       }
 
-      Context "Validating <ParameterName>" -ForEach $ParametersToValidate {
-        It "gets help for parameter: <ParameterName>" {
+      Context 'Validating <ParameterName>' -ForEach $ParametersToValidate {
+        It 'gets help for parameter: <ParameterName>' {
           $ParameterHelp.Description.Text | Should -Not -BeNullOrEmpty
         }
       }

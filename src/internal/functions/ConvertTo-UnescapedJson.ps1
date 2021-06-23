@@ -25,7 +25,7 @@ Function ConvertTo-UnescapedJson {
   #>
   [CmdletBinding()]
   param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
+    [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
     [AllowNull()]
     [System.Object]
     ${InputObject},
@@ -40,9 +40,8 @@ Function ConvertTo-UnescapedJson {
   begin {
     try {
       $outBuffer = $null
-      if ($PSBoundParameters.TryGetValue('OutBuffer', [ref]$outBuffer))
-      {
-          $PSBoundParameters['OutBuffer'] = 1
+      if ($PSBoundParameters.TryGetValue('OutBuffer', [ref]$outBuffer)) {
+        $PSBoundParameters['OutBuffer'] = 1
       }
       $wrappedCmd = $ExecutionContext.InvokeCommand.GetCommand('Microsoft.PowerShell.Utility\ConvertTo-Json', [System.Management.Automation.CommandTypes]::Cmdlet)
       $scriptCmd = {

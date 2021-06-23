@@ -60,8 +60,7 @@ Function Invoke-PdkCommand {
 
     if ($null -ne $SuccessFilterScript) {
       $PdkSuccessMessage = $PdkJob.Output | Where-Object -FilterScript $SuccessFilterScript
-    }
-    Else {
+    } Else {
       $PdkSuccessMessage = $null
     }
 
@@ -73,8 +72,7 @@ Function Invoke-PdkCommand {
 
     if ($null -ne $ErrorFilterScript) {
       $PdkErrorMessage = $PdkJob.Output | Where-Object -FilterScript $ErrorFilterScript
-    }
-    Else {
+    } Else {
       $PdkErrorMessage = $null
     }
 

@@ -22,17 +22,17 @@ function Update-PuppetModuleReadme {
   #>
   [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
   param (
-    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PowerShellModuleManifestPath,
-    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PowerShellModuleName,
-    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PuppetModuleFolderPath,
+    [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$PowerShellModuleManifestPath,
+    [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$PowerShellModuleName,
+    [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$PuppetModuleFolderPath,
     [string]$PuppetModuleName
   )
 
   begin {
     Try {
-      $PuppetReadmeFilePath         = Resolve-Path (Join-Path $PuppetModuleFolderPath "README.md") -ErrorAction Stop
+      $PuppetReadmeFilePath = Resolve-Path (Join-Path $PuppetModuleFolderPath 'README.md') -ErrorAction Stop
       $PowerShellModuleManifestPath = Resolve-Path -Path $PowerShellModuleManifestPath -ErrorAction Stop
-      $PowerShellMetadata           = Import-PSFPowerShellDataFile -Path $PowerShellModuleManifestPath -ErrorAction Stop
+      $PowerShellMetadata = Import-PSFPowerShellDataFile -Path $PowerShellModuleManifestPath -ErrorAction Stop
     } Catch {
       # Rethrow any exceptions from the above commands
       $PSCmdlet.ThrowTerminatingError($PSItem)
@@ -53,7 +53,7 @@ function Update-PuppetModuleReadme {
       PuppetModuleName            = $PuppetModuleName
     }
     $ReadmeContent = Get-ReadmeContent @ReadmeParameters
-    If ($PSCmdlet.ShouldProcess($PuppetModuleMetadataFilePath, "Overwrite Puppet Module Readme")) {
+    If ($PSCmdlet.ShouldProcess($PuppetModuleMetadataFilePath, 'Overwrite Puppet Module Readme')) {
       Out-Utf8File -Path $PuppetReadmeFilePath -InputObject $ReadmeContent
     }
   }

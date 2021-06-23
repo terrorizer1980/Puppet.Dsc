@@ -3,27 +3,27 @@ BeforeAll {
     Split-Path -Parent |
     Split-Path -Parent
   Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1','.ps1')
+  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
 }
 
 Describe 'Get-DscResourceTypeInformation' {
   InModuleScope puppet.dsc {
-    Context "When running <ElevationStatus>" -ForEach @(
+    Context 'When running <ElevationStatus>' -ForEach @(
       @{
-        ElevationStatus ='elevated'
-        TestResult = $true
-        QueryFunction = 'Get-DscResourceParameterInfoByCimClass'
+        ElevationStatus = 'elevated'
+        TestResult      = $true
+        QueryFunction   = 'Get-DscResourceParameterInfoByCimClass'
       }
       @{
-        ElevationStatus ='unelevated'
-        TestResult = $false
-        QueryFunction = 'Get-DscResourceParameterInfo'
+        ElevationStatus = 'unelevated'
+        TestResult      = $false
+        QueryFunction   = 'Get-DscResourceParameterInfo'
       }
     ) {
       BeforeAll {
-        Mock Test-RunningElevated                   { return $TestResult }
+        Mock Test-RunningElevated { return $TestResult }
         Mock Get-DscResourceParameterInfoByCimClass { return $DscResource.Name }
-        Mock Get-DscResourceParameterInfo           { return $DscResource.Name }
+        Mock Get-DscResourceParameterInfo { return $DscResource.Name }
       }
       Context 'When passed a DSCResourceInfo object' {
         BeforeAll {
@@ -32,8 +32,8 @@ Describe 'Get-DscResourceTypeInformation' {
 
         BeforeEach {
           $DscResources = [Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo[]]@(
-            @{Name = 'foo'}
-            @{Name = 'bar'}
+            @{Name = 'foo' }
+            @{Name = 'bar' }
           )
         }
 
@@ -43,7 +43,7 @@ Describe 'Get-DscResourceTypeInformation' {
         It 'processes once for each object in the pipeline' -TestCases $TestCase {
           $Result = $DscResources | Get-DscResourceTypeInformation
           Should -Invoke $QueryFunction -Times 2 -Scope It
-          $Result[0].ParameterInfo | Should -be $Result[0].Name
+          $Result[0].ParameterInfo | Should -Be $Result[0].Name
         }
         It 'never calls Get-DscResource' {
           $null = $DscResources | Get-DscResourceTypeInformation
@@ -59,7 +59,7 @@ Describe 'Get-DscResourceTypeInformation' {
           }
         }
         Context 'by name only' {
-          It 'calls Get-DscResource only once'{
+          It 'calls Get-DscResource only once' {
             $Result = Get-DscResourceTypeInformation -Name foo, bar, baz
             $Result[0].ParameterInfo | Should -Be $Result[0].Name
             Should -Invoke Get-DscResource -Times 1 -Scope It
@@ -72,7 +72,7 @@ Describe 'Get-DscResourceTypeInformation' {
               [Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo]@{
                 Name = $Module
               }
-            }  -ParameterFilter { $null -ne $Module }
+            } -ParameterFilter { $null -ne $Module }
           }
 
           It 'only searches by module if specified' {
@@ -91,7 +91,7 @@ Describe 'Get-DscResourceTypeInformation' {
               [Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo]@{
                 Name = $Name
               }
-            }  -ParameterFilter { $Name -eq 'foo' }
+            } -ParameterFilter { $Name -eq 'foo' }
             Mock Get-DscResource {
               [Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo]@{
                 Name = $Module
@@ -101,12 +101,12 @@ Describe 'Get-DscResourceTypeInformation' {
 
           It 'handles pipeline input by property name' {
             # Objects with name and module properties to pass to the function
-            $NameOnly      = [PSCustomObject]@{ Name = 'foo' }
+            $NameOnly = [PSCustomObject]@{ Name = 'foo' }
             $NameAndModule = [PSCustomObject]@{
               Name   = 'bar'
               Module = 'baz'
             }
-            $Results = $NameOnly,$NameAndModule | Get-DscResourceTypeInformation
+            $Results = $NameOnly, $NameAndModule | Get-DscResourceTypeInformation
             $Results.Count | Should -Be 2
             $Results[0].Name | Should -Be 'foo'
             $Results[1].Name | Should -Be 'baz'

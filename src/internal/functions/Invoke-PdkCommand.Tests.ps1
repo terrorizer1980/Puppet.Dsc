@@ -3,7 +3,7 @@ BeforeAll {
     Split-Path -Parent |
     Split-Path -Parent
   Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1','.ps1')
+  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
 }
 
 Describe 'Invoke-PdkCommand' {
@@ -39,8 +39,8 @@ Describe 'Invoke-PdkCommand' {
         }
 
         { Invoke-PdkCommand -Path TestDrive:\ -Command $Command -SuccessFilterScript { $_ -eq $SuccessOutput } } |
-            Should -Throw -PassThru |
-            Select-Object -ExpandProperty Exception | Should -Match 'Baz'
+          Should -Throw -PassThru |
+          Select-Object -ExpandProperty Exception | Should -Match 'Baz'
       }
       It 'Starts and waits for a job' {
         $null = Invoke-PdkCommand -Command $Command -SuccessFilterScript { $_ -eq $SuccessOutput }

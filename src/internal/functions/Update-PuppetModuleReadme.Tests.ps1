@@ -3,7 +3,7 @@ BeforeAll {
     Split-Path -Parent |
     Split-Path -Parent
   Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1','.ps1')
+  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
 }
 
 Describe 'Update-PuppetModuleReadme' {
@@ -23,21 +23,21 @@ Describe 'Update-PuppetModuleReadme' {
         $ManifestData = Import-PSFPowerShellDataFile -Path $ManifestFixtureFile
         # Setup mocks
         Mock Import-PSFPowerShellDataFile { return $ManifestData }
-        Mock Get-ReadmeContent            { return 'Content' }
-        Mock Out-Utf8File                 { }
+        Mock Get-ReadmeContent { return 'Content' }
+        Mock Out-Utf8File { }
       }
 
       Context 'Parameter handling' {
         BeforeAll {
-          Mock Get-PuppetizedModuleName     { return 'foo' }
+          Mock Get-PuppetizedModuleName { return 'foo' }
         }
 
         It 'Errors if the specified Puppet readme file cannot be found' {
           $Parameters = @{
             PowerShellModuleManifestPath = $ManifestFilePath
-            PowerShellModuleName = 'PowerShellGet'
-            PuppetModuleFolderPath = 'TestDrive:\foo\bar'
-            PuppetModuleName = 'powershellget'
+            PowerShellModuleName         = 'PowerShellGet'
+            PuppetModuleFolderPath       = 'TestDrive:\foo\bar'
+            PuppetModuleName             = 'powershellget'
           }
           # NB: This test may only work on English language test nodes?
           { Update-PuppetModuleReadme @Parameters } | Should -Throw "Cannot find path 'TestDrive:\foo\bar\README.md' because it does not exist."
@@ -45,41 +45,41 @@ Describe 'Update-PuppetModuleReadme' {
         It 'Errors if the specified PowerShell module manifest cannot be found' {
           $Parameters = @{
             PowerShellModuleManifestPath = 'TestDrive:\foo\bar'
-            PowerShellModuleName = 'PowerShellGet'
-            PuppetModuleFolderPath = $PuppetFolderPath
-            PuppetModuleName = 'powershellget'
+            PowerShellModuleName         = 'PowerShellGet'
+            PuppetModuleFolderPath       = $PuppetFolderPath
+            PuppetModuleName             = 'powershellget'
           }
-          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot find path 'TestDrive:\foo\bar' because it does not exist."
+          { Update-PuppetModuleReadme @Parameters } | Should -Throw "Cannot find path 'TestDrive:\foo\bar' because it does not exist."
         }
         It 'Errors if the PowerShellModuleManifestPath is not specified' {
           $Parameters = @{
-            PowerShellModuleName = 'PowerShellGet'
+            PowerShellModuleName   = 'PowerShellGet'
             PuppetModuleFolderPath = $PuppetFolderPath
-            PuppetModuleName = 'powershellget'
+            PuppetModuleName       = 'powershellget'
           }
-          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot process command because of one or more missing mandatory parameters: PowerShellModuleManifestPath."
+          { Update-PuppetModuleReadme @Parameters } | Should -Throw 'Cannot process command because of one or more missing mandatory parameters: PowerShellModuleManifestPath.'
         }
         It 'Errors if the PowerShellModuleName is not specified' {
           $Parameters = @{
             PowerShellModuleManifestPath = 'TestDrive:\foo\bar'
-            PuppetModuleFolderPath = $PuppetFolderPath
-            PuppetModuleName = 'powershellget'
+            PuppetModuleFolderPath       = $PuppetFolderPath
+            PuppetModuleName             = 'powershellget'
           }
-          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot process command because of one or more missing mandatory parameters: PowerShellModuleName."
+          { Update-PuppetModuleReadme @Parameters } | Should -Throw 'Cannot process command because of one or more missing mandatory parameters: PowerShellModuleName.'
         }
         It 'Errors if the PuppetModuleFolderPath is not specified' {
           $Parameters = @{
             PowerShellModuleManifestPath = 'TestDrive:\foo\bar'
-            PowerShellModuleName = 'PowerShellGet'
-            PuppetModuleName = 'powershellget'
+            PowerShellModuleName         = 'PowerShellGet'
+            PuppetModuleName             = 'powershellget'
           }
-          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot process command because of one or more missing mandatory parameters: PuppetModuleFolderPath."
+          { Update-PuppetModuleReadme @Parameters } | Should -Throw 'Cannot process command because of one or more missing mandatory parameters: PuppetModuleFolderPath.'
         }
         It 'Sets the Puppet module name if not specified' {
           $Parameters = @{
             PowerShellModuleManifestPath = $ManifestFilePath
-            PowerShellModuleName = 'PowerShellGet'
-            PuppetModuleFolderPath = $PuppetFolderPath
+            PowerShellModuleName         = 'PowerShellGet'
+            PuppetModuleFolderPath       = $PuppetFolderPath
           }
           # Specified
           { Update-PuppetModuleReadme @Parameters -PuppetModuleName override } | Should -Not -Throw
@@ -97,36 +97,36 @@ Describe 'Update-PuppetModuleReadme' {
         It 'Errors if the PowerShellModuleManifestPath is specified as an empty string' {
           $Parameters = @{
             PowerShellModuleManifestPath = ''
-            PowerShellModuleName = 'PowerShellGet'
-            PuppetModuleFolderPath = $PuppetFolderPath
-            PuppetModuleName = 'powershellget'
+            PowerShellModuleName         = 'PowerShellGet'
+            PuppetModuleFolderPath       = $PuppetFolderPath
+            PuppetModuleName             = 'powershellget'
           }
-          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot validate argument on parameter 'PowerShellModuleManifestPath'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+          { Update-PuppetModuleReadme @Parameters } | Should -Throw "Cannot validate argument on parameter 'PowerShellModuleManifestPath'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
         }
         It 'Errors if the PowerShellModuleName is specified as an empty string' {
           $Parameters = @{
             PowerShellModuleManifestPath = 'TestDrive:\foo\bar'
-            PowerShellModuleName = ''
-            PuppetModuleFolderPath = $PuppetFolderPath
-            PuppetModuleName = 'powershellget'
+            PowerShellModuleName         = ''
+            PuppetModuleFolderPath       = $PuppetFolderPath
+            PuppetModuleName             = 'powershellget'
           }
-          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot validate argument on parameter 'PowerShellModuleName'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+          { Update-PuppetModuleReadme @Parameters } | Should -Throw "Cannot validate argument on parameter 'PowerShellModuleName'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
         }
         It 'Errors if the PuppetModuleFolderPath is specified as an empty string' {
           $Parameters = @{
             PowerShellModuleManifestPath = 'TestDrive:\foo\bar'
-            PowerShellModuleName = 'PowerShellGet'
-            PuppetModuleFolderPath = ''
-            PuppetModuleName = 'powershellget'
+            PowerShellModuleName         = 'PowerShellGet'
+            PuppetModuleFolderPath       = ''
+            PuppetModuleName             = 'powershellget'
           }
-          { Update-PuppetModuleReadme @Parameters  } | Should -Throw "Cannot validate argument on parameter 'PuppetModuleFolderPath'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+          { Update-PuppetModuleReadme @Parameters } | Should -Throw "Cannot validate argument on parameter 'PuppetModuleFolderPath'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
         }
         It 'Sets the Puppet module name if specified as an empty string' {
           $Parameters = @{
             PowerShellModuleManifestPath = $ManifestFilePath
-            PowerShellModuleName = 'PowerShellGet'
-            PuppetModuleFolderPath = $PuppetFolderPath
-            PuppetModuleName = ''
+            PowerShellModuleName         = 'PowerShellGet'
+            PuppetModuleFolderPath       = $PuppetFolderPath
+            PuppetModuleName             = ''
           }
           # empty
           { Update-PuppetModuleReadme @Parameters } | Should -Not -Throw
@@ -138,16 +138,16 @@ Describe 'Update-PuppetModuleReadme' {
       }
       Context 'Updating Readme' {
         BeforeAll {
-          Mock Get-PuppetizedModuleName     { }
+          Mock Get-PuppetizedModuleName { }
           $Parameters = @{
             PowerShellModuleManifestPath = $ManifestFilePath
-            PowerShellModuleName = 'PowerShellGet'
-            PuppetModuleFolderPath = $PuppetFolderPath
-            PuppetModuleName = 'powershellget'
+            PowerShellModuleName         = 'PowerShellGet'
+            PuppetModuleFolderPath       = $PuppetFolderPath
+            PuppetModuleName             = 'powershellget'
           }
         }
-        
-        It 'does not throw'{
+
+        It 'does not throw' {
           { Update-PuppetModuleReadme @Parameters } | Should -Not -Throw
         }
 
@@ -171,8 +171,8 @@ Describe 'Update-PuppetModuleReadme' {
           $Description
           Should -Invoke Get-ReadmeContent -Times 1 -Scope Context -ParameterFilter {
             $PowerShellModuleDescription -eq $ManifestData.Description -and
-            $PowerShellModuleProjectUri  -eq $ManifestData.PrivateData.PSData.ProjectUri -and
-            $PowerShellModuleVersion     -eq $ManifestData.ModuleVersion
+            $PowerShellModuleProjectUri -eq $ManifestData.PrivateData.PSData.ProjectUri -and
+            $PowerShellModuleVersion -eq $ManifestData.ModuleVersion
           }
         }
       }

@@ -2,22 +2,22 @@ BeforeAll {
   $ModuleRootPath = Split-Path -Parent $PSCommandPath |
     Split-Path -Parent
   Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1','.ps1')
+  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
 }
 
-Describe "New-PuppetDscModule" {
+Describe 'New-PuppetDscModule' {
   InModuleScope puppet.dsc {
     Context 'Basic Functionality' {
       BeforeAll {
-        Mock Get-PuppetizedModuleName {$Name.ToLowerInvariant()}
-        Mock ConvertTo-CanonicalPuppetAuthorName {$AuthorName}
+        Mock Get-PuppetizedModuleName { $Name.ToLowerInvariant() }
+        Mock ConvertTo-CanonicalPuppetAuthorName { $AuthorName }
         Mock Initialize-PuppetModule {}
         Mock Write-PSFMessage {}
         Mock Test-WSMan {}
         Mock Test-RunningElevated { return $true }
-        Mock Test-SymLinkedItem   { return $false }
+        Mock Test-SymLinkedItem { return $false }
         Mock Add-DscResourceModule {}
-        Mock Resolve-Path {$Path}
+        Mock Resolve-Path { $Path }
         Mock Update-PuppetModuleMetadata {}
         Mock Update-PuppetModuleFixture {}
         Mock Update-PuppetModuleReadme {}
@@ -25,8 +25,8 @@ Describe "New-PuppetDscModule" {
         Mock Set-PSModulePath {}
         Mock Get-DscResource {
           [Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo[]]@(
-            @{Name = 'FooResource'}
-            @{Name = 'BarResource'}
+            @{Name = 'FooResource' }
+            @{Name = 'BarResource' }
           )
         }
         Mock ConvertTo-PuppetResourceApi {
@@ -38,14 +38,14 @@ Describe "New-PuppetDscModule" {
             Provider     = "$Name provider"
           }
         }
-        Mock Test-Path {$true}
+        Mock Test-Path { $true }
         Mock Out-Utf8File {}
         Mock Add-PuppetReferenceDocumentation {}
         Mock Get-Item {}
 
-        $ExpectedOutputDirectory = Join-Path -Path (Get-location) -ChildPath 'import'
+        $ExpectedOutputDirectory = Join-Path -Path (Get-Location) -ChildPath 'import'
       }
-      Context "Elevated" {
+      Context 'Elevated' {
         It 'does not throw' {
           { New-PuppetDscModule -PowerShellModuleName Foo } | Should -Not -Throw
         }
@@ -68,7 +68,7 @@ Describe "New-PuppetDscModule" {
         }
         It 'Updates the Puppet metadata based on the PowerShell metadata' {
           Should -Invoke Update-PuppetModuleMetadata -ParameterFilter {
-            $PuppetModuleFolderPath       -match 'import(/|\\)foo' -and
+            $PuppetModuleFolderPath -match 'import(/|\\)foo' -and
             $PowerShellModuleManifestPath -match 'import(/|\\)foo\S+(/|\\)foo(/|\\)foo.psd1'
           } -Scope Context
         }
@@ -79,15 +79,15 @@ Describe "New-PuppetDscModule" {
         }
         It 'Updates the Puppet README based on the PowerShell metadata' {
           Should -Invoke Update-PuppetModuleReadme -ParameterFilter {
-            $PuppetModuleName             -match 'foo' -and
-            $PowerShellModuleName         -match 'Foo' -and
-            $PuppetModuleFolderPath       -match 'import(/|\\)foo' -and
+            $PuppetModuleName -match 'foo' -and
+            $PowerShellModuleName -match 'Foo' -and
+            $PuppetModuleFolderPath -match 'import(/|\\)foo' -and
             $PowerShellModuleManifestPath -match 'import(/|\\)foo\S+(/|\\)foo(/|\\)foo.psd1'
           } -Scope Context
         }
         It 'Updates the Puppet CHANGELOG based on the PowerShell metadata' {
           Should -Invoke Update-PuppetModuleChangelog -ParameterFilter {
-            $PuppetModuleFolderPath       -match 'import(/|\\)foo' -and
+            $PuppetModuleFolderPath -match 'import(/|\\)foo' -and
             $PowerShellModuleManifestPath -match 'import(/|\\)foo\S+(/|\\)foo(/|\\)foo.psd1'
           } -Scope Context
         }
@@ -130,11 +130,11 @@ Describe "New-PuppetDscModule" {
           } -Times 1 -Scope Context
         }
       }
-      Context "Unelevated" {
+      Context 'Unelevated' {
         BeforeAll {
           Mock Test-RunningElevated { return $false }
           Mock Test-SymLinkedItem {}
-          Mock Test-Path {$true}
+          Mock Test-Path { $true }
         }
 
         It 'does not throw' {
@@ -142,7 +142,7 @@ Describe "New-PuppetDscModule" {
         }
 
         It 'Warns that the function is running in an unelevated context' {
-          Should -Invoke Write-PSFMessage -ParameterFilter {$Message -match '^Running un-elevated' } -Times 1 -Scope Context
+          Should -Invoke Write-PSFMessage -ParameterFilter { $Message -match '^Running un-elevated' } -Times 1 -Scope Context
         }
         It 'Canonicalizes the author name' {
           Should -Invoke ConvertTo-CanonicalPuppetAuthorName -Times 1 -Scope Context
@@ -162,7 +162,7 @@ Describe "New-PuppetDscModule" {
         }
         It 'Updates the Puppet metadata based on the PowerShell metadata' {
           Should -Invoke Update-PuppetModuleMetadata -ParameterFilter {
-            $PuppetModuleFolderPath       -match 'import(/|\\)foo' -and
+            $PuppetModuleFolderPath -match 'import(/|\\)foo' -and
             $PowerShellModuleManifestPath -match 'import(/|\\)foo\S+(/|\\)foo(/|\\)foo.psd1'
           } -Scope Context
         }
@@ -210,14 +210,14 @@ Describe "New-PuppetDscModule" {
           } -Times 1 -Scope Context
         }
       }
-      Context 'Parameter Validation'{
+      Context 'Parameter Validation' {
         Context 'Output Directory' {
           BeforeAll {
-            Mock New-Item {$Path}
-            Mock Resolve-Path {$Path}
+            Mock New-Item { $Path }
+            Mock Resolve-Path { $Path }
             Mock Get-DscResource {}
             Mock ConvertTo-PuppetResourceApi {}
-            New-PuppetDscModule -PowerShellModuleName Foo -OutputDirectory  TestDrive:\Bar -Repository FooRepo
+            New-PuppetDscModule -PowerShellModuleName Foo -OutputDirectory TestDrive:\Bar -Repository FooRepo
           }
 
           It 'Respects the specified path' {
@@ -231,7 +231,7 @@ Describe "New-PuppetDscModule" {
               $Repository -match 'FooRepo'
             } -Times 1 -Scope Context
             Should -Invoke Update-PuppetModuleMetadata -ParameterFilter {
-              $PuppetModuleFolderPath       -match 'bar(/|\\)foo' -and
+              $PuppetModuleFolderPath -match 'bar(/|\\)foo' -and
               $PowerShellModuleManifestPath -match 'bar(/|\\)foo\S+(/|\\)foo(/|\\)foo.psd1'
             } -Scope Context
             Should -Invoke Update-PuppetModuleFixture -ParameterFilter {
@@ -247,8 +247,8 @@ Describe "New-PuppetDscModule" {
         }
         Context 'Puppet Module Fixture' {
           BeforeAll {
-            Mock New-Item {$Path}
-            Mock Resolve-Path {$Path}
+            Mock New-Item { $Path }
+            Mock Resolve-Path { $Path }
             Mock Get-DscResource {}
             Mock ConvertTo-PuppetResourceApi {}
             $FixtureHash = @{
@@ -267,11 +267,11 @@ Describe "New-PuppetDscModule" {
         Context 'Puppet Module Name' {
           Context 'Output Directory' {
             BeforeAll {
-              Mock Resolve-Path {$Path}
+              Mock Resolve-Path { $Path }
               Mock Get-DscResource {}
               Mock ConvertTo-PuppetResourceApi {}
 
-              New-PuppetDscModule -PowerShellModuleName Foo -OutputDirectory  TestDrive:\Bar
+              New-PuppetDscModule -PowerShellModuleName Foo -OutputDirectory TestDrive:\Bar
             }
 
             It 'Respects the specified path' {
@@ -288,7 +288,7 @@ Describe "New-PuppetDscModule" {
                 $Repository -match 'PSGallery'
               } -Times 1 -Scope Context
               Should -Invoke Update-PuppetModuleMetadata -ParameterFilter {
-                $PuppetModuleFolderPath       -match 'bar(/|\\)foo' -and
+                $PuppetModuleFolderPath -match 'bar(/|\\)foo' -and
                 $PowerShellModuleManifestPath -match 'bar(/|\\)foo\S+(/|\\)foo(/|\\)foo.psd1'
               } -Scope Context
               Should -Invoke Update-PuppetModuleFixture -ParameterFilter {
@@ -306,12 +306,12 @@ Describe "New-PuppetDscModule" {
             Mock Get-DscResource {}
             Mock ConvertTo-PuppetResourceApi {}
             Mock New-Item { 'TestDrive:\OutputDirectory' }
-            Mock Get-Item {'Output'}
+            Mock Get-Item { 'Output' }
           }
 
           It 'Only returns output if PassThru is specified' {
             $ExpectNoOutputResult = New-PuppetDscModule -PowerShellModuleName Foo
-            $ExpectOutputResult   = New-PuppetDscModule -PowerShellModuleName Foo -PassThru
+            $ExpectOutputResult = New-PuppetDscModule -PowerShellModuleName Foo -PassThru
             Should -Invoke Get-Item -Times 1 -Scope It
             $ExpectNoOutputResult | Should -BeNullOrEmpty
             $ExpectOutputResult   | Should -Be 'Output'
@@ -321,10 +321,10 @@ Describe "New-PuppetDscModule" {
           BeforeAll {
             Mock Get-DscResource {}
             Mock ConvertTo-PuppetResourceApi {}
-            Mock Get-Item {$Path}
+            Mock Get-Item { $Path }
 
             $UnspecifiedResult = New-PuppetDscModule -PowerShellModuleName Foo -PassThru
-            $SpecifiedResult   = New-PuppetDscModule -PowerShellModuleName Foo -PassThru -PuppetModuleName bar_baz
+            $SpecifiedResult = New-PuppetDscModule -PowerShellModuleName Foo -PassThru -PuppetModuleName bar_baz
           }
 
           It 'Puppetizes the PowerShell module name if a Puppet module name is not specified' {
@@ -336,7 +336,7 @@ Describe "New-PuppetDscModule" {
               $Repository -match 'PSGallery'
             } -Times 1 -Scope Context
             Should -Invoke Update-PuppetModuleMetadata -ParameterFilter {
-              $PuppetModuleFolderPath       -match 'import(/|\\)foo' -and
+              $PuppetModuleFolderPath -match 'import(/|\\)foo' -and
               $PowerShellModuleManifestPath -match 'import(/|\\)foo\S+(/|\\)foo(/|\\)foo.psd1'
             } -Scope Context
             Should -Invoke Update-PuppetModuleFixture -ParameterFilter {
@@ -355,7 +355,7 @@ Describe "New-PuppetDscModule" {
               $Repository -match 'PSGallery'
             } -Times 1 -Scope Context
             Should -Invoke Update-PuppetModuleMetadata -ParameterFilter {
-              $PuppetModuleFolderPath       -match 'import(/|\\)bar_baz' -and
+              $PuppetModuleFolderPath -match 'import(/|\\)bar_baz' -and
               $PowerShellModuleManifestPath -match 'import(/|\\)bar_baz\S+(/|\\)foo(/|\\)foo.psd1'
             } -Scope Context
             Should -Invoke Update-PuppetModuleFixture -ParameterFilter {
@@ -370,7 +370,7 @@ Describe "New-PuppetDscModule" {
       Context 'Error Handling' {
         Context 'When an intermediate step fails' {
           BeforeAll {
-            Mock Initialize-PuppetModule {Throw 'Failure!'}
+            Mock Initialize-PuppetModule { Throw 'Failure!' }
             $UncalledFunctions = @(
               'Add-DscResourceModule'
               'Update-PuppetModuleMetadata'
@@ -400,7 +400,7 @@ Describe "New-PuppetDscModule" {
         }
         Context 'When running elevated and the output folder is in a symlinked path' {
           BeforeAll {
-            Mock Test-SymLinkedItem   { return $true }
+            Mock Test-SymLinkedItem { return $true }
           }
 
           It 'throws an explanatory exception' {

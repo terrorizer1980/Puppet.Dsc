@@ -1,4 +1,4 @@
-New-PSFLicense -Product 'puppet.dsc' -Manufacturer 'Puppet' -ProductVersion $script:ModuleVersion -ProductType Module -Name MIT -Version "1.0.0.0" -Date (Get-Date "2020-03-31") -Text @"
+New-PSFLicense -Product 'puppet.dsc' -Manufacturer 'Puppet' -ProductVersion $script:ModuleVersion -ProductType Module -Name MIT -Version '1.0.0.0' -Date (Get-Date '2020-03-31') -Text @'
 Copyright (c) 2020 Puppet
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,4 +18,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-"@
+'@

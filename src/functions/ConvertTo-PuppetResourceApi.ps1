@@ -36,7 +36,7 @@ Function ConvertTo-PuppetResourceApi {
       2. A combo of name/module to retrieve DSC Resources from
   #>
   [CmdletBinding(
-    DefaultParameterSetName='ByObject'
+    DefaultParameterSetName = 'ByObject'
   )]
   Param(
     [Parameter(
@@ -58,7 +58,7 @@ Function ConvertTo-PuppetResourceApi {
     [object]$Module
   )
 
-  Begin{}
+  Begin {}
 
   Process {
     # Retrieve the DSC Resource information from the system unless passed directly
@@ -70,7 +70,7 @@ Function ConvertTo-PuppetResourceApi {
       }
     } Else {
       $DscResourceToProcess = $DscResource
-      If ($null -eq $DscResourceToProcess.ParameterInfo) { $DscResourceToProcess = Get-DscResourceTypeInformation -DscResource $DscResourceToProcess}
+      If ($null -eq $DscResourceToProcess.ParameterInfo) { $DscResourceToProcess = Get-DscResourceTypeInformation -DscResource $DscResourceToProcess }
     }
     ForEach ($Resource in $DscResourceToProcess) {
       $PuppetizedName = "dsc_$($Resource.Name.ToLowerInvariant())"

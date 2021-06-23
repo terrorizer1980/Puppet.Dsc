@@ -31,7 +31,7 @@ BeforeAll {
     )
 
     if ($PSVersionTable.PSVersion.Major -lt 6) {
-      [byte[]]$byte = get-content -Encoding byte -ReadCount 4 -TotalCount 4 -Path $Path
+      [byte[]]$byte = Get-Content -Encoding byte -ReadCount 4 -TotalCount 4 -Path $Path
     } else {
       [byte[]]$byte = Get-Content -AsByteStream -ReadCount 4 -TotalCount 4 -Path $Path
     }
@@ -49,11 +49,11 @@ BeforeAll {
   }
 }
 
-Describe "Verifying integrity of module files" -Tag @('FileIntegrity', 'General') {
-  Context "Validating PS1 Script files" {
+Describe 'Verifying integrity of module files' -Tag @('FileIntegrity', 'General') {
+  Context 'Validating PS1 Script files' {
     BeforeDiscovery {
       $ScriptFileInfo = Get-ChildItem -Path $moduleRoot -Recurse |
-        Where-Object Name -like "*.ps1" |
+        Where-Object Name -Like '*.ps1' |
         Where-Object FullName -NotLike "$moduleRoot\tests\*" |
         ForEach-Object -Process {
           @{
@@ -64,7 +64,7 @@ Describe "Verifying integrity of module files" -Tag @('FileIntegrity', 'General'
         }
     }
 
-    Context "Validating <ShortName>" -ForEach $ScriptFileInfo {
+    Context 'Validating <ShortName>' -ForEach $ScriptFileInfo {
       BeforeAll {
         $Tokens = $null
         $ParseErrors = $null
@@ -76,7 +76,7 @@ Describe "Verifying integrity of module files" -Tag @('FileIntegrity', 'General'
       }
 
       It 'should have no trailing space' {
-        ($FileHandle | Select-String "\s$" | Where-Object { $_.Line.Trim().Length -gt 0}).LineNumber | Should -BeNullOrEmpty
+        ($FileHandle | Select-String '\s$' | Where-Object { $_.Line.Trim().Length -gt 0 }).LineNumber | Should -BeNullOrEmpty
       }
 
       It 'should have no syntax errors' {
@@ -86,17 +86,17 @@ Describe "Verifying integrity of module files" -Tag @('FileIntegrity', 'General'
       It 'should not use banned commands' {
         ForEach ($Command in $Global:BannedCommands) {
           If ($global:MayContainCommand["$Command"] -notcontains $FileHandle.Name) {
-            $tokens | Where-Object Text -eq $Command | Should -BeNullOrEmpty
+            $tokens | Where-Object Text -EQ $Command | Should -BeNullOrEmpty
           }
         }
       }
     }
   }
 
-  Context "Validating help.txt help files" {
+  Context 'Validating help.txt help files' {
     BeforeDiscovery {
-      $HelpFileInfo  = Get-ChildItem -Path $moduleRoot -Recurse |
-        Where-Object Name -like "*.help.txt" |
+      $HelpFileInfo = Get-ChildItem -Path $moduleRoot -Recurse |
+        Where-Object Name -Like '*.help.txt' |
         Where-Object FullName -NotLike "$moduleRoot\tests\*" |
         ForEach-Object -Process {
           @{
@@ -107,14 +107,14 @@ Describe "Verifying integrity of module files" -Tag @('FileIntegrity', 'General'
         }
     }
 
-    Context "Validating <ShortName>" -ForEach $HelpFileInfo {
+    Context 'Validating <ShortName>' -ForEach $HelpFileInfo {
       It 'should have UTF8 encoding without a Byte Order Mark' {
         # Temporary hack as all the files are UTF8 but the tests don't support that yet
         Get-FileEncoding -Path $FullName | Should -Be 'UTF-8'
       }
 
       It 'should have no trailing space' {
-        ($FileHandle | Select-String "\s$" | Where-Object { $_.Line.Trim().Length -gt 0}).LineNumber | Should -BeNullOrEmpty
+        ($FileHandle | Select-String '\s$' | Where-Object { $_.Line.Trim().Length -gt 0 }).LineNumber | Should -BeNullOrEmpty
       }
     }
   }

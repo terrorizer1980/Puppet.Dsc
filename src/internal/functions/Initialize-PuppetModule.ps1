@@ -19,9 +19,9 @@ function Initialize-PuppetModule {
   #>
   [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
   param (
-    [Parameter(Mandatory=$True)]
+    [Parameter(Mandatory = $True)]
     [string]$OutputFolderPath,
-    [Parameter(Mandatory=$True)]
+    [Parameter(Mandatory = $True)]
     [string]$PuppetModuleName
   )
 
@@ -39,8 +39,8 @@ function Initialize-PuppetModule {
         $null = New-Item -Path $OutputFolderPath -ItemType Directory -Force
       }
       # Clean previously scaffolded folder
-      If (Test-Path $ModuleFolderPath){
-        If ($PSCmdlet.ShouldProcess($ModuleFolderPath, "Remove existing Puppet Module Folder")) {
+      If (Test-Path $ModuleFolderPath) {
+        If ($PSCmdlet.ShouldProcess($ModuleFolderPath, 'Remove existing Puppet Module Folder')) {
           Remove-Item -Path $ModuleFolderPath -Force -Recurse
         }
       }

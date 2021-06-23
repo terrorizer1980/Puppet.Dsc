@@ -9,7 +9,7 @@ Function Test-DscResourcePropertyParameterStatus {
       The DSC Resource property to check for parameter status
     .EXAMPLE
       Test-DscResourcePropertyParameterStatus -Property $DscResource.Properties[0]
-      
+
       This will return `$True` if the property is a parameter and `$False` otherwise.
   #>
   [cmdletbinding()]
@@ -33,5 +33,5 @@ Function Test-DscResourcePropertyParameterStatus {
     'Validate'
   )
 
-  $Property.Name -in $KnownParameters -or  $Property.ReferenceClassName -match 'Credential'
+  $Property.Name -in $KnownParameters -or $Property.ReferenceClassName -match 'Credential'
 }

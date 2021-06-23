@@ -16,7 +16,7 @@ Function Test-EmbeddedInstance {
       THe property type of a DSC resource property
     .EXAMPLE
       Test-EmbeddedInstance -PropertyType $DscResource.Properties[0].PropertyType
-      
+
       This will return `$True` if the property is an embedded instance and `$False` otherwise.
   #>
   [cmdletbinding()]

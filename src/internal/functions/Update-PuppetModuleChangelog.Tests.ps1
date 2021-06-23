@@ -3,7 +3,7 @@ BeforeAll {
     Split-Path -Parent |
     Split-Path -Parent
   Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1','.ps1')
+  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
 }
 
 Describe 'UpdatePuppetModuleChangelog' {
@@ -24,17 +24,17 @@ Describe 'UpdatePuppetModuleChangelog' {
         $ManifestDataNoReleaseNotes = Import-PSFPowerShellDataFile -Path $ManifestFixtureFile
         $ManifestDataNoReleaseNotes.PrivateData.PSData.Remove('ReleaseNotes')
       }
-  
+
       Context 'Parameter handling' {
         BeforeAll {
           Mock Import-PSFPowerShellDataFile { return $ManifestData }
-          Mock Out-Utf8File                 { }
+          Mock Out-Utf8File { }
         }
-  
+
         It 'Errors if the specified Puppet changelog file cannot be found' {
           $Parameters = @{
             PowerShellModuleManifestPath = $ManifestFilePath
-            PuppetModuleFolderPath = 'TestDrive:\foo\bar'
+            PuppetModuleFolderPath       = 'TestDrive:\foo\bar'
           }
           # NB: This test may only work on English language test nodes?
           { Update-PuppetModuleChangelog @Parameters } | Should -Throw "Cannot find path 'TestDrive:\foo\bar\CHANGELOG.md' because it does not exist."
@@ -42,22 +42,22 @@ Describe 'UpdatePuppetModuleChangelog' {
         It 'Errors if the specified PowerShell module manifest cannot be found' {
           $Parameters = @{
             PowerShellModuleManifestPath = 'TestDrive:\foo\bar'
-            PuppetModuleFolderPath = $PuppetFolderPath
+            PuppetModuleFolderPath       = $PuppetFolderPath
           }
-          { Update-PuppetModuleChangelog @Parameters  } | Should -Throw "Cannot find path 'TestDrive:\foo\bar' because it does not exist."
+          { Update-PuppetModuleChangelog @Parameters } | Should -Throw "Cannot find path 'TestDrive:\foo\bar' because it does not exist."
         }
       }
       Context 'When Release Notes exist' {
         BeforeAll {
           Mock Import-PSFPowerShellDataFile { return $ManifestData }
-          Mock Out-Utf8File                 { return $InputObject }
-  
+          Mock Out-Utf8File { return $InputObject }
+
           $Parameters = @{
             PowerShellModuleManifestPath = $ManifestFilePath
-            PuppetModuleFolderPath = $PuppetFolderPath
+            PuppetModuleFolderPath       = $PuppetFolderPath
           }
         }
-  
+
         It 'Writes the file once with the ReleaseNotes as the content' {
           $Result = Update-PuppetModuleChangelog @Parameters
           Should -Invoke Out-Utf8File -Times 1
@@ -67,14 +67,14 @@ Describe 'UpdatePuppetModuleChangelog' {
       Context 'When neither Release Notes nor a changelog exist' {
         BeforeAll {
           Mock Import-PSFPowerShellDataFile { return $ManifestDataNoReleaseNotes }
-          Mock Out-Utf8File                 { return $InputObject }
-  
+          Mock Out-Utf8File { return $InputObject }
+
           $Parameters = @{
             PowerShellModuleManifestPath = $ManifestFilePath
-            PuppetModuleFolderPath = $PuppetFolderPath
+            PuppetModuleFolderPath       = $PuppetFolderPath
           }
         }
-  
+
         It 'Does not write to the file' {
           Update-PuppetModuleChangelog @Parameters
           Should -Invoke Out-Utf8File -Times 0
@@ -82,16 +82,16 @@ Describe 'UpdatePuppetModuleChangelog' {
       }
       Context 'When Release Notes do not exist but a changelog does' {
         BeforeAll {
-          New-Item -path 'TestDrive:\CHANGELOG.md' -Value 'foo'
+          New-Item -Path 'TestDrive:\CHANGELOG.md' -Value 'foo'
           Mock Import-PSFPowerShellDataFile { return $ManifestDataNoReleaseNotes }
-          Mock Out-Utf8File                 { return $InputObject }
-  
+          Mock Out-Utf8File { return $InputObject }
+
           $Parameters = @{
             PowerShellModuleManifestPath = $ManifestFilePath
-            PuppetModuleFolderPath = $PuppetFolderPath
+            PuppetModuleFolderPath       = $PuppetFolderPath
           }
         }
-  
+
         It 'Writes the file once with the CHANGELOG as the content' {
           $Result = Update-PuppetModuleChangelog @Parameters
           $Result | Should -Be 'foo'

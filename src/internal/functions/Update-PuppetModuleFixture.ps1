@@ -37,8 +37,8 @@ function Update-PuppetModuleFixture {
   param (
     [string]$PuppetModuleFolderPath,
     [hashtable]$Fixture = @{
-      Section   = 'forge_modules'
-      Repo = 'puppetlabs/pwshlib'
+      Section = 'forge_modules'
+      Repo    = 'puppetlabs/pwshlib'
     }
   )
 
@@ -53,7 +53,7 @@ function Update-PuppetModuleFixture {
         Throw "Invalid fixture section passed: must be one of: $($ValidSections -join ', ')`r`nPassed value: $($Fixture.Section)"
       }
       If ([string]::IsNullOrEmpty($Fixture.Repo)) {
-        Throw "Fixture repo cannot be null or empty; specify a Forge module name or repository URI"
+        Throw 'Fixture repo cannot be null or empty; specify a Forge module name or repository URI'
       }
     }
   }
@@ -62,7 +62,7 @@ function Update-PuppetModuleFixture {
     Try {
       $ErrorActionPreference = 'Stop'
       Test-FixtureSchema -Fixture $Fixture
-      $FixturesFilePath = Resolve-Path -Path (Join-Path $PuppetModuleFolderPath ".fixtures.yml")
+      $FixturesFilePath = Resolve-Path -Path (Join-Path $PuppetModuleFolderPath '.fixtures.yml')
       $FixturesYaml = Get-Content -Path $FixturesFilePath -Raw | ConvertFrom-Yaml
       $FixturesYaml.fixtures.($Fixture.Section) = @{
         pwshlib = @{

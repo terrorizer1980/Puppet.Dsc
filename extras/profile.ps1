@@ -2,11 +2,11 @@ Function New-LocalGemfile {
   Param (
     [string]$Path
   )
-  $Gems = @"
+  $Gems = @'
 gem 'fuubar'
 gem 'pry-byebug'
 gem 'pry-stack_explorer'
-"@
+'@
   if ([string]::IsNullOrEmpty($Path)) {
     $Path = Join-Path -Path (Get-Location) -ChildPath 'gemfile.local'
   }

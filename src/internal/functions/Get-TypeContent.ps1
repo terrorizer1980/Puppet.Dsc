@@ -28,7 +28,7 @@ function Get-TypeContent {
 
   Process {
     ForEach ($Resource in $DscResource) {
-      If($Null -eq $Resource.ParameterInfo) {
+      If ($Null -eq $Resource.ParameterInfo) {
         $Resource = Get-DscResourceTypeInformation -DscResource $Resource
       }
       If ($Null -eq $Resource.FriendlyName) {

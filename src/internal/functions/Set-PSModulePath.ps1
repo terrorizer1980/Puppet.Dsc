@@ -25,7 +25,7 @@ Function Set-PSModulePath {
   )
 
   Process {
-    If ($PSCmdlet.ShouldProcess("PSModulePath", "Overwriting the PSModulePath with $($Path -Join ';')")) {
+    If ($PSCmdlet.ShouldProcess('PSModulePath', "Overwriting the PSModulePath with $($Path -Join ';')")) {
       If ($ReturnInitialPath) { $Env:PSModulePath }
       $Env:PSModulePath = $Path -Join ';'
     }
