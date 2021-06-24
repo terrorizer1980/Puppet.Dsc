@@ -23,7 +23,7 @@ Function Get-EmbeddedCimInstance {
       found to be embedded.
   #>
   param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$ClassName,
     [string]$Namespace = 'root\Microsoft\Windows\DesiredStateConfiguration',
     [switch]$Recurse
@@ -34,7 +34,7 @@ Function Get-EmbeddedCimInstance {
   Process {
     [string[]]$EmbeddedInstanceTypes = Get-CimClassPropertiesList -ClassName $ClassName -Namespace $Namespace |
       Select-Object -ExpandProperty Qualifiers |
-      Where-Object  -FilterScript {$_.Name -eq 'EmbeddedInstance'} |
+      Where-Object -FilterScript { $_.Name -eq 'EmbeddedInstance' } |
       Select-Object -ExpandProperty Value
     If ($Recurse) {
       ForEach ($EmbeddedInstanceType in $EmbeddedInstanceTypes) {
@@ -42,7 +42,7 @@ Function Get-EmbeddedCimInstance {
       }
     }
     # Sometimes a null gets added to the list for some reason, but only in testing; discard null values
-    $EmbeddedInstanceTypes | Where-Object {![string]::IsNullOrEmpty($_)}
+    $EmbeddedInstanceTypes | Where-Object { ![string]::IsNullOrEmpty($_) }
   }
 
   End {}

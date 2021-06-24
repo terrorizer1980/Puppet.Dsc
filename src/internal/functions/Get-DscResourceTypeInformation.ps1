@@ -37,7 +37,7 @@ Function Get-DscResourceTypeInformation {
       2. A combo of name/module to retrieve DSC Resources from
   #>
   [CmdletBinding(
-    DefaultParameterSetName='ByObject'
+    DefaultParameterSetName = 'ByObject'
   )]
   Param(
     [Parameter(
@@ -59,7 +59,7 @@ Function Get-DscResourceTypeInformation {
     [object]$Module
   )
 
-  Begin{
+  Begin {
     $RunningElevated = Test-RunningElevated
   }
 

@@ -3,7 +3,7 @@ BeforeAll {
     Split-Path -Parent |
     Split-Path -Parent
   Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1','.ps1')
+  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
 }
 
 Describe 'Get-PuppetDataType' {
@@ -11,9 +11,9 @@ Describe 'Get-PuppetDataType' {
     BeforeAll {
       Function New-DscParameter {
         Param (
-          [string]$Name         = 'foo',
-          [string]$PropertyType ='[string]',
-          [string[]]$Values     = @(),
+          [string]$Name = 'foo',
+          [string]$PropertyType = '[string]',
+          [string[]]$Values = @(),
           [switch]$IsMandatory
         )
         [pscustomobject]@{

@@ -46,7 +46,7 @@ function Add-DscResourceModule {
       if (-not(Test-Path $Path)) {
         $null = New-Item -Path $Path -Force -ItemType 'Directory'
       }
-      $PathTmp = ($Path -Replace "(/|\\)$", $Null) + '_tmp'
+      $PathTmp = ($Path -Replace '(/|\\)$', $Null) + '_tmp'
       if (-not(Test-Path $PathTmp)) {
         $null = New-Item -Path $PathTmp -Force -ItemType 'Directory'
       }

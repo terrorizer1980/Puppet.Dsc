@@ -5,7 +5,7 @@ BeforeAll {
     Split-Path -Parent |
     Split-Path -Parent
   Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1','.ps1')
+  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
 }
 
 Describe 'Get-DscResourceParameterInfoByCimClass' -Skip:(!$RunningElevated) {
@@ -36,7 +36,7 @@ Describe 'Get-DscResourceParameterInfoByCimClass' -Skip:(!$RunningElevated) {
         # $CimlessParameterToInspect.mof_type | Should -BeExactly 'bool'
         $CimlessParameterToInspect.mof_type          | Should -BeExactly 'Boolean'
       }
-      It 'returns parameter info for resources with embedded CIM instances'{
+      It 'returns parameter info for resources with embedded CIM instances' {
         # We cannot effectively mock out the underlying object, so we need to retrieve a
         # well-known DSC resource at a specific version
         $CimfulDscResource = Get-DscResource -Name NTFSAccessEntry -Module @{
@@ -45,8 +45,8 @@ Describe 'Get-DscResourceParameterInfoByCimClass' -Skip:(!$RunningElevated) {
         }
         $CimfulParametersToInspect = Get-DscResourceParameterInfoByCimClass -DscResource $CimfulDscResource |
           Sort-Object -Property Name
-        $AclProperty  = $CimfulParametersToInspect | Where-Object -FilterScript { $_.Name -eq 'AccessControlList'}
-        $PathProperty = $CimfulParametersToInspect | Where-Object -FilterScript { $_.Name -eq 'Path'}
+        $AclProperty = $CimfulParametersToInspect | Where-Object -FilterScript { $_.Name -eq 'AccessControlList' }
+        $PathProperty = $CimfulParametersToInspect | Where-Object -FilterScript { $_.Name -eq 'Path' }
         $AclProperty.Name              | Should -BeExactly 'accesscontrollist'
         # This function currently cannot discover default values
         $AclProperty.DefaultValue      | Should -BeNullOrEmpty
@@ -63,7 +63,7 @@ Describe 'Get-DscResourceParameterInfoByCimClass' -Skip:(!$RunningElevated) {
       }
     }
     Context "When the resource can't be found" {
-      Mock Initialize-DscResourceCimClass {Throw 'foo'}
+      Mock Initialize-DscResourceCimClass { Throw 'foo' }
       $DscResource = Get-DscResource -Name Archive -Module @{
         ModuleName    = 'PSDscResources'
         ModuleVersion = '2.12.0.0'

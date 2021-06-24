@@ -30,9 +30,9 @@ function ConvertTo-PuppetRubyString {
     [Parameter(ValueFromPipeline)]
     [string]$String
   )
-  
+
   begin {}
-  
+
   process {
     if ($String -match "'") {
       # Puppet strings does not currently handle %q() delimited strings
@@ -48,6 +48,6 @@ function ConvertTo-PuppetRubyString {
       "'$String'"
     }
   }
-  
+
   end {}
 }

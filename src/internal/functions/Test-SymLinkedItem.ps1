@@ -22,13 +22,13 @@ Function Test-SymLinkedItem {
   [cmdletbinding()]
   [OutputType([Boolean])]
   Param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$Path,
     [switch]$Recurse
   )
 
   $SymLinkedItem = Get-Item -Path $Path -Force -ErrorAction SilentlyContinue |
-    Where-Object -FilterScript {![string]::IsNullOrEmpty($_.LinkType)}
+    Where-Object -FilterScript { ![string]::IsNullOrEmpty($_.LinkType) }
   If ($null -ne $SymLinkedItem) {
     return $true
   } ElseIf ($Recurse) {

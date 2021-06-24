@@ -3,7 +3,7 @@ BeforeAll {
     Split-Path -Parent |
     Split-Path -Parent
   Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1','.ps1')
+  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
 }
 
 Describe 'Get-EmbeddedCimInstance' {
@@ -11,20 +11,20 @@ Describe 'Get-EmbeddedCimInstance' {
     BeforeAll {
       Mock Get-CimClassPropertiesList {
         @(
-          [pscustomobject]@{ Qualifiers = @([pscustomobject]@{ Name='foo';Value='bar' }) }
-          [pscustomobject]@{ Qualifiers = @([pscustomobject]@{ Name='EmbeddedInstance';Value='bar' }) }
+          [pscustomobject]@{ Qualifiers = @([pscustomobject]@{ Name = 'foo'; Value = 'bar' }) }
+          [pscustomobject]@{ Qualifiers = @([pscustomobject]@{ Name = 'EmbeddedInstance'; Value = 'bar' }) }
         )
-      } -ParameterFilter {$ClassName -eq 'foo'}
+      } -ParameterFilter { $ClassName -eq 'foo' }
       Mock Get-CimClassPropertiesList {
         @(
-          [pscustomobject]@{ Qualifiers = @([pscustomobject]@{ Name='EmbeddedInstance';Value='baz' }) }
+          [pscustomobject]@{ Qualifiers = @([pscustomobject]@{ Name = 'EmbeddedInstance'; Value = 'baz' }) }
         )
-      } -ParameterFilter {$ClassName -eq 'bar'}
+      } -ParameterFilter { $ClassName -eq 'bar' }
       Mock Get-CimClassPropertiesList {
         @(
-          [pscustomobject]@{ Qualifiers = @([pscustomobject]@{ Name='baz';Value='bing' }) }
+          [pscustomobject]@{ Qualifiers = @([pscustomobject]@{ Name = 'baz'; Value = 'bing' }) }
         )
-      } -ParameterFilter {$ClassName -eq 'baz'}
+      } -ParameterFilter { $ClassName -eq 'baz' }
     }
     Context 'Basic functionality' {
       It 'returns every discovered property for the CIM class' {

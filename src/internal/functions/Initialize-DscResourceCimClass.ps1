@@ -18,10 +18,10 @@ Function Initialize-DscResourceCimClass {
     [string]$ModuleVersion
   )
   $InvokeParams = @{
-    Name       = $Name
-    Method     = 'Get'
-    Property   = @{foo = 1}
-    ModuleName = @{
+    Name        = $Name
+    Method      = 'Get'
+    Property    = @{foo = 1 }
+    ModuleName  = @{
       ModuleName    = $ModuleName
       ModuleVersion = $ModuleVersion
     }

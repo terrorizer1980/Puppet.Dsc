@@ -26,10 +26,10 @@ function Update-PuppetModuleChangelog {
 
   begin {
     Try {
-      $PuppetChangelogFilePath       = Resolve-Path (Join-Path $PuppetModuleFolderPath "CHANGELOG.md") -ErrorAction Stop
-      $PowerShellModuleManifestPath  = Resolve-Path -Path $PowerShellModuleManifestPath -ErrorAction Stop
+      $PuppetChangelogFilePath = Resolve-Path (Join-Path $PuppetModuleFolderPath 'CHANGELOG.md') -ErrorAction Stop
+      $PowerShellModuleManifestPath = Resolve-Path -Path $PowerShellModuleManifestPath -ErrorAction Stop
       $PowerShellModuleChangelogPath = Resolve-Path -Path (Join-Path (Split-Path -Parent $PowerShellModuleManifestPath) 'CHANGELOG.md') -ErrorAction SilentlyContinue
-      $PowerShellMetadata            = Import-PSFPowerShellDataFile -Path $PowerShellModuleManifestPath -ErrorAction Stop
+      $PowerShellMetadata = Import-PSFPowerShellDataFile -Path $PowerShellModuleManifestPath -ErrorAction Stop
     } Catch {
       # Rethrow any exceptions from the above commands
       $PSCmdlet.ThrowTerminatingError($PSItem)
@@ -46,7 +46,7 @@ function Update-PuppetModuleChangelog {
       $ChangelogContent = Get-Content $PowerShellModuleChangelogPath
     }
     If ($ChangelogContent) {
-      If ($PSCmdlet.ShouldProcess($PuppetChangelogFilePath, "Overwrite Puppet Module Changelog")) {
+      If ($PSCmdlet.ShouldProcess($PuppetChangelogFilePath, 'Overwrite Puppet Module Changelog')) {
         Out-Utf8File -Path $PuppetChangelogFilePath -InputObject $ChangelogContent
       }
     }

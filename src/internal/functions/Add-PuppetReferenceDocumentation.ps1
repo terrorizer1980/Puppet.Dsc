@@ -1,5 +1,5 @@
 function Add-PuppetReferenceDocumentation {
-    <#
+  <#
       .SYNOPSIS
         Generate REFERENCE.md
       .DESCRIPTION
@@ -12,28 +12,28 @@ function Add-PuppetReferenceDocumentation {
         Add-PuppetReferenceDocumentation -PuppetModuleFolderPath C:\output\testmodule
         This command will generate `REFERENCE.md` file for the `testmodule` Puppet module.
     #>
-    [CmdletBinding()]
-    param (
-      [Parameter(Mandatory=$true)]
-      $PuppetModuleFolderPath
-    )
+  [CmdletBinding()]
+  param (
+    [Parameter(Mandatory = $true)]
+    $PuppetModuleFolderPath
+  )
 
-    begin {
-      $PuppetModuleFolderPath = Resolve-Path -Path $PuppetModuleFolderPath -ErrorAction Stop
-      $Command = "pdk bundle exec puppet strings generate --format markdown --out REFERENCE.md"
-    }
-    process {
-      Try {
-        $ErrorActionPreference = 'Stop'
-        Invoke-PdkCommand -Path $PuppetModuleFolderPath -Command $Command -SuccessFilterScript {
-          $_ -match "% documented"
-        }
-        # Verify REFERENCE.md file is generated
-        $ReferenceFile = Join-Path -Path $PuppetModuleFolderPath -ChildPath REFERENCE.md
-        $null = Resolve-Path $ReferenceFile
-      } Catch {
-        $PSCmdlet.ThrowTerminatingError($PSItem)
-      }
-    }
-    end {}
+  begin {
+    $PuppetModuleFolderPath = Resolve-Path -Path $PuppetModuleFolderPath -ErrorAction Stop
+    $Command = 'pdk bundle exec puppet strings generate --format markdown --out REFERENCE.md'
   }
+  process {
+    Try {
+      $ErrorActionPreference = 'Stop'
+      Invoke-PdkCommand -Path $PuppetModuleFolderPath -Command $Command -SuccessFilterScript {
+        $_ -match '% documented'
+      }
+      # Verify REFERENCE.md file is generated
+      $ReferenceFile = Join-Path -Path $PuppetModuleFolderPath -ChildPath REFERENCE.md
+      $null = Resolve-Path $ReferenceFile
+    } Catch {
+      $PSCmdlet.ThrowTerminatingError($PSItem)
+    }
+  }
+  end {}
+}

@@ -3,7 +3,7 @@ BeforeAll {
     Split-Path -Parent |
     Split-Path -Parent
   Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1','.ps1')
+  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
 }
 
 Describe 'Update-PuppetModuleMetadata' {
@@ -112,7 +112,7 @@ Describe 'Update-PuppetModuleMetadata' {
       Context 'Edge Cases' {
         Context 'Issues Url' {
           BeforeAll {
-            Mock Invoke-WebRequest { If ($Uri -match 'bar') {throw 'Site not found'} }
+            Mock Invoke-WebRequest { If ($Uri -match 'bar') { throw 'Site not found' } }
           }
           It 'Sets the issues url to the issues tab of a repo, if it can resolve the Project URI to a valid git repo' {
             # Replace the Project URI with a "valid" GitHub repo URI, should direct to the issues tab:
@@ -134,7 +134,7 @@ Describe 'Update-PuppetModuleMetadata' {
 
           It 'Defaults to the project uri if no Help URI is specified' {
             # Remove the HelpUri from the manifest
-            Get-Content -Path $ManifestFilePath | Where-Object -FilterScript {$_ -notmatch 'HelpUri' } | Out-File $ManifestFilePath
+            Get-Content -Path $ManifestFilePath | Where-Object -FilterScript { $_ -notmatch 'HelpUri' } | Out-File $ManifestFilePath
             Update-PuppetModuleMetadata -PuppetModuleFolderPath $PuppetFolderPath -PowerShellModuleManifestPath $ManifestFilePath |
               Select-Object -ExpandProperty project_page | Should -Be 'https://go.microsoft.com/fwlink/?LinkId=828955'
           }

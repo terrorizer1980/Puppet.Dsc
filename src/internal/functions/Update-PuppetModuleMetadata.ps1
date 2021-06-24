@@ -27,10 +27,10 @@ function Update-PuppetModuleMetadata {
 
   begin {
     Try {
-      $PuppetModuleMetadataFilePath = Resolve-Path (Join-Path $PuppetModuleFolderPath "metadata.json") -ErrorAction Stop
+      $PuppetModuleMetadataFilePath = Resolve-Path (Join-Path $PuppetModuleFolderPath 'metadata.json') -ErrorAction Stop
       $PowerShellModuleManifestPath = Resolve-Path -Path $PowerShellModuleManifestPath -ErrorAction Stop
-      $PuppetMetadata               = Get-Content -Path $PuppetModuleMetadataFilePath | ConvertFrom-Json -ErrorAction Stop
-      $PowerShellMetadata           = Import-PSFPowerShellDataFile -Path $PowerShellModuleManifestPath -ErrorAction Stop
+      $PuppetMetadata = Get-Content -Path $PuppetModuleMetadataFilePath | ConvertFrom-Json -ErrorAction Stop
+      $PowerShellMetadata = Import-PSFPowerShellDataFile -Path $PowerShellModuleManifestPath -ErrorAction Stop
     } Catch {
       # Rethrow any exceptions from the above commands
       $PSCmdlet.ThrowTerminatingError($PSItem)
@@ -39,7 +39,7 @@ function Update-PuppetModuleMetadata {
 
   process {
     If (![string]::IsNullOrEmpty($PuppetModuleAuthor)) {
-      $PuppetMetadata.name   = $PuppetMetadata.name -replace '(^\S+)-(\S+)', "$PuppetModuleAuthor-`$2"
+      $PuppetMetadata.name = $PuppetMetadata.name -replace '(^\S+)-(\S+)', "$PuppetModuleAuthor-`$2"
       $PuppetMetadata.author = $PuppetModuleAuthor
     }
     $PuppetMetadata.version = Get-PuppetModuleVersion -Version $PowerShellMetadata.ModuleVersion
@@ -47,10 +47,10 @@ function Update-PuppetModuleMetadata {
     $summary = $summary -Replace '"', '\"'
     # summary needs to be 144 chars or less (see https://github.com/voxpupuli/metadata-json-lint/blob/5ab67f9404ee65da0efd84a597b2ee86152d2659/lib/metadata-json-lint/schema.rb#L99 )
     if ($summary.length -gt 144) {
-      $summary = $summary.substring(0, 144 - 3) + "..."
+      $summary = $summary.substring(0, 144 - 3) + '...'
     }
     $PuppetMetadata.summary = $summary
-    $PuppetMetadata.source  = $PowerShellMetadata.PrivateData.PSData.ProjectUri
+    $PuppetMetadata.source = $PowerShellMetadata.PrivateData.PSData.ProjectUri
     if ([string]::IsNullOrEmpty($PuppetMetadata.source)) {
       $PowerShellModuleName = Get-Item $PowerShellModuleManifestPath | Select-Object -ExpandProperty BaseName
       $PuppetMetadata.source = "https://www.powershellgallery.com/packages/$PowerShellModuleName/$($PowerShellMetadata.ModuleVersion)/Content/$PowerShellModuleName.psd1"
@@ -63,10 +63,10 @@ function Update-PuppetModuleMetadata {
           $null = Invoke-WebRequest -Uri $IssueUri -UseBasicParsing -ErrorAction Stop
           $PuppetMetadata | Add-Member -MemberType NoteProperty -Name issues_url -Value $IssueUri
         } Catch {
-          $PuppetMetadata | Add-Member -MemberType NoteProperty -Name issues_url -Value  $PowerShellMetadata.PrivateData.PSData.ProjectUri
+          $PuppetMetadata | Add-Member -MemberType NoteProperty -Name issues_url -Value $PowerShellMetadata.PrivateData.PSData.ProjectUri
         }
       }
-      Default { $PuppetMetadata | Add-Member -MemberType NoteProperty -Name issues_url -Value  $PowerShellMetadata.PrivateData.PSData.ProjectUri }
+      Default { $PuppetMetadata | Add-Member -MemberType NoteProperty -Name issues_url -Value $PowerShellMetadata.PrivateData.PSData.ProjectUri }
     }
     # If the HelpInfoURI is specified, use it, otherwise default to project page
     If ($null -ne $PowerShellMetadata.HelpInfoURI) {
@@ -77,14 +77,14 @@ function Update-PuppetModuleMetadata {
     # Update the dependencies to include the base DSC provider and PowerShell code manager
     $PuppetMetadata.dependencies = @(
       @{
-        name = 'puppetlabs/pwshlib'
+        name                = 'puppetlabs/pwshlib'
         version_requirement = '>= 0.7.0 < 2.0.0'
       }
     )
     # Update the operating sytem to only support windows *for now*.
     $PuppetMetadata.operatingsystem_support = @(
       @{
-        operatingsystem = 'windows'
+        operatingsystem        = 'windows'
         operatingsystemrelease = @(
           '2012',
           '2012R2',

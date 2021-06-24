@@ -12,13 +12,13 @@ Function Get-CimClassPropertiesList {
       The CIM namespace to look in; by default, the root DSC namespace.
     .EXAMPLE
       Get-CimClassPropertiesList -ClassName NTFSAccessEntry
-      
+
       This command will look in the DSC namespace for the NTFSAccessEntry CIM
       Class and, if loaded, return its properties as an iterable array.
   #>
   [cmdletbinding()]
   param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$ClassName,
     [string]$Namespace = 'root\Microsoft\Windows\DesiredStateConfiguration'
   )
@@ -29,7 +29,7 @@ Function Get-CimClassPropertiesList {
     # For some reason, the base list is not iterable, so make it an iterable variable
     Get-CimClass -ClassName $ClassName -Namespace $Namespace |
       Select-Object -ExpandProperty CimClassProperties |
-      ForEach-Object {$_}
+      ForEach-Object { $_ }
   }
 
   End {}

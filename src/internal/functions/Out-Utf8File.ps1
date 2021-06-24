@@ -16,14 +16,14 @@ Function Out-Utf8File {
   #>
   [CmdletBinding()]
   param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$Path,
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [psobject]$InputObject
   )
-  
+
   begin {}
-  
+
   process {
     [IO.File]::WriteAllLines($Path, $InputObject)
   }

@@ -31,29 +31,29 @@ function Get-ReadmeContent {
   [cmdletbinding()]
   param (
     [OutputType([String])]
-    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PowerShellModuleName,
+    [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$PowerShellModuleName,
     [ValidateNotNullOrEmpty()][string]$PowerShellModuleDescription,
     [ValidateNotNullOrEmpty()][string]$PowerShellModuleGalleryUri,
     [ValidateNotNullOrEmpty()][string]$PowerShellModuleProjectUri,
     [ValidateNotNullOrEmpty()][string]$PowerShellModuleVersion,
-    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PuppetModuleName
+    [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$PuppetModuleName
   )
 
   Begin {
-    $BuilderModuleGalleryUri      = 'https://www.powershellgallery.com/packages/puppet.dsc'
-    $BuilderModuleRepository      = 'https://github.com/puppetlabs/Puppet.Dsc'
-    $BaseProviderSource           = 'https://github.com/puppetlabs/ruby-pwsh/blob/main/lib/puppet/provider/dsc_base_provider/dsc_base_provider.rb'
-    $ResourceApiOverview          = 'https://puppet.com/docs/puppet/latest/create_types_and_providers_resource_api.html'
-    $ResourceApiDocumentation     = 'https://puppet.com/docs/puppet/latest/about_the_resource_api.html'
-    $dscForgePage                 = 'https://forge.puppet.com/dsc'
-    $pwshlibForgePage             = 'https://forge.puppet.com/puppetlabs/pwshlib'
-    $pwshlibIssuesPage            = 'https://github.com/puppetlabs/ruby-pwsh/issues/new/choose'
-    $PowerShellGetUri             = 'https://github.com/PowerShell/PowerShellGet'
-    $NarrativeDocumentation       = 'https://puppetlabs.github.io/iac/news/roadmap/2020/03/30/dsc-announcement.html'
+    $BuilderModuleGalleryUri = 'https://www.powershellgallery.com/packages/puppet.dsc'
+    $BuilderModuleRepository = 'https://github.com/puppetlabs/Puppet.Dsc'
+    $BaseProviderSource = 'https://github.com/puppetlabs/ruby-pwsh/blob/main/lib/puppet/provider/dsc_base_provider/dsc_base_provider.rb'
+    $ResourceApiOverview = 'https://puppet.com/docs/puppet/latest/create_types_and_providers_resource_api.html'
+    $ResourceApiDocumentation = 'https://puppet.com/docs/puppet/latest/about_the_resource_api.html'
+    $dscForgePage = 'https://forge.puppet.com/dsc'
+    $pwshlibForgePage = 'https://forge.puppet.com/puppetlabs/pwshlib'
+    $pwshlibIssuesPage = 'https://github.com/puppetlabs/ruby-pwsh/issues/new/choose'
+    $PowerShellGetUri = 'https://github.com/PowerShell/PowerShellGet'
+    $NarrativeDocumentation = 'https://puppetlabs.github.io/iac/news/roadmap/2020/03/30/dsc-announcement.html'
     $TroubleshootingDocumentation = 'https://github.com/puppetlabs/Puppet.Dsc#troubleshooting'
     $MicrosoftLongPathSupportDocs = 'https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=powershell#enable-long-paths-in-windows-10-version-1607-and-later'
-    $PuppetModuleInstallIssue     = 'https://tickets.puppetlabs.com/browse/PUP-10924'
-    $r10kInstallationIssue        = 'https://github.com/puppetlabs/r10k/issues/1117'
+    $PuppetModuleInstallIssue = 'https://tickets.puppetlabs.com/browse/PUP-10924'
+    $r10kInstallationIssue = 'https://github.com/puppetlabs/r10k/issues/1117'
   }
 
   Process {

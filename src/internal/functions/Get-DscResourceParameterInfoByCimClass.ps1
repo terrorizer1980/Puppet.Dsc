@@ -51,7 +51,7 @@ Function Get-DscResourceParameterInfoByCimClass {
             cim_instance_type = "'$InstanceType'"
           }
           $CimClassProperties = Get-CimClassPropertiesList -ClassName $InstanceType
-          ForEach($Property in $CimClassProperties) {
+          ForEach ($Property in $CimClassProperties) {
             If ($Property.ReferenceClassName -in $DefinedEmbeddedInstances.Keys) {
               # Handle nested instances, wrapping them in the Array datatype if necessary
               If ($Property.CimType -match 'Array') {
@@ -65,7 +65,7 @@ Function Get-DscResourceParameterInfoByCimClass {
                 Values       = $Property.Qualifiers['Values'].Value
                 IsMandatory  = $Property.Flags -Match 'Required'
                 # Replace the Array identifier with [] to match current expectations
-                PropertyType = $Property.CimType -Replace '(\S+)Array$','$1[]'
+                PropertyType = $Property.CimType -Replace '(\S+)Array$', '$1[]'
               }
             }
           }
@@ -91,15 +91,15 @@ Function Get-DscResourceParameterInfoByCimClass {
     $DscResourceMetadata = @{}
 
     # Similarly to how the properties were resolved for embedded CIM instances, resolve them for each property
-    ForEach($Property in $DscResourceCimClassProperties) {
+    ForEach ($Property in $DscResourceCimClassProperties) {
       $IsMandatory = $Property.Flags -Match '(Required|Key)'
       $DscResourceMetadata.$($Property.Name) = [ordered]@{
-        Name = $Property.Name.ToLowerInvariant()
+        Name              = $Property.Name.ToLowerInvariant()
         # The one thing we *can't* retrieve here is the default values; they still apply, but they're
         # not exposed in the definition here for some reason. In the alternate implementation, we can
         # only retrieve default values by parsing the AST, so this is acceptable, if not ideal.
-        DefaultValue = $null
-        Help = $Property.Qualifiers['Description'].Value
+        DefaultValue      = $null
+        Help              = $Property.Qualifiers['Description'].Value
         is_parameter      = Test-DscResourcePropertyParameterStatus -Property $Property
         is_namevar        = ($Property.Flags -Match 'Key').ToString().ToLowerInvariant()
         is_read_only      = $Property.Flags.HasFlag([Microsoft.Management.Infrastructure.CimFlags]::ReadOnly)
@@ -111,16 +111,16 @@ Function Get-DscResourceParameterInfoByCimClass {
         $DscResourceMetadata.$($Property.Name).mof_is_embedded = 'true'
         $MofType = $Property.ReferenceClassName
         # Munge the type name per the expectations/surface from Get-DscResource and existing provider.
-        If ($MofType -eq 'MSFT_Credential') { $MofType = "PSCredential"}
+        If ($MofType -eq 'MSFT_Credential') { $MofType = 'PSCredential' }
         $DscResourceMetadata.$($Property.Name).mof_type = if ($Property.CimType -match 'Array') {
-                                                            "$MofType[]"
-                                                          } Else {
-                                                            $MofType
-                                                          }
+          "$MofType[]"
+        } Else {
+          $MofType
+        }
         # Split the definition for the struct and toss away the cim_instance_type key as this is a top-level property
         # and that information is captured in the mof_type key already.
         $SplitDefinition = $DefinedEmbeddedInstances.($Property.ReferenceClassName) -split "`n" |
-          Where-Object -FilterScript {$_ -notmatch "cim_instance_type => '$($Property.ReferenceClassName)'"}
+          Where-Object -FilterScript { $_ -notmatch "cim_instance_type => '$($Property.ReferenceClassName)'" }
         # Recombine the struct definition appropriately mapped as an array or singleton
         If ($Property.CimType -match 'Array') {
           $PuppetType = "Array[$($SplitDefinition -Join "`n")]"
@@ -134,12 +134,12 @@ Function Get-DscResourceParameterInfoByCimClass {
           $DscResourceMetadata.$($Property.Name).Type = "Optional[$PuppetType]"
         }
       } Else {
-        $DscResourceMetadata.$($Property.Name).mof_type = $Property.CimType -Replace '(\S+)Array$','$1[]'
-        $DscResourceMetadata.$($Property.Name).Type     = Get-PuppetDataType -DscResourceProperty @{
+        $DscResourceMetadata.$($Property.Name).mof_type = $Property.CimType -Replace '(\S+)Array$', '$1[]'
+        $DscResourceMetadata.$($Property.Name).Type = Get-PuppetDataType -DscResourceProperty @{
           Values       = $Property.Qualifiers['Values'].Value
           IsMandatory  = $Property.Flags -Match '(Required|Key)'
           # Replace the Array identifier with [] to match current expectations
-          PropertyType = $Property.CimType -Replace '(\S+)Array$','[$1[]]'
+          PropertyType = $Property.CimType -Replace '(\S+)Array$', '[$1[]]'
         }
       }
     }

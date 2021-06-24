@@ -49,7 +49,7 @@ Function New-PuppetDscModule {
   #>
   [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
   param(
-    [Parameter(Mandatory=$True)]
+    [Parameter(Mandatory = $True)]
     [string]$PowerShellModuleName,
     [string]$PowerShellModuleVersion,
     [string]$PuppetModuleName,
@@ -74,37 +74,37 @@ Function New-PuppetDscModule {
     # If specified, canonicalize the Puppet module author name
     If (![string]::IsNullOrEmpty($PuppetModuleAuthor)) { $PuppetModuleAuthor = ConvertTo-CanonicalPuppetAuthorName -AuthorName $PuppetModuleAuthor }
     # Default to the `import` folder in the current path
-    If ([string]::IsNullOrEmpty($OutputDirectory))  {
-      $OutputDirectory  = Join-Path -Path (Get-Location) -ChildPath 'import'
+    If ([string]::IsNullOrEmpty($OutputDirectory)) {
+      $OutputDirectory = Join-Path -Path (Get-Location) -ChildPath 'import'
     } Else {}
 
     # make sure that we're operating on a absolute path to avoid confusion from symlinks and relative paths
-    $OutputDirectory = New-Item -Path $OutputDirectory -ItemType "directory" -Force
+    $OutputDirectory = New-Item -Path $OutputDirectory -ItemType 'directory' -Force
 
-    $PuppetModuleRootFolderDirectory = Join-Path -Path $OutputDirectory                 -ChildPath $PuppetModuleName
-    $VendoredDscResourcesDirectory   = Join-Path -Path $OutputDirectory                 -ChildPath "$PuppetModuleName/lib/puppet_x/$PuppetModuleName/dsc_resources"
-    $PuppetModuleTypeDirectory       = Join-Path -Path $PuppetModuleRootFolderDirectory -ChildPath 'lib/puppet/type'
-    $PuppetModuleProviderDirectory   = Join-Path -Path $PuppetModuleRootFolderDirectory -ChildPath 'lib/puppet/provider'
-    $InitialPSModulePath          = $Env:PSModulePath
+    $PuppetModuleRootFolderDirectory = Join-Path -Path $OutputDirectory -ChildPath $PuppetModuleName
+    $VendoredDscResourcesDirectory = Join-Path -Path $OutputDirectory -ChildPath "$PuppetModuleName/lib/puppet_x/$PuppetModuleName/dsc_resources"
+    $PuppetModuleTypeDirectory = Join-Path -Path $PuppetModuleRootFolderDirectory -ChildPath 'lib/puppet/type'
+    $PuppetModuleProviderDirectory = Join-Path -Path $PuppetModuleRootFolderDirectory -ChildPath 'lib/puppet/provider'
+    $InitialPSModulePath = $Env:PSModulePath
     $InitialErrorActionPreference = $ErrorActionPreference
     If (!(Test-RunningElevated)) {
       Write-PSFMessage -Message 'Running un-elevated: will not be able to parse embedded CIM instances; run again with Administrator permissions to map embedded CIM instances' -Level Warning
     } Else {
       If (Test-SymLinkedItem -Path $OutputDirectory -Recurse) {
-        Stop-PsfFunction -EnableException $true -Message "The specified output folder '$OutputDirectory' has a symlink in the path; CIM class parsing will not work in a symlinked folder, specify another path"
+        Stop-PSFFunction -EnableException $true -Message "The specified output folder '$OutputDirectory' has a symlink in the path; CIM class parsing will not work in a symlinked folder, specify another path"
       }
       Try {
         $null = Test-WSMan -ErrorAction Stop
       } Catch {
-        Stop-PsfFunction -EnableException $true -Message "PSRemoting does not appear to be enabled; in order to parse CIM instances, the function needs to do a stubbed DSC invocation; this will fail without PSRemoting enabled. Enable PSRemoting (possibly via the Enable-PSRemoting command) before retrying. Exception:`r`n$($_.Exception | Format-List -Force * | Out-String )"
+        Stop-PSFFunction -EnableException $true -Message "PSRemoting does not appear to be enabled; in order to parse CIM instances, the function needs to do a stubbed DSC invocation; this will fail without PSRemoting enabled. Enable PSRemoting (possibly via the Enable-PSRemoting command) before retrying. Exception:`r`n$($_.Exception | Format-List -Force * | Out-String )"
       }
     }
   }
 
   Process {
     $ShouldProcessMessage = "Puppetize the '$PowerShellModuleName' module"
-    If (![string]::IsNullOrEmpty($PowerShellModuleVersion)) { $ShouldProcessMessage += " at version '$PowerShellModuleVersion'"}
-    If ([string]::IsNullOrEmpty($Repository)) { $Repository = "PSGallery"}
+    If (![string]::IsNullOrEmpty($PowerShellModuleVersion)) { $ShouldProcessMessage += " at version '$PowerShellModuleVersion'" }
+    If ([string]::IsNullOrEmpty($Repository)) { $Repository = 'PSGallery' }
     If ($PSCmdlet.ShouldProcess($OutputDirectory, $ShouldProcessMessage)) {
       Try {
         $ErrorActionPreference = 'Stop'
@@ -149,15 +149,15 @@ Function New-PuppetDscModule {
         $Resources = Get-DscResource -Module $PowerShellModuleName | ConvertTo-PuppetResourceApi
 
         # Write the type and provider files for each DSC Resource
-        foreach($Resource in $Resources){
-          $PuppetTypeFilePath          = Join-Path -Path $PuppetModuleTypeDirectory     -ChildPath $Resource.RubyFileName
+        foreach ($Resource in $Resources) {
+          $PuppetTypeFilePath = Join-Path -Path $PuppetModuleTypeDirectory -ChildPath $Resource.RubyFileName
           $PuppetProviderDirectoryPath = Join-Path -Path $PuppetModuleProviderDirectory -ChildPath $Resource.Name
-          $PuppetProviderFilePath      = Join-Path -Path $PuppetProviderDirectoryPath   -ChildPath $Resource.RubyFileName
-          if(-not(Test-Path $PuppetModuleTypeDirectory)){
+          $PuppetProviderFilePath = Join-Path -Path $PuppetProviderDirectoryPath -ChildPath $Resource.RubyFileName
+          if (-not(Test-Path $PuppetModuleTypeDirectory)) {
             New-Item -Path $PuppetModuleTypeDirectory -ItemType Directory -Force | Out-Null
           }
           Out-Utf8File -Path $PuppetTypeFilePath -InputObject $Resource.Type
-          if(-not(Test-Path $PuppetProviderDirectoryPath)){
+          if (-not(Test-Path $PuppetProviderDirectoryPath)) {
             New-Item -Path $PuppetProviderDirectoryPath -ItemType Directory -Force | Out-Null
           }
           Out-Utf8File -Path $PuppetProviderFilePath -InputObject $Resource.Provider

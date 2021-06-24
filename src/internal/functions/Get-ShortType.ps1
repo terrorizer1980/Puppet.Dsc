@@ -19,8 +19,7 @@ Function Get-ShortType {
   )
   if ($PropertyType.StartsWith('[') -and $PropertyType.EndsWith(']')) {
     $ShortType = $PropertyType.Substring(1, $PropertyType.Length - 2)
-  }
-  else {
+  } else {
     $ShortType = $PropertyType
   }
   $ShortType

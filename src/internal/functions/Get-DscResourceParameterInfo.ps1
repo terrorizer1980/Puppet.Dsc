@@ -36,8 +36,8 @@ function Get-DscResourceParameterInfo {
     If ($null -ne $ParsedAst) {
       # We can currently only retrieve parameter metadata from function and composite DSC resources, not class-based :(
       # There are probably more elegant AST filters but this worked for now.
-      $GetFunctionAst = $ParsedAst.FindAll({$true}, $true) | Where-Object -FilterScript {$_.Name -eq 'Get-TargetResource'}
-      $SetFunctionAst = $ParsedAst.FindAll({$true}, $true) | Where-Object -FilterScript {$_.Name -eq 'Set-TargetResource'}
+      $GetFunctionAst = $ParsedAst.FindAll( { $true }, $true) | Where-Object -FilterScript { $_.Name -eq 'Get-TargetResource' }
+      $SetFunctionAst = $ParsedAst.FindAll( { $true }, $true) | Where-Object -FilterScript { $_.Name -eq 'Set-TargetResource' }
       $FilterForMandatoryParameters = {
         $MandatoryAttribute = $_.Attributes.NamedArguments | Where-Object -FilterScript {
           $_.ArgumentName -eq 'Mandatory' -and
@@ -65,12 +65,12 @@ function Get-DscResourceParameterInfo {
     ForEach ($Parameter in $AllowedProperties) {
       If ($null -ne $HelpInfo) {
         $ParameterDescription = $HelpInfo[$Parameter.Name.ToUpper()]
-        If ($null -ne $ParameterDescription) { $ParameterDescription = $ParameterDescription.Trim()}
+        If ($null -ne $ParameterDescription) { $ParameterDescription = $ParameterDescription.Trim() }
       } Else { $ParameterDescription = $null }
       If ($null -ne $SetFunctionAst) {
         $MandatorySet = ("`$$($Parameter.Name)" -in [string[]]$MandatorySetParameters.Name)
         $DefaultValue = $SetFunctionAst.body.ParamBlock.Parameters |
-          Where-Object  -FilterScript { $_.Name -match [string]$Parameter.Name } |
+          Where-Object -FilterScript { $_.Name -match [string]$Parameter.Name } |
           Select-Object -ExpandProperty DefaultValue
       } Else { $MandatorySet = $Parameter.IsMandatory }
       If ($null -ne $GetFunctionAst) {

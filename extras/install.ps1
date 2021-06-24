@@ -58,7 +58,7 @@ Write-Host "Installing $($PowerShellModules.Count) modules with Install-Module"
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -Verbose:$false
 ForEach ($Module in $PowerShellModules) {
   $InstalledModuleVersions = Get-Module -ListAvailable $Module.Name -ErrorAction SilentlyContinue |
-  Select-Object -ExpandProperty Version
+    Select-Object -ExpandProperty Version
   If ($Module.ContainsKey('RequiredVersion')) {
     $AlreadyInstalled = $null -ne ($InstalledModuleVersions | Where-Object -FilterScript { $_ -eq $Module.RequiredVersion })
   } Else {

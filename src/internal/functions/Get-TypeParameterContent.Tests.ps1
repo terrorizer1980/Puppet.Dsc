@@ -3,7 +3,7 @@ BeforeAll {
     Split-Path -Parent |
     Split-Path -Parent
   Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1','.ps1')
+  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
 }
 
 Describe 'Get-TypeParameterContent' {
@@ -14,7 +14,7 @@ Describe 'Get-TypeParameterContent' {
           @{
             Name              = 'apple'
             DefaultValue      = $null
-            Type              = "Optional[Boolean]"
+            Type              = 'Optional[Boolean]'
             Help              = "Some string of help content`nSplit on a new line"
             is_namevar        = 'false'
             mandatory_for_get = 'false'
@@ -36,7 +36,7 @@ Describe 'Get-TypeParameterContent' {
           @{
             Name              = 'cookie'
             DefaultValue      = 'foo'
-            Type              = "String"
+            Type              = 'String'
             Help              = $null
             is_namevar        = 'false'
             mandatory_for_get = 'true'
