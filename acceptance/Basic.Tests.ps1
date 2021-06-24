@@ -2,16 +2,16 @@ Param (
   [hashtable]$FixtureHash
 )
 
-BeforeDiscovery {
-}
 BeforeAll {
-  $ModuleRoot = Split-Path $PSCommandPath -Parent | Join-Path -ChildPath 'src'
-  . .\src\internal\functions\Invoke-PdkCommand.ps1
+  $ModuleRoot = Split-Path $PSCommandPath -Parent |
+    Split-Path -Parent |
+    Join-Path -ChildPath 'src'
+  . "$ModuleRoot\internal\functions\Invoke-PdkCommand.ps1"
   Import-Module "$ModuleRoot/puppet.dsc.psd1"
   $Script = $PSCommandPath.Replace('5.Tests.ps1', '.ps1')
 }
 
-Describe 'Acceptance Tests' -Tag 'acceptance' {
+Describe 'Acceptance Tests: Basic' -Tag 'basic' {
   BeforeDiscovery {
     $PSDscRunAsCredentialUsername = 'Foo'
     $PSDscRunAsCredentialPassword = 'This is a pretty long phrase, to be quite honest! :)'
@@ -281,5 +281,4 @@ Describe 'Acceptance Tests' -Tag 'acceptance' {
       }
     }
   }
-
 }

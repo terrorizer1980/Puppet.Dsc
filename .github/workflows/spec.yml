@@ -95,7 +95,7 @@ jobs:
 
           $testResultsFile = ".\AcceptanceTestsResults.xml"
           $TestPath = @(
-            (Resolve-Path .\Acceptance.Tests.ps1)
+            (Resolve-Path .\acceptance\Basic.Tests.ps1)
           )
 
           $container = New-PesterContainer -Path $TestPath -Data @{ FixtureHash = @{
@@ -131,7 +131,7 @@ jobs:
 
           $testResultsFile = ".\AcceptanceTestsResults.xml"
           $TestPath = @(
-            (Resolve-Path .\Acceptance.Tests.ps1)
+            (Resolve-Path .\Acceptance\Basic.Tests.ps1)
           )
 
           $container = New-PesterContainer -Path $TestPath -Data @{ FixtureHash = @{
