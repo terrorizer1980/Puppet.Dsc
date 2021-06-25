@@ -60,7 +60,7 @@ Vagrant.configure("2") do |config|
     }
   end
 
-  config.vm.provision "shell", path: 'extras/install.ps1'
+  config.vm.provision "shell", path: 'extras/install.ps1', args: '-Full'
   profile_destination = 'C:\Users\vagrant\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1'
   config.vm.provision "file", source: "./extras/profile.ps1", destination: profile_destination
 end
