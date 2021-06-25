@@ -1,13 +1,11 @@
-BeforeAll {
-  $ModuleRootPath = Split-Path -Parent $PSCommandPath |
-    Split-Path -Parent |
-    Split-Path -Parent
-  Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
-}
-
-Describe 'Add-DscResourceModule' {
+Describe 'Add-DscResourceModule' -Tag 'Unit' {
   BeforeAll {
+    $ModuleRootPath = Split-Path -Parent $PSCommandPath |
+      Split-Path -Parent |
+      Split-Path -Parent
+    Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
+    . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
+
     Mock New-Item -Verifiable
     Mock Save-Module -Verifiable
     Mock Test-Path { $false } -ParameterFilter { $path -eq 'TestDrive:\target\' }

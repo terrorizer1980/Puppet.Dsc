@@ -1,12 +1,12 @@
-BeforeAll {
-  $ModuleRootPath = Split-Path -Parent $PSCommandPath |
-    Split-Path -Parent |
-    Split-Path -Parent
-  Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
-}
+Describe 'Get-PuppetModuleVersion' -Tag 'Unit' {
+  BeforeAll {
+    $ModuleRootPath = Split-Path -Parent $PSCommandPath |
+      Split-Path -Parent |
+      Split-Path -Parent
+    Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
+    . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
+  }
 
-Describe 'Get-PuppetModuleVersion' {
   InModuleScope puppet.dsc {
     Context 'Basic functionality' {
       It 'Returns a valid Puppet module version' {

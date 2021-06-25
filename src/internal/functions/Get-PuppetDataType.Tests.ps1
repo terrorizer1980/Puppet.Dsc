@@ -1,12 +1,12 @@
-BeforeAll {
-  $ModuleRootPath = Split-Path -Parent $PSCommandPath |
-    Split-Path -Parent |
-    Split-Path -Parent
-  Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
-}
+Describe 'Get-PuppetDataType' -Tag 'Unit' {
+  BeforeAll {
+    $ModuleRootPath = Split-Path -Parent $PSCommandPath |
+      Split-Path -Parent |
+      Split-Path -Parent
+    Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
+    . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
+  }
 
-Describe 'Get-PuppetDataType' {
   InModuleScope Puppet.Dsc {
     BeforeAll {
       Function New-DscParameter {

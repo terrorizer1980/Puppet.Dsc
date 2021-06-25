@@ -1,12 +1,12 @@
-BeforeAll {
-  $ModuleRootPath = Split-Path -Parent $PSCommandPath |
-    Split-Path -Parent |
-    Split-Path -Parent
-  Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
-}
+Describe 'Update-PuppetModuleReadme' -Tag 'Unit' {
+  BeforeAll {
+    $ModuleRootPath = Split-Path -Parent $PSCommandPath |
+      Split-Path -Parent |
+      Split-Path -Parent
+    Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
+    . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
+  }
 
-Describe 'Update-PuppetModuleReadme' {
   InModuleScope puppet.dsc {
     Context 'Basic Verification' {
       BeforeAll {
@@ -52,28 +52,19 @@ Describe 'Update-PuppetModuleReadme' {
           { Update-PuppetModuleReadme @Parameters } | Should -Throw "Cannot find path 'TestDrive:\foo\bar' because it does not exist."
         }
         It 'Errors if the PowerShellModuleManifestPath is not specified' {
-          $Parameters = @{
-            PowerShellModuleName   = 'PowerShellGet'
-            PuppetModuleFolderPath = $PuppetFolderPath
-            PuppetModuleName       = 'powershellget'
-          }
-          { Update-PuppetModuleReadme @Parameters } | Should -Throw 'Cannot process command because of one or more missing mandatory parameters: PowerShellModuleManifestPath.'
+          (Get-Command -Name Update-PuppetModuleReadme).Parameters['PowerShellModuleManifestPath'].Attributes |
+            Where-Object -FilterScript { $_ -is [parameter] } |
+            Select-Object -ExpandProperty Mandatory | Should -Be $true
         }
         It 'Errors if the PowerShellModuleName is not specified' {
-          $Parameters = @{
-            PowerShellModuleManifestPath = 'TestDrive:\foo\bar'
-            PuppetModuleFolderPath       = $PuppetFolderPath
-            PuppetModuleName             = 'powershellget'
-          }
-          { Update-PuppetModuleReadme @Parameters } | Should -Throw 'Cannot process command because of one or more missing mandatory parameters: PowerShellModuleName.'
+          (Get-Command -Name Update-PuppetModuleReadme).Parameters['PowerShellModuleName'].Attributes |
+            Where-Object -FilterScript { $_ -is [parameter] } |
+            Select-Object -ExpandProperty Mandatory | Should -Be $true
         }
         It 'Errors if the PuppetModuleFolderPath is not specified' {
-          $Parameters = @{
-            PowerShellModuleManifestPath = 'TestDrive:\foo\bar'
-            PowerShellModuleName         = 'PowerShellGet'
-            PuppetModuleName             = 'powershellget'
-          }
-          { Update-PuppetModuleReadme @Parameters } | Should -Throw 'Cannot process command because of one or more missing mandatory parameters: PuppetModuleFolderPath.'
+          (Get-Command -Name Update-PuppetModuleReadme).Parameters['PuppetModuleFolderPath'].Attributes |
+            Where-Object -FilterScript { $_ -is [parameter] } |
+            Select-Object -ExpandProperty Mandatory | Should -Be $true
         }
         It 'Sets the Puppet module name if not specified' {
           $Parameters = @{

@@ -1,16 +1,17 @@
-BeforeDiscovery {
-  $ModuleRoot = Split-Path -Parent $PSCommandPath |
-    Split-Path -Parent |
-    Split-Path -Parent
-  $Manifest = ((Get-Content "$moduleRoot\puppet.dsc.psd1") -join "`n") | Invoke-Expression
-}
-BeforeAll {
-  $ModuleRoot = Split-Path -Parent $PSCommandPath |
-    Split-Path -Parent |
-    Split-Path -Parent
-  $Manifest = ((Get-Content "$moduleRoot\puppet.dsc.psd1") -join "`n") | Invoke-Expression
-}
 Describe 'Validating the module manifest' -Tag @('Manifest', 'General') {
+  BeforeDiscovery {
+    $ModuleRoot = Split-Path -Parent $PSCommandPath |
+      Split-Path -Parent |
+      Split-Path -Parent
+    $Manifest = ((Get-Content "$moduleRoot\puppet.dsc.psd1") -join "`n") | Invoke-Expression
+  }
+  BeforeAll {
+    $ModuleRoot = Split-Path -Parent $PSCommandPath |
+      Split-Path -Parent |
+      Split-Path -Parent
+    $Manifest = ((Get-Content "$moduleRoot\puppet.dsc.psd1") -join "`n") | Invoke-Expression
+  }
+
   Context 'Basic resources validation' {
     BeforeAll {
       $files = Get-ChildItem "$moduleRoot\functions" -Recurse -File | Where-Object { ($_.Name -like '*.ps1') -and ($_.Name -notmatch '\.Tests\.') }

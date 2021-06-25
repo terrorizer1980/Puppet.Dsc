@@ -1,12 +1,12 @@
-BeforeAll {
-  $ModuleRootPath = Split-Path -Parent $PSCommandPath |
-    Split-Path -Parent |
-    Split-Path -Parent
-  Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
-}
+Describe 'Get-ReadmeContent' -Tag 'Unit' {
+  BeforeAll {
+    $ModuleRootPath = Split-Path -Parent $PSCommandPath |
+      Split-Path -Parent |
+      Split-Path -Parent
+    Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
+    . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
+  }
 
-Describe 'Get-ReadmeContent' {
   InModuleScope Puppet.Dsc {
     Context 'Basic verification' {
       BeforeAll {
@@ -48,25 +48,15 @@ Describe 'Get-ReadmeContent' {
       }
     }
     Context 'Parameter handling' {
-      It 'Errors if the PowerShellModuleName is not specified' {
-        $Parameters = @{
-          PowerShellModuleDescription = 'Foo and bar and baz!'
-          PowerShellModuleGalleryUri  = 'https://powershellgallery.com/Foo.Bar/1.0.0'
-          PowerShellModuleProjectUri  = 'https://github.com/Baz/Foo.Bar'
-          PowerShellModuleVersion     = '1.0.0'
-          PuppetModuleName            = 'foo_bar'
-        }
-        { Get-ReadmeContent @Parameters } | Should -Throw 'Cannot process command because of one or more missing mandatory parameters: PowerShellModuleName.'
+      It 'Marks the PowerShellModuleName parameter as mandatory' {
+        (Get-Command -Name Get-ReadmeContent).Parameters['PowerShellModuleName'].Attributes |
+          Where-Object -FilterScript { $_ -is [parameter] } |
+          Select-Object -ExpandProperty Mandatory | Should -Be $true
       }
-      It 'Errors if the PuppetModuleName is not specified' {
-        $Parameters = @{
-          PowerShellModuleName        = 'Foo.Bar'
-          PowerShellModuleDescription = 'Foo and bar and baz!'
-          PowerShellModuleGalleryUri  = 'https://powershellgallery.com/Foo.Bar/1.0.0'
-          PowerShellModuleProjectUri  = 'https://github.com/Baz/Foo.Bar'
-          PowerShellModuleVersion     = '1.0.0'
-        }
-        { Get-ReadmeContent @Parameters } | Should -Throw 'Cannot process command because of one or more missing mandatory parameters: PuppetModuleName.'
+      It 'Marks the PuppetModuleName parameter as mandatory' {
+        (Get-Command -Name Get-ReadmeContent).Parameters['PuppetModuleName'].Attributes |
+          Where-Object -FilterScript { $_ -is [parameter] } |
+          Select-Object -ExpandProperty Mandatory | Should -Be $true
       }
       It 'Errors if the PowerShellModuleName is specified as an empty string' {
         $Parameters = @{

@@ -1,12 +1,12 @@
-BeforeAll {
-  $ModuleRootPath = Split-Path -Parent $PSCommandPath |
-    Split-Path -Parent |
-    Split-Path -Parent
-  Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
-}
+Describe 'Add-PuppetReferenceDocumentation' -Tag 'Unit' {
+  BeforeAll {
+    $ModuleRootPath = Split-Path -Parent $PSCommandPath |
+      Split-Path -Parent |
+      Split-Path -Parent
+    Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
+    . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
+  }
 
-Describe 'Add-PuppetReferenceDocumentation' {
   InModuleScope Puppet.Dsc {
     BeforeAll {
       Mock Test-Path { return $False }

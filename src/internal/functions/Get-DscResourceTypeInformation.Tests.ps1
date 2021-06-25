@@ -1,14 +1,14 @@
-BeforeAll {
-  $ModuleRootPath = Split-Path -Parent $PSCommandPath |
-    Split-Path -Parent |
-    Split-Path -Parent
-  Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
-  . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
-}
+Describe 'Get-DscResourceTypeInformation' -Tag 'Unit' {
+  BeforeAll {
+    $ModuleRootPath = Split-Path -Parent $PSCommandPath |
+      Split-Path -Parent |
+      Split-Path -Parent
+    Import-Module "$ModuleRootPath/Puppet.Dsc.psd1"
+    . $PSCommandPath.Replace('.Tests.ps1', '.ps1')
+  }
 
-Describe 'Get-DscResourceTypeInformation' {
   InModuleScope puppet.dsc {
-    Context 'When running <ElevationStatus>' -ForEach @(
+    Context 'When running <ElevationStatus>' -Foreach @(
       @{
         ElevationStatus = 'elevated'
         TestResult      = $true

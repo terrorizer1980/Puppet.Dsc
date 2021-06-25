@@ -1,5 +1,7 @@
 Param (
-  [hashtable]$FixtureHash
+  [string]$PwshLibSource,
+  [string]$PwshLibRepo,
+  [string]$PwshLibReference
 )
 
 BeforeAll {
@@ -8,10 +10,9 @@ BeforeAll {
     Join-Path -ChildPath 'src'
   . "$ModuleRoot\internal\functions\Invoke-PdkCommand.ps1"
   Import-Module "$ModuleRoot/puppet.dsc.psd1"
-  $Script = $PSCommandPath.Replace('5.Tests.ps1', '.ps1')
 }
 
-Describe 'Acceptance Tests: Basic' -Tag 'basic' {
+Describe 'Acceptance Tests: Basic' -Tag @('Acceptance', 'Basic') {
   BeforeDiscovery {
     $PSDscRunAsCredentialUsername = 'Foo'
     $PSDscRunAsCredentialPassword = 'This is a pretty long phrase, to be quite honest! :)'
@@ -168,7 +169,23 @@ Describe 'Acceptance Tests: Basic' -Tag 'basic' {
       }
       # TODO: Class-based resource scenario
     )
-    if ($null -ne $FixtureHash) {
+    if ($null -ne $PwshLibSource) {
+      Switch ($PwshLibSource) {
+        'forge' {
+          $FixtureHash = @{
+            Section = 'forge_modules'
+            Repo    = $PwshLibRepo
+          }
+          If (![string]::IsNullOrEmpty($PwshLibReference)) { $FixtureHash.Ref = $PwshLibReference }
+        }
+        'git' {
+          $FixtureHash = @{
+            Section = 'repositories'
+            Repo    = $PwshLibRepo
+          }
+          If (![string]::IsNullOrEmpty($PwshLibReference)) { $FixtureHash.Branch = $PwshLibReference }
+        }
+      }
       $Scenarios | ForEach-Object -Process {
         $_.BuildParameters.PuppetModuleFixture = $FixtureHash
       }
@@ -237,12 +254,15 @@ Describe 'Acceptance Tests: Basic' -Tag 'basic' {
         }
       }
       Context '<ApplicationScenarioTitle>' -ForEach $ApplicationScenarios {
+        BeforeAll {
+          Invoke-PdkCommand -Path $expected_base -Command 'pdk bundle exec rake spec_prep' -SuccessFilterScript { $_ -match 'Using Puppet' } -ErrorFilterScript { $_ -match 'error:' }
+        }
         It '<TestName>' -TestCases $ApplicationScenarioTestCases {
           Set-Content -Path "$expected_base\$ManifestFileName" -Value $ManifestFileValue
           If ($null -eq $PdkSuccessFilterScript) {
-            Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet apply --color=false $ManifestFileName" -ErrorFilterScript $PdkErrorFilterScript
+            Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet apply --color=false $ManifestFileName --modulepath .\spec\fixtures\modules" -ErrorFilterScript $PdkErrorFilterScript
           } Else {
-            Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet apply --color=false $ManifestFileName" -ErrorFilterScript $PdkErrorFilterScript -SuccessFilterScript $PdkSuccessFilterScript
+            Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet apply --color=false $ManifestFileName --modulepath .\spec\fixtures\modules" -ErrorFilterScript $PdkErrorFilterScript -SuccessFilterScript $PdkSuccessFilterScript
           }
         }
       }
@@ -257,10 +277,10 @@ Describe 'Acceptance Tests: Basic' -Tag 'basic' {
           Remove-LocalUser -Name $Username
         }
         It 'works' {
-          Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet apply --color=false $ManifestFileName" -ErrorFilterScript $FirstRunErrorFilterScript -SuccessFilterScript $FirstRunSuccessFilterScript
+          Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet apply --color=false $ManifestFileName --modulepath .\spec\fixtures\modules" -ErrorFilterScript $FirstRunErrorFilterScript -SuccessFilterScript $FirstRunSuccessFilterScript
         }
         It 'is idempotent' {
-          Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet apply --color=false $ManifestFileName" -ErrorFilterScript $IdempotentRunErrorFilterScript
+          Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet apply --color=false $ManifestFileName --modulepath .\spec\fixtures\modules" -ErrorFilterScript $IdempotentRunErrorFilterScript
         }
       }
       Context 'with a Sensitive value' {
@@ -268,13 +288,13 @@ Describe 'Acceptance Tests: Basic' -Tag 'basic' {
         It 'does not print the value in debug mode' -Pending { }
       }
       It 'shows a specific <TestResource> resource' {
-        $Result = Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet resource $TestResource title $MinimalProperties" -PassThru -SuccessFilterScript {
+        $Result = Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet resource $TestResource title $MinimalProperties --modulepath .\spec\fixtures\modules" -PassThru -SuccessFilterScript {
           $_ -match "$TestResource { 'title'"
         }
         $Result -match $MinimalExpectation | Should -BeTrue
       }
       It 'shows a specific <TestResource> resource with attributes' -Pending {
-        $Result = Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet resource $TestResource title $MinimalProperties" -PassThru -SuccessFilterScript {
+        $Result = Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet resource $TestResource title $MinimalProperties --modulepath .\spec\fixtures\modules" -PassThru -SuccessFilterScript {
           $_ -match "$TestResource { 'title'"
         }
         $Result -match $MinimalExpectation -and $Result -match $PropertyExpectation | Should -BeTrue

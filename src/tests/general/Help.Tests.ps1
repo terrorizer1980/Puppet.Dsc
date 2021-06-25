@@ -1,28 +1,29 @@
-BeforeDiscovery {
-  $ModuleRoot = Split-Path -Parent $PSCommandPath |
-    Split-Path -Parent |
-    Split-Path -Parent
-  $CommandPath = @("$ModuleRoot\functions", "$ModuleRoot\internal\functions")
-  $ModuleName = 'Puppet.Dsc'
-
-  $ExceptionsFile = "$(Split-Path -Parent $PSCommandPath)\Help.Exceptions.ps1"
-  . $ExceptionsFile
-
-  $includedNames = Get-ChildItem $CommandPath -Recurse -File |
-    Where-Object Name -Like '*.ps1' |
-    Select-Object -ExpandProperty BaseName
-  $CommandsToValidate = New-Object -TypeName System.Collections.ArrayList
-  $null = Get-Command -Module (Get-Module $ModuleName) -CommandType Cmdlet, Function, Workflow |
-    Where-Object Name -In $includedNames |
-    ForEach-Object -Process {
-      $CommandsToValidate.Add(@{
-          Name   = $PSItem.Name
-          Object = $PSItem
-        })
-    }
-}
-
 Describe 'Validating function help' -Tag @('Help', 'General') {
+  BeforeDiscovery {
+    $ModuleRoot = Split-Path -Parent $PSCommandPath |
+      Split-Path -Parent |
+      Split-Path -Parent
+    $CommandPath = @("$ModuleRoot\functions", "$ModuleRoot\internal\functions")
+    $ModuleName = 'Puppet.Dsc'
+    $Module = Get-Module -ListAvailable -Name "$ModuleRoot\src\$ModuleName.psd1"
+
+    $ExceptionsFile = "$(Split-Path -Parent $PSCommandPath)\Help.Exceptions.ps1"
+    . $ExceptionsFile
+
+    $includedNames = Get-ChildItem $CommandPath -Recurse -File |
+      Where-Object Name -Like '*.ps1' |
+      Select-Object -ExpandProperty BaseName
+    $CommandsToValidate = New-Object -TypeName System.Collections.ArrayList
+    $null = Get-Command -Module $Module -CommandType Cmdlet, Function |
+      Where-Object Name -In $includedNames |
+      ForEach-Object -Process {
+        $CommandsToValidate.Add(@{
+            Name   = $PSItem.Name
+            Object = $PSItem
+          })
+      }
+  }
+
   Context 'Validating help for <Name>' -Foreach $CommandsToValidate {
     BeforeDiscovery {
       $Help = Get-Help $Name -ErrorAction SilentlyContinue
