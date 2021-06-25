@@ -1,19 +1,8 @@
-BeforeDiscovery {
-  $ModuleRoot = Split-Path -Parent $PSCommandPath |
-    Split-Path -Parent |
-    Split-Path -Parent
-}
-
-BeforeAll {
-  $List = New-Object System.Collections.ArrayList
-}
-
-AfterAll {
-  $List | Out-Default
-}
-
 Describe 'Invoking PSScriptAnalyzer against commandbase' -Tag @('ScriptAnalysis', 'General') {
   BeforeDiscovery {
+    $ModuleRoot = Split-Path -Parent $PSCommandPath |
+      Split-Path -Parent |
+      Split-Path -Parent
     $RulesToTest = New-Object System.Collections.ArrayList
     $ScriptAnalyzerRules = Get-ScriptAnalyzerRule
     ForEach ($Rule in $ScriptAnalyzerRules) {
@@ -36,7 +25,15 @@ Describe 'Invoking PSScriptAnalyzer against commandbase' -Tag @('ScriptAnalysis'
     }
   }
 
-  Context 'Analyzing <Name>' -ForEach $FilesToInspect {
+  BeforeAll {
+    $List = New-Object System.Collections.ArrayList
+  }
+
+  AfterAll {
+    $List | Out-Default
+  }
+
+  Context 'Analyzing <Name>' -Foreach $FilesToInspect {
     BeforeAll {
       $Analysis = Invoke-ScriptAnalyzer -Path $Path -ExcludeRule PSAvoidTrailingWhitespace, PSShouldProcess
     }
