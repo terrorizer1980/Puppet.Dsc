@@ -1,5 +1,7 @@
 Param (
-  [hashtable]$FixtureHash
+  [string]$PwshLibSource,
+  [string]$PwshLibRepo,
+  [string]$PwshLibReference
 )
 
 BeforeAll {
@@ -8,10 +10,9 @@ BeforeAll {
     Join-Path -ChildPath 'src'
   . "$ModuleRoot\internal\functions\Invoke-PdkCommand.ps1"
   Import-Module "$ModuleRoot/puppet.dsc.psd1"
-  $Script = $PSCommandPath.Replace('5.Tests.ps1', '.ps1')
 }
 
-Describe 'Acceptance Tests: Basic' -Tag 'basic' {
+Describe 'Acceptance Tests: Basic' -Tag @('Acceptance', 'Basic') {
   BeforeDiscovery {
     $PSDscRunAsCredentialUsername = 'Foo'
     $PSDscRunAsCredentialPassword = 'This is a pretty long phrase, to be quite honest! :)'
@@ -168,7 +169,23 @@ Describe 'Acceptance Tests: Basic' -Tag 'basic' {
       }
       # TODO: Class-based resource scenario
     )
-    if ($null -ne $FixtureHash) {
+    if ($null -ne $PwshLibSource) {
+      Switch ($PwshLibSource) {
+        'forge' {
+          $FixtureHash = @{
+            Section = 'forge_modules'
+            Repo    = $PwshLibRepo
+          }
+          If (![string]::IsNullOrEmpty($PwshLibReference)) { $FixtureHash.Ref = $PwshLibReference }
+        }
+        'git' {
+          $FixtureHash = @{
+            Section = 'repositories'
+            Repo    = $PwshLibRepo
+          }
+          If (![string]::IsNullOrEmpty($PwshLibReference)) { $FixtureHash.Branch = $PwshLibReference }
+        }
+      }
       $Scenarios | ForEach-Object -Process {
         $_.BuildParameters.PuppetModuleFixture = $FixtureHash
       }

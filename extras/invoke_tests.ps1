@@ -4,7 +4,10 @@ Param(
   [string[]]$TestPath,
   [Parameter(Mandatory = $true)]
   [string]$ResultsPath,
-  [string]$Tag
+  [string]$Tag,
+  [string]$PwshLibSource,
+  [string]$PwshLibRepo,
+  [string]$PwshLibReference
 )
 
 $ErrorActionPreference = 'Stop'
@@ -19,7 +22,6 @@ Import-Module -Name (Join-Path -Path $ProjectRoot -ChildPath 'src/puppet.dsc.psd
 
 $PesterConfiguration = New-PesterConfiguration
 $PesterConfiguration.Output.Verbosity = 'Detailed'
-$PesterConfiguration.Run.Path = $TestPath
 $PesterConfiguration.Run.PassThru = $true
 
 If ($ResultsPath) {
@@ -29,6 +31,18 @@ If ($ResultsPath) {
 
 If ($null -ne $Tag) {
   $PesterConfiguration.Filter.Tag = $Tag
+}
+
+If ($null -ne $PwshLibSource) {
+  $Data = @{
+    PwshLibSource = $PwshLibSource
+    PwshLibRepo   = $PwshLibRepo
+  }
+  # Ignore reference if not specified or specified as latest (needed for CI)
+  If ($null -ne $PwshLibReference -and 'latest' -ne $PwshLibReference) { $Data.PwshLibReference = $PwshLibReference }
+  $PesterConfiguration.Run.Container = New-PesterContainer -Path $TestPath -Data $Data
+} Else {
+  $PesterConfiguration.Run.Path = $TestPath
 }
 
 Invoke-Pester -Configuration $PesterConfiguration
