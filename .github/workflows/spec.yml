@@ -36,7 +36,7 @@ jobs:
           $TestPath = @(
             (Resolve-Path .\src\tests\general)
           )
-          $Results = Invoke-Pester -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru -Path $TestPath
+          $Results = .\extras\invoke_tests.ps1 -TestPath $TestPath -ResultsPath $testResultsFile -Tag General
           if ($Results.FailedCount -gt 0) {
             throw "$($Results.FailedCount) tests failed."
           }
@@ -68,7 +68,7 @@ jobs:
             (Resolve-Path .\src\functions)
             (Resolve-Path .\src\internal\functions)
           )
-          $Results = Invoke-Pester -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru -Path $TestPath
+          $Results = .\extras\invoke_tests.ps1 -TestPath $TestPath -ResultsPath $testResultsFile -Tag Unit
           if ($Results.FailedCount -gt 0) {
             throw "$($Results.FailedCount) tests failed."
           }
