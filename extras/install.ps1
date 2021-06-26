@@ -23,6 +23,10 @@ $PowerShellModules = @(
 
 If ($Full) {
   $ChocolateyPackages += 'pdk'
+  $PuppetInstalled = Get-Command puppet -ErrorAction SilentlyContinue
+  If ($null -eq $PuppetInstalled) {
+    $ChocolateyPackages += 'puppet-agent'
+  }
 }
 
 if ($ENV:CI -ne 'True' -and $Full) {
@@ -48,6 +52,13 @@ If ($Full -or $ENV:CI -eq 'True') {
     winrm create winrm/config/Listener?Address=*+Transport=HTTP
     winrm e winrm/config/listener
   }
+}
+
+$Choco = Get-Command choco -ErrorAction SilentlyContinue
+If ($null -eq $Choco) {
+  Write-Host 'Installing Chocolatey'
+  [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+  Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 }
 
 $Choco = Get-Command choco -ErrorAction SilentlyContinue
