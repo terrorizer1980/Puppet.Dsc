@@ -39,7 +39,7 @@ If ($null -ne $PwshLibSource) {
     PwshLibRepo   = $PwshLibRepo
   }
   # Ignore reference if not specified or specified as latest (needed for CI)
-  If ($null -ne $PwshLibReference -and 'latest' -ne $PwshLibReference) { $Data.PwshLibReference = $PwshLibReference }
+  If (![string]::IsNullOrEmpty($PwshLibReference) -and 'latest' -ne $PwshLibReference) { $Data.PwshLibReference = $PwshLibReference }
   $PesterConfiguration.Run.Container = New-PesterContainer -Path $TestPath -Data $Data
 } Else {
   $PesterConfiguration.Run.Path = $TestPath
