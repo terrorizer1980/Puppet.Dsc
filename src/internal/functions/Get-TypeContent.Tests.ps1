@@ -29,7 +29,8 @@ Describe 'Get-TypeContent' -Tag 'Unit' {
         $Result | Should -MatchExactly "dscmeta_module_version: '2.12.0.0'"
         $Result | Should -MatchExactly 'The DSC Archive resource type.'
         $Result | Should -MatchExactly 'Automatically generated from version 2.12.0.0'
-        $Result | Should -MatchExactly "features: \['simple_get_filter', 'canonicalize'\]"
+        $Result | Should -MatchExactly "features: \['simple_get_filter', 'canonicalize', 'custom_insync'\]"
+        $Result | Should -MatchExactly 'validation_mode:'
       }
       It 'Attempts to interpolate the parameter information once' {
         Should -Invoke Get-TypeParameterContent -Times 1 -Scope Context

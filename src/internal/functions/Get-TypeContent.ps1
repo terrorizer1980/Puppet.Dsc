@@ -53,12 +53,18 @@ Puppet::ResourceApi.register_type(
   dscmeta_module_name: '$($Resource.ModuleName)',
   dscmeta_module_version: '$($Resource.Version)',
   docs: $(ConvertTo-PuppetRubyString $ResourceDescription),
-  features: ['simple_get_filter', 'canonicalize'],
+  features: ['simple_get_filter', 'canonicalize', 'custom_insync'],
   attributes: {
     name: {
       type:      'String',
       desc:      'Description of the purpose for this resource declaration.',
       behaviour: :namevar,
+    },
+    validation_mode: {
+      type:      'Enum[property, resource]',
+      desc:      'Whether to check if the resource is in the desired state by property (default) or using Invoke-DscResource in Test mode (resource).',
+      behaviour: :parameter,
+      default:   'property',
     },
 $((Get-TypeParameterContent -ParameterInfo $Resource.ParameterInfo) -join "`n")
   },

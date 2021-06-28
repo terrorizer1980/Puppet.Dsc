@@ -212,6 +212,42 @@ Note that the only properties specified in a resource declaration which are pass
 If a property does _not_ start with `dsc_` it is used to control how Puppet interacts with DSC/other Puppet resources - for example,
 specifying a unique name for the resource for Puppet to distinguish between declarations or Puppet metaparameters (``notifies`, ``before`, etc).
 
+### Validation Mode
+
+By default, these resources use the property validation mode, which checks whether or not the resource is in the desired state the same way most Puppet resources are validated;
+by comparing the properties returned from the system with those specified in the manifest.
+Sometimes, however, this is insufficient;
+many DSC Resources return data that does not compare properly to the desired state (some are missing properties, others are malformed, some simply cannot be strictly compared).
+In these cases, you can set the validation mode to ``resource``, which falls back on calling ``Invoke-DscResource`` with the ``Test`` method and trusts that result.
+
+When using the ``resource`` validation mode, the resource is tested once and will then treat **all** properties of that resource as in sync (if the result returned ``true``) or not in sync.
+This loses the granularity of change reporting for the resource but prevents flapping and unexpected behavior.
+
+``````puppet
+# This will flap because the DSC resource never returns name in SecurityPolicyDsc v2.10.0.0
+dsc_securityoption { 'Enforce Anonoymous SID Translation':
+  dsc_name => 'Enforce Anonymous SID Translation',
+  dsc_network_access_allow_anonymous_sid_name_translation => 'Disabled',
+}
+
+# This will idempotently apply
+dsc_psrepository { 'PowerShell Gallery':
+  validation_mode => 'resource',
+  dsc_name        => 'Enforce Anonymous SID Translation',
+  dsc_network_access_allow_anonymous_sid_name_translation => 'Disabled',
+}
+``````
+
+It is important to note that this feature is only supported with a version of ``puppetlabs-pwshlib`` equal to or higher than ``0.9.0``, in which the supporting code for the DSC Base Provider to implement custom insync was shipped.
+
+Finally, while this module's metadata says that the supported Puppet versions are 6.0.0 and up, the implementation of the ``validation_mode`` parameter relies on the ``custom_insync`` feature of the Puppet Resource API.
+The ``custom_insync`` feature first shipped in the ``puppet-resource_api`` version ``1.8.14``, which itself is only included in Puppet versions equal to or newer than ``6.23.0`` and ``7.8.0`` for the 6x and 7x platforms respectively.
+Using this module against older Puppet versions will result in a warning (example below) and _only_ use the default property-by-property change reporting, regardless of the setting of ``validation_mode``.
+
+``````
+Warning: Unknown feature detected: ["custom_insync"]
+``````
+
 ## Troubleshooting
 
 In general, there are three broad categories of problems:
