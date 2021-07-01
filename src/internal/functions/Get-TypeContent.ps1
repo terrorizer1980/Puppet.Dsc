@@ -50,6 +50,7 @@ Puppet::ResourceApi.register_type(
   name: 'dsc_$($Resource.Name.ToLowerInvariant())',
   dscmeta_resource_friendly_name: '$FriendlyName',
   dscmeta_resource_name: '$($Resource.ResourceType)',
+  dscmeta_resource_implementation: '$($Resource.ResourceImplementation)',
   dscmeta_module_name: '$($Resource.ModuleName)',
   dscmeta_module_version: '$($Resource.Version)',
   docs: $(ConvertTo-PuppetRubyString $ResourceDescription),

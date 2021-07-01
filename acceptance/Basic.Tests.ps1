@@ -251,6 +251,69 @@ Describe 'Acceptance Tests: Basic' -Tag @('Acceptance', 'Basic') {
         )
       }
       # TODO: Class-based resource scenario
+      @{
+        Scenario                                    = 'puppetizing a module with class-based resources'
+        # We need to know where the module will be built and what properties to build it with
+        expected_base                               = '../bar/jeadsc'
+        PuppetModuleName                            = 'jeadsc'
+        BuildParameters                             = @{
+          PowerShellModuleName    = 'JeaDsc'
+          PowerShellModuleVersion = '0.7.2'
+          PuppetModuleAuthor      = 'testuser'
+          OutputDirectory         = '../bar'
+        }
+        # Any modified resources need to be cleaned up prior to each test run
+        # Unfortunately, class based resources won't work via Invoke-DscResource
+        DscResetInvocations                         = @()
+        # The module should be uninstalled prior to each run if it exists
+        PdkModuleUninstallationInvocationParameters = @{
+          Path                = '../bar/jeadsc'
+          Command             = 'pdk bundle exec puppet module uninstall testuser-jeadsc'
+          SuccessFilterScript = { $true }
+        }
+        # Each of these types should be created and defined for puppet
+        TypesToValidateTestCases                    = @(
+          @{ Type = 'dsc_jearolecapabilities' }
+        )
+        # We need to validate that `puppet resource` works with the built module
+        TestResource                                = 'dsc_jearolecapabilities'
+        MinimalProperties                           = "dsc_path='$(Resolve-Path -Path '.')\example.psrc'"
+        MinimalExpectation                          = "dsc_path => '$(Resolve-Path -Path '.')\example.psrc'"
+        PropertyExpectation                         = "dsc_description => 'Example JEA'"
+        # These are scenarios for child contexts that validate expected invocation behavior
+        ApplicationScenarios                        = @(
+          @{
+            ApplicationScenarioTitle     = 'when creating a JEA role capability with "puppet apply"'
+            ApplicationScenarioTestCases = @(
+              @{
+                TestName               = 'works'
+                ManifestFileName       = 'jea_role_capability.pp'
+                ManifestFileValue      = @(
+                  "dsc_jearolecapabilities { 'ExampleRoleCapability':"
+                  "  dsc_ensure           => 'Present',"
+                  "  dsc_path             => '$(Resolve-Path -Path '.')\example.psrc',"
+                  "  dsc_description      => 'Example role capability file'"
+                  "}`n"
+                ) -join "`n"
+                PdkSuccessFilterScript = { $_ -match 'Creating: Finished' }
+                PdkErrorFilterScript   = { $_ -match 'Error' }
+              }
+              @{
+                TestName             = 'is idempotent'
+                ManifestFileName     = 'jea_role_capability.pp'
+                ManifestFileValue    = @(
+                  "dsc_jearolecapabilities { 'ExampleRoleCapability':"
+                  "  dsc_ensure           => 'Present',"
+                  "  dsc_path             => '$(Resolve-Path -Path '.')\example.psrc',"
+                  "  dsc_description      => 'Example role capability file'"
+                  "}`n"
+                ) -join "`n"
+                PdkErrorFilterScript = { $_ -match 'Notice:.*Dsc_jearolecapabilities' }
+              }
+            )
+          }
+        )
+      }
     )
     if ($null -ne $PwshLibSource) {
       Switch ($PwshLibSource) {
@@ -374,13 +437,13 @@ Describe 'Acceptance Tests: Basic' -Tag @('Acceptance', 'Basic') {
         $Result = Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet resource $TestResource title $MinimalProperties --modulepath .\spec\fixtures\modules" -PassThru -SuccessFilterScript {
           $_ -match "$TestResource { 'title'"
         }
-        $Result -match $MinimalExpectation | Should -BeTrue
+        $Result -match [regex]::escape($MinimalExpectation) | Should -BeTrue
       }
       It 'shows a specific <TestResource> resource with attributes' -Pending {
         $Result = Invoke-PdkCommand -Path $expected_base -Command "pdk bundle exec puppet resource $TestResource title $MinimalProperties --modulepath .\spec\fixtures\modules" -PassThru -SuccessFilterScript {
           $_ -match "$TestResource { 'title'"
         }
-        $Result -match $MinimalExpectation -and $Result -match $PropertyExpectation | Should -BeTrue
+        $Result -match [regex]::escape($MinimalExpectation) -and $Result -match [regex]::escape($PropertyExpectation) | Should -BeTrue
       }
     }
   }

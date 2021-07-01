@@ -164,6 +164,12 @@ dsc_psrepository { 'PowerShell Gallery':
 }
 ``````
 
+### Class-Based Resources
+
+Class-based DSC Resources can be used like any other DSC Resource in this module, with one important note:
+Due to a bug in calling class-based DSC Resources by path instead of module name, each call to ``Invoke-DscResource`` needs to temporarily munge the system-level environment variable for ``PSModulePath``;
+the variable is reset prior to the end of each invocation.
+
 ### CIM Instances
 
 Because the CIM instances for DSC resources are fully mapped, the types actually explain fairly precisely what the shape of each CIM instance has to be - and, moreover, the type definition means that you get checking at catalog compile time.
@@ -272,6 +278,10 @@ For specific information on troubleshooting a generated module, check the [troub
 
 Currently, because of the way Puppet caches files on agents, use of the legacy [``puppetlabs-dsc``]($LegacyDscForgePage) module is **not** compatible with this or any auto-generated DSC module.
 Inclusion of both will lead to pluginsync conflicts.
+
+Right now, if you have the same version of a PowerShell module with class-based DSC Resources in your PSModulePath as vendored in a Puppetized DSC Module,
+you cannot use those class-based DSC Resources from inside of Puppet due to a bug in DSC which prevents using a module by path reference instead of name.
+Instead, DSC will see that there are two DSC Resources for the same module and version and then error out.
 
 ### Configuring the LCM
 

@@ -8,7 +8,7 @@ Describe 'Get-DscResourceTypeInformation' -Tag 'Unit' {
   }
 
   InModuleScope puppet.dsc {
-    Context 'When running <ElevationStatus>' -Foreach @(
+    Context 'When running <ElevationStatus>' -ForEach @(
       @{
         ElevationStatus = 'elevated'
         TestResult      = $true
@@ -24,6 +24,7 @@ Describe 'Get-DscResourceTypeInformation' -Tag 'Unit' {
         Mock Test-RunningElevated { return $TestResult }
         Mock Get-DscResourceParameterInfoByCimClass { return $DscResource.Name }
         Mock Get-DscResourceParameterInfo { return $DscResource.Name }
+        Mock Get-DscResourceImplementation { }
       }
       Context 'When passed a DSCResourceInfo object' {
         BeforeAll {
@@ -43,6 +44,7 @@ Describe 'Get-DscResourceTypeInformation' -Tag 'Unit' {
         It 'processes once for each object in the pipeline' -TestCases $TestCase {
           $Result = $DscResources | Get-DscResourceTypeInformation
           Should -Invoke $QueryFunction -Times 2 -Scope It
+          Should -Invoke Get-DscResourceImplementation -Times 2 -Scope It
           $Result[0].ParameterInfo | Should -Be $Result[0].Name
         }
         It 'never calls Get-DscResource' {
@@ -114,6 +116,7 @@ Describe 'Get-DscResourceTypeInformation' -Tag 'Unit' {
           It 'processes once for each resource found' {
             Should -Invoke Get-DscResource -Times 2 -Scope Context
             Should -Invoke $QueryFunction -Times 2 -Scope Context
+            Should -Invoke Get-DscResourceImplementation -Times 2 -Scope Context
           }
         }
       }
