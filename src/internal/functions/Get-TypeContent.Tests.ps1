@@ -25,6 +25,7 @@ Describe 'Get-TypeContent' -Tag 'Unit' {
         $Result | Should -MatchExactly "name: 'dsc_archive'"
         $Result | Should -MatchExactly "dscmeta_resource_friendly_name: 'Archive'"
         $Result | Should -MatchExactly "dscmeta_resource_name: 'MSFT_Archive'"
+        $Result | Should -MatchExactly "dscmeta_resource_implementation: 'MOF'"
         $Result | Should -MatchExactly "dscmeta_module_name: 'PSDscResources'"
         $Result | Should -MatchExactly "dscmeta_module_version: '2.12.0.0'"
         $Result | Should -MatchExactly 'The DSC Archive resource type.'

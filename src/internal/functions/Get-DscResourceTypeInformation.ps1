@@ -74,8 +74,15 @@ Function Get-DscResourceTypeInformation {
     } Else {
       $DscResourceToProcess = $DscResource
     }
+
+    # Ensure we know the DSC Resource Type; unfortunately, DSC does not distinguish
+    # between MOF-based DSC Resources and Class-based DSC Resources, they are both
+    # designated ImplementedAs 'PowerShell' - updating the resource in place here
+    # can happen regardless of PowerShell version or administrative privileges.
+    $null = $DscResourceToProcess | Get-DscResourceImplementation -ModifyResource
+
     ForEach ($Resource in $DscResourceToProcess) {
-      $Value = If ($RunningElevated -and ($DscResource.ImplementedAs -ne 'Composite')) {
+      $Value = If ($RunningElevated -and ($Resource.ImplementedAs -ne 'Composite')) {
         Get-DscResourceParameterInfoByCimClass -DscResource $Resource
       } Else {
         Get-DscResourceParameterInfo -DscResource $Resource

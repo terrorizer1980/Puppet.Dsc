@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Ability to invoke class-based resources by adding the `dscmeta_resource_implementation` key in the generated types; functionality requires [puppetlabs-pwshlib](https://forge.puppet.com/modules/puppetlabs/pwshlib) `0.10.0` or higher ([#172](https://github.com/puppetlabs/ruby-pwsh/issues/172))
+
 ## [0.6.0] - 2021-6-28
 
 ### Added
